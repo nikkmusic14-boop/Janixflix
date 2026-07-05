@@ -113,15 +113,15 @@ export default function Watch() {
         setNetmirrorChromecastUrl(data.chromecastUrl);
         setMirrors(data.mirrors || []); // wait, mirrors is not returned by getVideoSources but let's keep it empty or mock it
 
-        if (data.qualities && data.qualities.length > 0) {
+        if (data.chromecastUrl) {
+          setActiveNetmirrorUrl(data.chromecastUrl);
+        } else if (data.qualities && data.qualities.length > 0) {
           const q1080 = data.qualities.find(q => q.quality.toUpperCase() === '1080P');
           if (q1080) {
             setActiveNetmirrorUrl(q1080.url);
           } else {
             setActiveNetmirrorUrl(data.qualities[0].url);
           }
-        } else if (data.chromecastUrl) {
-          setActiveNetmirrorUrl(data.chromecastUrl);
         } else {
           throw new Error('No streaming media links resolved from Server 1.');
         }
