@@ -529,7 +529,7 @@ export default function Watch() {
             {source === 'netmirror' && (
               netmirrorLoading ? (
                 <div className="loading" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  Resolving secure stream parameters…
+                  JaNixFlix is resolving secure stream parameters…
                 </div>
               ) : activeNetmirrorUrl ? (
                 <video
@@ -555,7 +555,7 @@ export default function Watch() {
             {source === 'okjatt' && (
               okjattLoading ? (
                 <div className="loading" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  Decrypting link &amp; fetching stream...
+                  JaNixFlix is decrypting and fetching stream...
                 </div>
               ) : okjattVideoUrl ? (
                 <video
