@@ -512,15 +512,34 @@ img {
   text-align: center;
 }
 
+.movie-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 24px 16px;
+}
+
 .navbar-nav::-webkit-scrollbar {
   display: none;
 }
 
 @media (max-width: 700px) {
-  .navbar { padding: 12px 16px; gap: 8px; flex-wrap: wrap; }
-  .navbar-nav { order: 3; width: 100% !important; max-width: 100% !important; margin-top: 6px; padding-bottom: 4px; }
-  .navbar .search { padding: 6px 10px; margin-left: auto; }
-  .navbar .search input { width: 110px; }
+  .navbar { padding: 10px 12px; gap: 6px; flex-wrap: wrap; }
+  .navbar-nav { order: 3; width: 100% !important; max-width: 100% !important; margin-top: 6px; padding-bottom: 2px; }
+  .navbar .nav-link { padding: 3px 6px !important; font-size: 10.5px !important; gap: 2px !important; }
+  .navbar .search { padding: 4px 6px; margin-left: auto; }
+  .navbar .search input { width: 85px; font-size: 11px; }
+  .hide-mobile { display: none !important; }
+  
+  .movie-grid {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 8px 4px !important;
+  }
+  
+  .card .info { padding: 6px 3px !important; }
+  .card .info .title { font-size: 9.5px !important; }
+  .card .info .sub { font-size: 7.5px !important; margin-top: 1px !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .card .poster .badge { top: 3px !important; left: 3px !important; font-size: 7px !important; padding: 1px 3px !important; }
+  
   .hero, .detail-hero { padding: 0 16px 40px; }
   .hero-content h1 { font-size: 28px; }
   .row, .detail-body, .player-wrap, .upload-page { padding-left: 16px; padding-right: 16px; }

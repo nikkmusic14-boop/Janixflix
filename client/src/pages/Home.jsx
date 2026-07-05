@@ -342,11 +342,7 @@ export default function Home() {
                 {categoryTitles[activeTab]} ({activeServer === 'server1' || activeTab === 'japanese' ? 'Server 1' : 'Server 2'}) — Page {isServer2Series ? page : (page + 1)}
               </h2>
               
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
-                gap: '24px 16px'
-              }}>
+              <div className="movie-grid">
                 {movies.map((m) => (
                   <MovieCard key={m.id} movie={m} />
                 ))}

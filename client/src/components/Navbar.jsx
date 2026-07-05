@@ -68,7 +68,7 @@ export default function Navbar() {
           to="/?tab=southindian" 
           className={`nav-link ${(activeTab === 'southindian' && !hasQuery) ? 'active' : ''}`}
         >
-          🌴 South Indian
+          🌴 South <span className="hide-mobile">Indian</span>
         </Link>
         <Link 
           to="/?tab=punjabi" 
@@ -86,19 +86,19 @@ export default function Navbar() {
           to="/?tab=indianwebseries" 
           className={`nav-link ${(activeTab === 'indianwebseries' && !hasQuery) ? 'active' : ''}`}
         >
-          📺 Indian Web Series
+          📺 <span className="hide-mobile">Indian </span>Web Series
         </Link>
         <Link 
           to="/?tab=indiantvshows" 
           className={`nav-link ${(activeTab === 'indiantvshows' && !hasQuery) ? 'active' : ''}`}
         >
-          🇮🇳 Indian TV Shows
+          🇮🇳 <span className="hide-mobile">Indian </span>TV Shows
         </Link>
         <Link 
           to="/?tab=hollywoodtvshows" 
           className={`nav-link ${(activeTab === 'hollywoodtvshows' && !hasQuery) ? 'active' : ''}`}
         >
-          🛸 Hollywood TV Shows
+          🛸 <span className="hide-mobile">Hollywood </span>TV Shows
         </Link>
         <Link 
           to="/?tab=korean" 
@@ -110,7 +110,7 @@ export default function Navbar() {
           to="/?tab=japanese" 
           className={`nav-link ${(activeTab === 'japanese' && !hasQuery) ? 'active' : ''}`}
         >
-          🇯🇵 Japanese & Anime
+          🇯🇵 <span className="hide-mobile">Japanese & </span>Anime
         </Link>
       </nav>
 
