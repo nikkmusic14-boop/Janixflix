@@ -86,19 +86,19 @@ export default function Navbar() {
           to="/?tab=indianwebseries" 
           className={`nav-link ${(activeTab === 'indianwebseries' && !hasQuery) ? 'active' : ''}`}
         >
-          📺 <span className="hide-mobile">Indian </span>Web Series
+          📺 <span className="hide-mobile">Web </span>Series
         </Link>
         <Link 
           to="/?tab=indiantvshows" 
           className={`nav-link ${(activeTab === 'indiantvshows' && !hasQuery) ? 'active' : ''}`}
         >
-          🇮🇳 <span className="hide-mobile">Indian </span>TV Shows
+          🇮🇳 TV <span className="hide-mobile">Shows</span>
         </Link>
         <Link 
           to="/?tab=hollywoodtvshows" 
           className={`nav-link ${(activeTab === 'hollywoodtvshows' && !hasQuery) ? 'active' : ''}`}
         >
-          🛸 <span className="hide-mobile">Hollywood </span>TV Shows
+          🛸 US <span className="hide-mobile">Hollywood </span>TV
         </Link>
         <Link 
           to="/?tab=korean" 
