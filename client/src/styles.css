@@ -527,44 +527,48 @@ img {
 }
 
 @media (max-width: 700px) {
-  .navbar { padding: 10px 12px; gap: 6px; flex-wrap: wrap; }
+  .navbar { padding: 8px 10px; gap: 4px; flex-wrap: wrap; }
   .navbar-nav { 
     order: 3; 
     width: 100% !important; 
     max-width: 100% !important; 
-    margin-top: 6px; 
+    margin-top: 4px; 
     padding-bottom: 2px; 
-    gap: 3px !important;
+    gap: 2px !important;
   }
   .navbar .nav-link { 
-    padding: 3px 5px !important; 
-    font-size: 10px !important; 
+    padding: 2px 4px !important; 
+    font-size: 9px !important; 
     gap: 2px !important; 
-    letter-spacing: -0.2px; 
+    letter-spacing: -0.3px; 
+    white-space: nowrap !important;
   }
   
   .navbar > div:last-child {
-    gap: 6px !important;
+    gap: 4px !important;
     flex-wrap: nowrap !important;
     margin-left: auto;
   }
   
-  .navbar .search { padding: 4px 6px; }
-  .navbar .search input { width: 55px; font-size: 11px; transition: width 0.2s ease; }
-  .navbar .search input:focus { width: 90px; }
+  .navbar .search { padding: 3px 5px; }
+  .navbar .search input { width: 45px; font-size: 10px; transition: width 0.2s ease; }
+  .navbar .search input:focus { width: 75px; }
   
   .navbar a[title="Telegram"],
   .navbar a[title="Instagram"] {
-    width: 28px !important;
-    height: 28px !important;
+    width: 26px !important;
+    height: 26px !important;
   }
   .navbar a[title="Telegram"] svg,
   .navbar a[title="Instagram"] svg {
-    width: 14px !important;
-    height: 14px !important;
+    width: 13px !important;
+    height: 13px !important;
   }
   
-  .hide-mobile { display: none !important; }
+  .hide-mobile,
+  .hide-emoji-mobile { 
+    display: none !important; 
+  }
   
   .catalog-container {
     padding: 12px 6px !important;

@@ -56,61 +56,61 @@ export default function Navbar() {
           to="/" 
           className={`nav-link ${(!searchParams.get('tab') && !hasQuery) ? 'active' : ''}`}
         >
-          🏠 Home
+          <span className="hide-emoji-mobile">🏠</span> Home
         </Link>
         <Link 
           to="/?tab=bollywood" 
           className={`nav-link ${(activeTab === 'bollywood' && !hasQuery) ? 'active' : ''}`}
         >
-          🇮🇳 Bollywood
+          <span className="hide-emoji-mobile">🇮🇳</span> Bollywood
         </Link>
         <Link 
           to="/?tab=southindian" 
           className={`nav-link ${(activeTab === 'southindian' && !hasQuery) ? 'active' : ''}`}
         >
-          🌴 South <span className="hide-mobile">Indian</span>
+          <span className="hide-emoji-mobile">🌴</span> South <span className="hide-mobile">Indian</span>
         </Link>
         <Link 
           to="/?tab=punjabi" 
           className={`nav-link ${(activeTab === 'punjabi' && !hasQuery) ? 'active' : ''}`}
         >
-          🌾 Punjabi
+          <span className="hide-emoji-mobile">🌾</span> Punjabi
         </Link>
         <Link 
           to="/?tab=hollywood" 
           className={`nav-link ${(activeTab === 'hollywood' && !hasQuery) ? 'active' : ''}`}
         >
-          🇺🇸 Hollywood
+          <span className="hide-emoji-mobile">🇺🇸</span> Hollywood
         </Link>
         <Link 
           to="/?tab=indianwebseries" 
           className={`nav-link ${(activeTab === 'indianwebseries' && !hasQuery) ? 'active' : ''}`}
         >
-          📺 <span className="hide-mobile">Web </span>Series
+          <span className="hide-emoji-mobile">📺</span> <span className="hide-mobile">Web </span>Series
         </Link>
         <Link 
           to="/?tab=indiantvshows" 
           className={`nav-link ${(activeTab === 'indiantvshows' && !hasQuery) ? 'active' : ''}`}
         >
-          🇮🇳 TV <span className="hide-mobile">Shows</span>
+          <span className="hide-emoji-mobile">🇮🇳</span> TV <span className="hide-mobile">Shows</span>
         </Link>
         <Link 
           to="/?tab=hollywoodtvshows" 
           className={`nav-link ${(activeTab === 'hollywoodtvshows' && !hasQuery) ? 'active' : ''}`}
         >
-          🛸 US <span className="hide-mobile">Hollywood </span>TV
+          <span className="hide-emoji-mobile">🛸</span> US <span className="hide-mobile">Hollywood </span>TV
         </Link>
         <Link 
           to="/?tab=korean" 
           className={`nav-link ${(activeTab === 'korean' && !hasQuery) ? 'active' : ''}`}
         >
-          🇰🇷 Korean
+          <span className="hide-emoji-mobile">🇰🇷</span> Korean
         </Link>
         <Link 
           to="/?tab=japanese" 
           className={`nav-link ${(activeTab === 'japanese' && !hasQuery) ? 'active' : ''}`}
         >
-          🇯🇵 <span className="hide-mobile">Japanese & </span>Anime
+          <span className="hide-emoji-mobile">🇯🇵</span> <span className="hide-mobile">Japanese & </span>Anime
         </Link>
       </nav>
 
