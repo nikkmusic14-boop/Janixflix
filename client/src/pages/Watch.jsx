@@ -520,8 +520,8 @@ export default function Watch() {
               </div>
             </div>
 
-            {/* Netmirror Quality Selector */}
-            {source === 'netmirror' && !netmirrorLoading && netmirrorQualities.length > 0 && (
+            {/* Netmirror Quality Selector - Hidden on Render to avoid 403 proxy blocks */}
+            {source === 'netmirror' && !window.location.hostname.includes('onrender.com') && !netmirrorLoading && netmirrorQualities.length > 0 && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '12px', marginTop: '4px' }}>
                 <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>🎬 Video Quality:</span>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
