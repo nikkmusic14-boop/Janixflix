@@ -175,7 +175,7 @@ router.get('/netmirror/video-sources', async (req, res) => {
   try {
     const response = await fetchWithTimeout(signedUrl, {
       headers: {
-        'Referer': 'http://localhost:5173/'
+        'Referer': 'https://janixflix-1.onrender.com/'
       }
     });
     if (!response.ok) {

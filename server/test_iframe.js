@@ -16,7 +16,7 @@ async function run() {
   console.log("URL:", url);
 
   const referers = [
-    { name: "Default (localhost)", value: "http://localhost:5173/" },
+    { name: "Default (localhost)", value: "https://janixflix-1.onrender.com/" },
     { name: "No Referer", value: "" },
     { name: "Netmirror Domain", value: "https://netmirror.app/" },
     { name: "Watch22 Domain", value: "https://speed.watch22.shop/" },

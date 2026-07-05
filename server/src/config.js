@@ -13,6 +13,6 @@ export const THUMBS_DIR = path.join(STORAGE_DIR, 'thumbnails');
 export const DB_FILE = path.join(STORAGE_DIR, 'catalog.json');
 
 export const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
-export const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+export const CLIENT_ORIGIN = process.env.CLIENT_ORIGIN || 'https://janixflix-1.onrender.com';
 export const MAX_UPLOAD_MB = process.env.MAX_UPLOAD_MB ? Number(process.env.MAX_UPLOAD_MB) : 2048;
 export const MAX_UPLOAD_BYTES = MAX_UPLOAD_MB * 1024 * 1024;

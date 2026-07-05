@@ -1,11 +1,17 @@
 import express from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { PORT, CLIENT_ORIGIN } from './config.js';
 import { seedIfEmpty } from './seed.js';
 import moviesRouter from './routes/movies.js';
 import streamRouter from './routes/stream.js';
 import externalRouter from './routes/external.js';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const CLIENT_DIST_DIR = path.resolve(__dirname, '..', '..', 'client', 'dist');
 
 const app = express();
 
@@ -13,11 +19,12 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+app.use(express.static(CLIENT_DIST_DIR));
 
 // ────────────────────────────────────────────────────────────
 // Routes
 // ────────────────────────────────────────────────────────────
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
   res.json({
     name: 'JaNixFlix API',
     version: '1.0.0',
@@ -33,6 +40,14 @@ app.get('/', (req, res) => {
 app.use('/api/movies', moviesRouter);
 app.use('/api/stream', streamRouter);
 app.use('/api/external', externalRouter);
+
+// Catch-all route to serve React's index.html for client-side routing
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api')) {
+    return next();
+  }
+  res.sendFile(path.join(CLIENT_DIST_DIR, 'index.html'));
+});
 
 // ────────────────────────────────────────────────────────────
 // 404 + error handlers

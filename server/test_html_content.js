@@ -13,7 +13,7 @@ async function run() {
   try {
     const res = await fetch(url, {
       headers: {
-        'Referer': 'http://localhost:5173/'
+        'Referer': 'https://janixflix-1.onrender.com/'
       }
     });
     const text = await res.text();
