@@ -499,11 +499,16 @@ router.get('/okjatt/proxy-stream', async (req, res) => {
 function sanitizeTitle(title) {
   if (!title) return '';
   let cleaned = title
+    // Replace "OkJatt [number].html" or "JaNixFlix [number].html" with "JaNixFlix"
+    .replace(/\s*(okjatt\.bond\.com|okjatt\.bond|okjatt|ok-jatt|JaNixFlix)\s+\d+\.html$/gi, ' JaNixFlix')
+    // Standard replacements if any raw names remain
     .replace(/okjatt\.bond\.com/gi, 'JaNixFlix')
     .replace(/okjatt\.bond/gi, 'JaNixFlix')
     .replace(/okjatt/gi, 'JaNixFlix')
     .replace(/ok-jatt/gi, 'JaNixFlix')
-    .replace(/\s+(JaNixFlix\s+)?\d+\.html$/gi, '')
+    // Remove raw IDs or .html at the end
+    .replace(/\s+--\s*\d+\.html$/gi, '')
+    .replace(/\s+-\s*\d+\.html$/gi, '')
     .replace(/\s+\d+\.html$/gi, '')
     .replace(/\.html$/gi, '');
   return cleaned.trim();
