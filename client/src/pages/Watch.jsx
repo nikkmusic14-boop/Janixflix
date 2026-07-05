@@ -53,6 +53,15 @@ export default function Watch() {
   const handleAutoVolumeBoost = () => {
     if (!videoRef.current) return;
 
+    // Check if the video source is same-origin (proxied) to prevent CORS muting
+    const videoSrc = videoRef.current.currentSrc || videoRef.current.src || '';
+    const isSameOrigin = videoSrc.startsWith('/') || videoSrc.startsWith(window.location.origin);
+
+    if (!isSameOrigin) {
+      console.log("[Auto Volume Boost]: Stream is cross-origin. Skipping boost to prevent browser muting.");
+      return;
+    }
+
     try {
       if (!audioCtxRef.current) {
         const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -69,7 +78,7 @@ export default function Watch() {
         gainNode.connect(ctx.destination);
       }
 
-      // Automatically boost gain to 2.5 (2.5x boost) for all videos
+      // Automatically boost gain to 2.5 (2.5x boost) for all same-origin videos
       gainNodeRef.current.gain.value = 2.5;
       setBoostActive(true);
       if (audioCtxRef.current.state === 'suspended') {
