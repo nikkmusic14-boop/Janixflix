@@ -314,7 +314,20 @@ export default function Watch() {
     const matchTitle = (a, b) => {
       const cleanA = getCleanBase(a);
       const cleanB = getCleanBase(b);
-      return cleanA === cleanB || cleanA.includes(cleanB) || cleanB.includes(cleanA);
+      
+      const extractYear = (str) => {
+        if (!str) return null;
+        const match = str.match(/\b(19|20)\d{2}\b/);
+        return match ? match[0] : null;
+      };
+      
+      const yearA = extractYear(a);
+      const yearB = extractYear(b);
+      if (yearA && yearB && yearA !== yearB) {
+        return false;
+      }
+      
+      return cleanA === cleanB;
     };
 
     const baseTitle = getCleanBase(movieTitle);
