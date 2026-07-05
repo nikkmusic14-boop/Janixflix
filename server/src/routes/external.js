@@ -498,12 +498,15 @@ router.get('/okjatt/proxy-stream', async (req, res) => {
 
 function sanitizeTitle(title) {
   if (!title) return '';
-  return title
+  let cleaned = title
     .replace(/okjatt\.bond\.com/gi, 'JaNixFlix')
     .replace(/okjatt\.bond/gi, 'JaNixFlix')
     .replace(/okjatt/gi, 'JaNixFlix')
     .replace(/ok-jatt/gi, 'JaNixFlix')
-    .trim();
+    .replace(/\s+(JaNixFlix\s+)?\d+\.html$/gi, '')
+    .replace(/\s+\d+\.html$/gi, '')
+    .replace(/\.html$/gi, '');
+  return cleaned.trim();
 }
 
 function parseOKJattList(html) {

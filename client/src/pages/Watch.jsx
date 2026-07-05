@@ -42,6 +42,34 @@ export default function Watch() {
   const [okjattLoading, setOkjattLoading] = useState(false);
   const [okjattEpisodes, setOkjattEpisodes] = useState([]); // TV episodes list for sidebar
 
+  // Universal Quality Selection
+  const [selectedQuality, setSelectedQuality] = useState('1080p');
+
+  const handleQualityChange = (qLabel) => {
+    setSelectedQuality(qLabel);
+    
+    if (source === 'netmirror' && netmirrorQualities.length > 0) {
+      const numeric = qLabel.replace('p', '');
+      const match = netmirrorQualities.find(q => q.quality.toLowerCase().includes(numeric));
+      if (match) {
+        setActiveNetmirrorUrl(match.url);
+        return;
+      }
+      setActiveNetmirrorUrl(netmirrorQualities[0].url);
+    } else {
+      const currentVideo = videoRef.current;
+      if (currentVideo) {
+        const time = currentVideo.currentTime;
+        const paused = currentVideo.paused;
+        currentVideo.load();
+        currentVideo.currentTime = time;
+        if (!paused) {
+          currentVideo.play().catch(() => {});
+        }
+      }
+    }
+  };
+
   // Volume Boost States & Refs
   const videoRef = useRef(null);
   const [boostActive, setBoostActive] = useState(false);
@@ -655,30 +683,34 @@ export default function Watch() {
               </div>
             </div>
 
-            {/* Netmirror Quality Selector - Hidden on Render to avoid 403 proxy blocks */}
-            {source === 'netmirror' && !window.location.hostname.includes('onrender.com') && !netmirrorLoading && netmirrorQualities.length > 0 && (
+            {/* Universal Quality Selector */}
+            {(!netmirrorLoading && !okjattLoading) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '12px', marginTop: '4px' }}>
                 <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>🎬 Video Quality:</span>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-
-                  {netmirrorQualities.map((q, idx) => (
-                    <button
-                      key={idx}
-                      onClick={() => setActiveNetmirrorUrl(q.url)}
-                      style={{
-                        background: activeNetmirrorUrl === q.url ? '#0070f3' : '#222',
-                        color: '#fff',
-                        border: 'none',
-                        padding: '6px 12px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {q.quality}
-                    </button>
-                  ))}
+                  {['1080p', '720p', '480p'].map((qLabel) => {
+                    const isActive = selectedQuality === qLabel;
+                    return (
+                      <button
+                        key={qLabel}
+                        onClick={() => handleQualityChange(qLabel)}
+                        style={{
+                          background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #0070f3 100%)' : '#222',
+                          color: '#fff',
+                          border: isActive ? '1px solid #00f3ff' : '1px solid #444',
+                          padding: '6px 16px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer',
+                          boxShadow: isActive ? '0 0 10px rgba(0, 243, 255, 0.3)' : 'none',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        {qLabel === '1080p' ? '1080p (FHD)' : qLabel === '720p' ? '720p (HD)' : '480p (SD)'}
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             )}
