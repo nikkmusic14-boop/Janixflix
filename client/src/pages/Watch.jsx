@@ -254,37 +254,65 @@ export default function Watch() {
     };
 
     const baseTitle = getBaseTitle(movieTitle);
-    if (!baseTitle || source !== 'netmirror') return;
+    if (!baseTitle) return;
 
-    api.external.netmirror.search(baseTitle)
-      .then(res => {
-        if (res && res.results) {
-          const tracks = [];
-          res.results.forEach(item => {
-            if (matchTitle(item.title, movieTitle)) {
-              let lang = 'Original';
-              const tLower = item.title.toLowerCase();
-              if (tLower.includes('hindi') || tLower.includes('[hin]')) lang = 'Hindi';
-              else if (tLower.includes('english') || tLower.includes('[eng]')) lang = 'English';
-              else if (tLower.includes('telugu')) lang = 'Telugu';
-              else if (tLower.includes('tamil')) lang = 'Tamil';
-              else if (tLower.includes('malayalam')) lang = 'Malayalam';
-              else if (tLower.includes('kannada')) lang = 'Kannada';
+    if (source === 'netmirror') {
+      api.external.netmirror.search(baseTitle)
+        .then(res => {
+          if (res && res.results) {
+            const tracks = [];
+            res.results.forEach(item => {
+              if (matchTitle(item.title, movieTitle)) {
+                let lang = 'Original';
+                const tLower = item.title.toLowerCase();
+                if (tLower.includes('hindi') || tLower.includes('[hin]')) lang = 'Hindi';
+                else if (tLower.includes('english') || tLower.includes('[eng]')) lang = 'English';
+                else if (tLower.includes('telugu')) lang = 'Telugu';
+                else if (tLower.includes('tamil')) lang = 'Tamil';
+                else if (tLower.includes('malayalam')) lang = 'Malayalam';
+                else if (tLower.includes('kannada')) lang = 'Kannada';
 
-              if (!tracks.some(t => t.language === lang)) {
-                tracks.push({
-                  language: lang,
-                  id: item.id,
-                  dp: item.dp,
-                  title: item.title
-                });
+                if (!tracks.some(t => t.language === lang)) {
+                  tracks.push({
+                    language: lang,
+                    id: item.id,
+                    dp: item.dp,
+                    title: item.title
+                  });
+                }
               }
-            }
-          });
-          setAudioTracks(tracks);
-        }
-      })
-      .catch(err => console.log("Failed to find alternative audio languages:", err));
+            });
+            setAudioTracks(tracks);
+          }
+        })
+        .catch(err => console.log("Failed to find alternative audio languages:", err));
+    } else if (source === 'okjatt') {
+      api.external.okjatt.search(baseTitle)
+        .then(res => {
+          if (res) {
+            const tracks = [];
+            res.forEach(item => {
+              if (matchTitle(item.title, movieTitle)) {
+                let lang = 'Original';
+                const tLower = item.title.toLowerCase();
+                if (tLower.includes('hindi') || tLower.includes('dubbed') || tLower.includes('[hin]')) lang = 'Hindi';
+                else if (tLower.includes('english') || tLower.includes('[eng]')) lang = 'English';
+
+                if (!tracks.some(t => t.language === lang)) {
+                  tracks.push({
+                    language: lang,
+                    id: item.id,
+                    href: item.path || item.href,
+                    title: item.title
+                  });
+                }
+              }
+            });
+            setAudioTracks(tracks);
+          }
+        })
+        .catch(err => console.log("Failed to find alternative OKJatt audio:", err));
+    }
   }, [movieTitle, source]);
 
   // Handle switching to Server 1 (FHD)
@@ -576,18 +604,24 @@ export default function Watch() {
               </div>
 
               {/* Audio Switcher buttons if multiple tracks exist */}
-              {source === 'netmirror' && audioTracks.length > 1 && (
+              {audioTracks.length > 1 && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginTop: '4px' }}>
                   <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>🔄 Switch Language:</span>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {audioTracks.map((track) => {
-                      const isActive = track.id === subjectid;
+                      const isActive = source === 'netmirror' 
+                        ? track.id === subjectid 
+                        : (track.href === href || track.id === id);
                       return (
                         <button
                           key={track.id}
                           onClick={() => {
                             if (isActive) return;
-                            navigate(`/watch/${track.id}?source=netmirror&type=${mediaType}&subjectid=${track.id}&dp=${encodeURIComponent(track.dp || '')}&title=${encodeURIComponent(track.title)}&se=${activeSe}&ep=${activeEp}`);
+                            if (source === 'netmirror') {
+                              navigate(`/watch/${track.id}?source=netmirror&type=${mediaType}&subjectid=${track.id}&dp=${encodeURIComponent(track.dp || '')}&title=${encodeURIComponent(track.title)}&se=${activeSe}&ep=${activeEp}`);
+                            } else {
+                              navigate(`/watch/${track.id}?source=okjatt&href=${encodeURIComponent(track.href)}&title=${encodeURIComponent(track.title)}`);
+                            }
                           }}
                           style={{
                             background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #ff007f 100%)' : '#222',
