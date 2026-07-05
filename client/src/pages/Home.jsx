@@ -1,0 +1,436 @@
+import { useEffect, useState } from 'react';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
+import { api } from '../api.js';
+import MovieCard from '../components/MovieCard.jsx';
+
+export default function Home() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const q = searchParams.get('q') || '';
+  
+  // Read active category directly from URL params: 'bollywood' | 'punjabi' | 'hollywood' | 'webseries' | 'tvshows' | 'anime'
+  const activeTab = searchParams.get('tab') || 'bollywood';
+  
+  // Server selection state
+  const [activeServer, setActiveServer] = useState('server1');
+  
+  // Catalog contents
+  const [movies, setMovies] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [page, setPage] = useState(0);
+
+  // Search result states
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [netmirrorResults, setNetmirrorResults] = useState([]);
+  const [okjattResults, setOkjattResults] = useState([]);
+
+  // Reset page and active server when category changes in URL
+  useEffect(() => {
+    const defaultServer = activeTab === 'southindian' ? 'server2' : 'server1';
+    const isSeries = activeTab === 'indianwebseries' || activeTab === 'indiantvshows' || activeTab === 'hollywoodtvshows' || activeTab === 'webseries' || activeTab === 'tvshows';
+    const startPage = (defaultServer === 'server2' && isSeries) ? 1 : 0;
+    setActiveServer(defaultServer);
+    setPage(startPage);
+  }, [activeTab]);
+
+  // Handle server switching
+  const handleServerChange = (server) => {
+    setActiveServer(server);
+    const isSeries = activeTab === 'indianwebseries' || activeTab === 'indiantvshows' || activeTab === 'hollywoodtvshows' || activeTab === 'webseries' || activeTab === 'tvshows';
+    const startPage = (server === 'server2' && isSeries) ? 1 : 0;
+    setPage(startPage);
+  };
+
+  // 1. Unified Search Logic
+  useEffect(() => {
+    if (q) {
+      setSearchLoading(true);
+      setError('');
+      
+      Promise.all([
+        api.external.netmirror.search(q).then(res => res.results || []).catch(() => []),
+        api.external.okjatt.search(q).catch(() => [])
+      ]).then(([netmirror, okjatt]) => {
+        setNetmirrorResults(netmirror.map(m => ({ ...m, source: 'netmirror' })));
+        setOkjattResults(okjatt);
+        setSearchLoading(false);
+      }).catch(err => {
+        setError(err.message);
+        setSearchLoading(false);
+      });
+    }
+  }, [q]);
+
+  // 2. Fetch category listings
+  useEffect(() => {
+    if (q) return;
+
+    let cancelled = false;
+    setLoading(true);
+    setError('');
+
+    const loadCategory = async () => {
+      try {
+        let results = [];
+
+        if (activeServer === 'server1' || activeTab === 'japanese') {
+          // Server 1 (Netmirror) listing parameters
+          const params = { page };
+          
+          if (activeTab === 'bollywood' || activeTab === 'southindian') {
+            params.type = '1';
+            params.cn = 'India';
+            const data = await api.external.netmirror.list(params);
+            if (cancelled) return;
+            results = (data.results || [])
+              .map(m => ({ ...m, source: 'netmirror' }))
+              .filter(m => !m.title.toLowerCase().includes('punjabi'));
+          } else if (activeTab === 'punjabi') {
+            const data = await api.external.netmirror.search('Punjabi', page);
+            if (cancelled) return;
+            results = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
+          } else {
+            if (activeTab === 'hollywood') {
+              params.type = '1';
+              params.cn = 'US';
+            } else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') {
+              params.type = '2';
+              params.cn = 'India';
+            } else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') {
+              params.type = '2';
+              params.cn = 'US';
+            } else if (activeTab === 'japanese') {
+              params.cn = 'Japan';
+            } else if (activeTab === 'korean') {
+              params.cn = 'Korea';
+            }
+            const data = await api.external.netmirror.list(params);
+            if (cancelled) return;
+            results = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
+            if (activeTab === 'japanese') {
+              results = results.filter(m => {
+                const titleLower = m.title.toLowerCase();
+                const cnLower = (m.cn || '').toLowerCase();
+                
+                // Exclude any title from Korea
+                if (cnLower.includes('korea') || cnLower === 'kr' || titleLower.includes('korean') || titleLower.includes('korea')) {
+                  return false;
+                }
+                
+                return true;
+              });
+            }
+          }
+        } else {
+          // Server 2 (OKJatt) scraped category keys
+          let categoryKey = 'bollywood';
+          if (activeTab === 'southindian') categoryKey = 'southindian';
+          else if (activeTab === 'punjabi') categoryKey = 'punjabi';
+          else if (activeTab === 'hollywood') categoryKey = 'hollywood';
+          else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') categoryKey = 'indianwebseries';
+          else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') categoryKey = 'hollywoodtvshows';
+
+          const data = await api.external.okjatt.list(categoryKey, page);
+          if (cancelled) return;
+          results = data.results || [];
+        }
+
+        setMovies(results);
+        setLoading(false);
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message);
+          setLoading(false);
+        }
+      }
+    };
+
+    loadCategory();
+    return () => { cancelled = true; };
+  }, [activeTab, activeServer, page, q]);
+
+  // Search layout view
+  if (q) {
+    if (searchLoading) return <div className="loading" style={{ paddingTop: '100px' }}>Searching stream servers…</div>;
+    return (
+      <div style={{ paddingTop: '100px', minHeight: '80vh' }}>
+        <div className="row">
+          <h2 style={{ marginBottom: 24 }}>Search Results for "{q}"</h2>
+
+          {/* Server 1 results */}
+          <div style={{ marginBottom: 40 }}>
+            <h3 style={{ borderLeft: '4px solid #0070f3', paddingLeft: 10, marginBottom: 16 }}>Global Streams (Server 1)</h3>
+            {netmirrorResults.length ? (
+              <div className="row-grid">
+                {netmirrorResults.map((m) => <MovieCard key={m.id} movie={m} />)}
+              </div>
+            ) : (
+              <p style={{ color: 'var(--text-dim)', paddingLeft: 14 }}>No matches in global streams.</p>
+            )}
+          </div>
+
+          {/* Server 2 results */}
+          <div style={{ marginBottom: 40 }}>
+            <h3 style={{ borderLeft: '4px solid #00a000', paddingLeft: 10, marginBottom: 16 }}>Premium Streams (Server 2)</h3>
+            {okjattResults.length ? (
+              <div className="row-grid">
+                {okjattResults.map((m) => <MovieCard key={m.id} movie={m} />)}
+              </div>
+            ) : (
+              <p style={{ color: 'var(--text-dim)', paddingLeft: 14 }}>No matches in premium streams.</p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const categoryTitles = {
+    bollywood: 'Bollywood Movies',
+    southindian: 'South Indian Dubbed Movies',
+    punjabi: 'Punjabi Movies Feed',
+    hollywood: 'Hollywood Movies',
+    indianwebseries: 'Indian Web Series',
+    indiantvshows: 'Indian TV Shows',
+    hollywoodtvshows: 'Hollywood TV Shows',
+    korean: 'Korean Dramas & Movies',
+    japanese: 'Japanese Movies, Series & Anime'
+  };
+
+  const isServer2Series = activeServer === 'server2' && (
+    activeTab === 'indianwebseries' ||
+    activeTab === 'indiantvshows' ||
+    activeTab === 'hollywoodtvshows' ||
+    activeTab === 'webseries' ||
+    activeTab === 'tvshows'
+  );
+
+  return (
+    <div style={{ paddingTop: '100px' }}>
+      {/* Sub-tabs for Server Selection (Hidden for Japanese/South Indian/Korean categories) */}
+      {!loading && !error && activeTab !== 'japanese' && activeTab !== 'southindian' && activeTab !== 'korean' && (
+        <div className="filters-bar" style={{ 
+          padding: '16px 48px 0', 
+          display: 'flex', 
+          justifyContent: 'center',
+          gap: '12px' 
+        }}>
+          <button
+            onClick={() => handleServerChange('server1')}
+            style={serverButtonStyle(activeServer === 'server1', '#0070f3')}
+          >
+            ⚡ Stream Server 1 (FHD)
+          </button>
+          <button
+            onClick={() => handleServerChange('server2')}
+            style={serverButtonStyle(activeServer === 'server2', '#00a000')}
+          >
+            🔥 Stream Server 2 (HD)
+          </button>
+        </div>
+      )}
+
+      {/* Catalog Render View */}
+      {loading ? (
+        <div className="loading">Loading titles…</div>
+      ) : error ? (
+        <div className="empty-state">
+          <h2>Could not load database</h2>
+          <p>{error}</p>
+        </div>
+      ) : (
+        <div style={{ padding: '24px 48px' }}>
+          {movies.length > 0 ? (
+            <div>
+              {/* Featured Banner at page 0 */}
+              {((activeServer === 'server2' && isServer2Series) ? page === 1 : page === 0) && movies[0] && (
+                <div style={{
+                  position: 'relative',
+                  height: '380px',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  marginBottom: '40px',
+                  background: `linear-gradient(90deg, rgba(10, 11, 30, 0.95) 0%, rgba(10, 11, 30, 0.75) 50%, rgba(10, 11, 30, 0.2) 100%), url(${movies[0].image || movies[0].thumbnail || 'https://images.unsplash.com/photo-1574375927938-d5a98e8edd86?q=80&w=1000'}) no-repeat center/cover`,
+                  border: '1px solid rgba(0, 243, 255, 0.15)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 243, 255, 0.05)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '40px 60px'
+                }}>
+                  <div style={{ maxWidth: '580px', zIndex: 2 }}>
+                    <span style={{ 
+                      background: 'rgba(0, 243, 255, 0.15)', 
+                      border: '1px solid var(--cyan)',
+                      color: 'var(--cyan)', 
+                      padding: '4px 12px', 
+                      borderRadius: '4px', 
+                      fontSize: '11px', 
+                      fontWeight: 'bold',
+                      letterSpacing: '1px',
+                      textTransform: 'uppercase',
+                      textShadow: '0 0 8px var(--cyan)'
+                    }}>
+                      ⚡ FEATURED STREAM
+                    </span>
+                    <h1 style={{ 
+                      fontSize: '38px', 
+                      fontFamily: 'Outfit, sans-serif', 
+                      color: '#fff', 
+                      margin: '14px 0 16px 0',
+                      textShadow: '0 2px 12px rgba(0,0,0,0.8)',
+                      lineHeight: '1.2'
+                    }}>
+                      {movies[0].title}
+                    </h1>
+                    <p style={{ 
+                      color: 'var(--text-dim)', 
+                      fontSize: '13.5px', 
+                      lineHeight: '1.6',
+                      marginBottom: '28px',
+                      display: '-webkit-box',
+                      WebkitLineClamp: '3',
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden'
+                    }}>
+                      Stream this title in high definition with instant server caching. Experience seamless dual-audio options and custom streaming capabilities exclusively on JaNixFlix.
+                    </p>
+                    <button 
+                      onClick={() => {
+                        const m = movies[0];
+                        const path = m.source === 'netmirror'
+                          ? `/watch/${m.id}?source=netmirror&type=${m.media_type || 'movie'}&subjectid=${m.id}&dp=${encodeURIComponent(m.dp || '')}&title=${encodeURIComponent(m.title)}`
+                          : `/watch/${m.id}?source=okjatt&href=${encodeURIComponent(m.href || m.path)}&title=${encodeURIComponent(m.title)}`;
+                        navigate(path);
+                      }}
+                      style={{
+                        background: 'linear-gradient(90deg, var(--cyan) 0%, #00bcff 100%)',
+                        color: '#000',
+                        border: 'none',
+                        padding: '12px 28px',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s',
+                        boxShadow: '0 0 15px rgba(0, 243, 255, 0.45)',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      ▶ Play Title
+                    </button>
+                  </div>
+                  
+                  {/* Background overlay layer */}
+                  <div style={{
+                    position: 'absolute',
+                    right: '8%',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    width: '320px',
+                    height: '320px',
+                    background: 'radial-gradient(circle, rgba(0, 243, 255, 0.12) 0%, transparent 70%)',
+                    zIndex: 1,
+                    pointerEvents: 'none'
+                  }} />
+                </div>
+              )}
+
+              <h2 style={{ marginBottom: '20px', fontSize: '20px' }}>
+                {categoryTitles[activeTab]} ({activeServer === 'server1' || activeTab === 'japanese' ? 'Server 1' : 'Server 2'}) — Page {isServer2Series ? page : (page + 1)}
+              </h2>
+              
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+                gap: '24px 16px'
+              }}>
+                {movies.map((m) => (
+                  <MovieCard key={m.id} movie={m} />
+                ))}
+              </div>
+              
+              {/* Pagination Controls */}
+              <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '20px',
+                marginTop: '48px',
+                paddingBottom: '20px'
+              }}>
+                <button
+                  onClick={() => {
+                    if (isServer2Series) {
+                      if (page > 1) setPage(page - 1);
+                    } else {
+                      if (page > 0) setPage(page - 1);
+                    }
+                  }}
+                  disabled={isServer2Series ? (page <= 1) : (page === 0)}
+                  className="btn"
+                  style={paginationButtonStyle(
+                    isServer2Series ? (page <= 1) : (page === 0)
+                  )}
+                >
+                  ← Previous Page
+                </button>
+                <span style={{ fontSize: '15px', fontWeight: 'bold' }}>
+                  Page {isServer2Series ? page : (page + 1)}
+                </span>
+                <button
+                  onClick={() => setPage(page + 1)}
+                  className="btn"
+                  style={paginationButtonStyle(false)}
+                >
+                  Next Page →
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="empty-state">
+              <h2>No titles found</h2>
+              <p>No content resolved in this server category.</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ────────────────────────────────────────────────────────────
+// INLINE STYLING HELPERS
+// ────────────────────────────────────────────────────────────
+
+function serverButtonStyle(isActive, activeColor) {
+  return {
+    background: isActive ? activeColor : '#222',
+    color: '#fff',
+    border: isActive ? `1px solid ${activeColor}` : '1px solid #444',
+    padding: '8px 16px',
+    borderRadius: '20px',
+    fontSize: '13px',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    outline: 'none',
+    boxShadow: isActive ? `0 4px 10px ${activeColor}30` : 'none'
+  };
+}
+
+function paginationButtonStyle(disabled) {
+  return {
+    background: disabled ? '#222' : '#fff',
+    color: disabled ? '#555' : '#000',
+    cursor: disabled ? 'default' : 'pointer',
+    border: 'none',
+    padding: '8px 20px',
+    fontSize: '14px',
+    fontWeight: 'bold',
+    opacity: disabled ? 0.5 : 1,
+    borderRadius: '4px'
+  };
+}

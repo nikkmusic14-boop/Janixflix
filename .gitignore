@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+server/node_modules/
+client/node_modules/
+
+# Storage (user content - don't commit)
+server/storage/videos/*
+server/storage/thumbnails/*
+!server/storage/videos/.gitkeep
+!server/storage/thumbnails/.gitkeep
+
+# Build
+client/dist/
+dist/
+build/
+
+# Env
+.env
+.env.local
+server/.env
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db

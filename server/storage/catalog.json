@@ -1,0 +1,28 @@
+[
+  {
+    "id": "demo-bbb",
+    "title": "Big Buck Bunny — Test Clip",
+    "description": "Short test clip used to demo the JaNixFlix player with seek/scrub support. Upload your own movies to replace it.",
+    "genre": "Animation",
+    "year": 2008,
+    "duration": 10,
+    "videoFile": "bbb.mp4",
+    "thumbnail": null,
+    "featured": true,
+    "rating": 8,
+    "createdAt": "2026-07-05T09:16:10.389Z"
+  },
+  {
+    "id": "demo-bbb2",
+    "title": "Big Buck Bunny — Clip 2",
+    "description": "Another short test clip for the catalog. Delete it once you upload your own content.",
+    "genre": "Animation",
+    "year": 2008,
+    "duration": 10,
+    "videoFile": "bbb2.mp4",
+    "thumbnail": null,
+    "featured": false,
+    "rating": 7.5,
+    "createdAt": "2026-07-05T09:16:10.395Z"
+  }
+]
