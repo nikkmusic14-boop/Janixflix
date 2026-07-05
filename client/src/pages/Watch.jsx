@@ -212,107 +212,101 @@ export default function Watch() {
 
   // 5. Background Search for different audio languages of the same movie (Server 1 only)
   useEffect(() => {
-    const getBaseTitle = (t) => {
+    const getCleanBase = (t) => {
       if (!t) return '';
-      let cleaned = t
+      return t
+        .toLowerCase()
+        .replace(/dubbed/g, '')
+        .replace(/dual audio/g, '')
+        .replace(/multi audio/g, '')
+        .replace(/hindi/g, '')
+        .replace(/english/g, '')
+        .replace(/telugu/g, '')
+        .replace(/tamil/g, '')
+        .replace(/malayalam/g, '')
+        .replace(/kannada/g, '')
+        .replace(/punjabi/g, '')
+        .replace(/bengali/g, '')
+        .replace(/japanese/g, '')
+        .replace(/korean/g, '')
+        .replace(/[\[\(]hin[\]\)]/g, '')
+        .replace(/[\[\(]eng[\]\)]/g, '')
+        .replace(/[\[\(]tel[\]\)]/g, '')
+        .replace(/[\[\(]tam[\]\)]/g, '')
         .replace(/\[.*\]/g, '')
         .replace(/\(.*\)/g, '')
-        .replace(/S\d+Ep\d+/gi, '')
-        .replace(/S\d+/gi, '')
-        .replace(/Season\s+\d+/gi, '')
-        .replace(/Episode\s+\d+/gi, '')
-        .replace(/Ep\s+\d+/gi, '')
+        .replace(/\b(19|20)\d{2}\b/g, '') // remove year
+        .replace(/s\d+ep\d+/g, '')
+        .replace(/s\d+/g, '')
+        .replace(/season\s+\d+/g, '')
+        .replace(/episode\s+\d+/g, '')
+        .replace(/ep\s+\d+/g, '')
         .replace(/-download-\d+\.html$/, '')
-        .replace(/-/g, ' ');
-      
-      if (cleaned.includes(':')) {
-        cleaned = cleaned.split(':')[0];
-      }
-      if (cleaned.toLowerCase().includes('the movie')) {
-        cleaned = cleaned.toLowerCase().split('the movie')[0];
-      }
-      return cleaned.trim();
+        .replace(/[^a-z0-9]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
     };
 
     const matchTitle = (a, b) => {
-      const cleanA = getBaseTitle(a).toLowerCase();
-      const cleanB = getBaseTitle(b).toLowerCase();
-      
-      if (cleanA === cleanB) return true;
-      if (cleanA.includes(cleanB) || cleanB.includes(cleanA)) return true;
-      
-      const wordsA = cleanA.split(/\s+/).filter(Boolean);
-      const wordsB = cleanB.split(/\s+/).filter(Boolean);
-      
-      if (wordsA.length >= 2 && wordsB.length >= 2) {
-        return wordsA[0] === wordsB[0] && wordsA[1] === wordsB[1];
-      }
-      if (wordsA.length > 0 && wordsB.length > 0) {
-        return wordsA[0] === wordsB[0];
-      }
-      return false;
+      const cleanA = getCleanBase(a);
+      const cleanB = getCleanBase(b);
+      return cleanA === cleanB || cleanA.includes(cleanB) || cleanB.includes(cleanA);
     };
 
-    const baseTitle = getBaseTitle(movieTitle);
+    const baseTitle = getCleanBase(movieTitle);
     if (!baseTitle) return;
 
-    if (source === 'netmirror') {
-      api.external.netmirror.search(baseTitle)
-        .then(res => {
-          if (res && res.results) {
-            const tracks = [];
-            res.results.forEach(item => {
-              if (matchTitle(item.title, movieTitle)) {
-                let lang = 'Original';
-                const tLower = item.title.toLowerCase();
-                if (tLower.includes('hindi') || tLower.includes('[hin]')) lang = 'Hindi';
-                else if (tLower.includes('english') || tLower.includes('[eng]')) lang = 'English';
-                else if (tLower.includes('telugu')) lang = 'Telugu';
-                else if (tLower.includes('tamil')) lang = 'Tamil';
-                else if (tLower.includes('malayalam')) lang = 'Malayalam';
-                else if (tLower.includes('kannada')) lang = 'Kannada';
+    const performSearch = async (query) => {
+      if (source === 'netmirror') {
+        const res = await api.external.netmirror.search(query);
+        return res?.results || [];
+      } else {
+        return await api.external.okjatt.search(query) || [];
+      }
+    };
 
-                if (!tracks.some(t => t.language === lang)) {
-                  tracks.push({
-                    language: lang,
-                    id: item.id,
-                    dp: item.dp,
-                    title: item.title
-                  });
-                }
-              }
-            });
-            setAudioTracks(tracks);
+    const runSearch = async () => {
+      try {
+        let results = await performSearch(baseTitle);
+        if (results.length === 0) {
+          const words = baseTitle.split(' ');
+          if (words.length > 2) {
+            const shortQuery = words.slice(0, 2).join(' ');
+            results = await performSearch(shortQuery);
           }
-        })
-        .catch(err => console.log("Failed to find alternative audio languages:", err));
-    } else if (source === 'okjatt') {
-      api.external.okjatt.search(baseTitle)
-        .then(res => {
-          if (res) {
-            const tracks = [];
-            res.forEach(item => {
-              if (matchTitle(item.title, movieTitle)) {
-                let lang = 'Original';
-                const tLower = item.title.toLowerCase();
-                if (tLower.includes('hindi') || tLower.includes('dubbed') || tLower.includes('[hin]')) lang = 'Hindi';
-                else if (tLower.includes('english') || tLower.includes('[eng]')) lang = 'English';
+        }
 
-                if (!tracks.some(t => t.language === lang)) {
-                  tracks.push({
-                    language: lang,
-                    id: item.id,
-                    href: item.path || item.href,
-                    title: item.title
-                  });
-                }
-              }
-            });
-            setAudioTracks(tracks);
+        const tracks = [];
+        results.forEach(item => {
+          if (matchTitle(item.title, movieTitle)) {
+            let lang = 'Original';
+            const tLower = item.title.toLowerCase();
+            if (tLower.includes('hindi') || tLower.includes('[hin]') || tLower.includes('dubbed') || tLower.includes('hin-')) lang = 'Hindi';
+            else if (tLower.includes('english') || tLower.includes('[eng]') || tLower.includes('eng-')) lang = 'English';
+            else if (tLower.includes('telugu') || tLower.includes('[tel]')) lang = 'Telugu';
+            else if (tLower.includes('tamil') || tLower.includes('[tam]')) lang = 'Tamil';
+            else if (tLower.includes('malayalam') || tLower.includes('[mal]')) lang = 'Malayalam';
+            else if (tLower.includes('kannada') || tLower.includes('[kan]')) lang = 'Kannada';
+            else if (tLower.includes('punjabi') || tLower.includes('[pun]')) lang = 'Punjabi';
+
+            if (!tracks.some(t => t.language === lang)) {
+              tracks.push({
+                language: lang,
+                id: item.id,
+                dp: item.dp,
+                href: item.path || item.href,
+                title: item.title
+              });
+            }
           }
-        })
-        .catch(err => console.log("Failed to find alternative OKJatt audio:", err));
-    }
+        });
+        setAudioTracks(tracks);
+      } catch (err) {
+        console.error("Failed to resolve audio tracks:", err);
+      }
+    };
+
+    runSearch();
   }, [movieTitle, source]);
 
   // Handle switching to Server 1 (FHD)
