@@ -49,23 +49,9 @@ export default function Watch() {
   const gainNodeRef = useRef(null);
   const sourceNodeRef = useRef(null);
 
-  // Automatic Web Audio API Volume Boost (2x for Hollywood streams)
+  // Automatic Web Audio API Volume Boost (2.5x for ALL streams)
   const handleAutoVolumeBoost = () => {
     if (!videoRef.current) return;
-
-    // Check if it is a Hollywood / US movie or show
-    const isHollywood = 
-      params.get('tab') === 'hollywood' || 
-      params.get('tab') === 'hollywoodtvshows' ||
-      (movie?.cn && (
-        movie.cn.toLowerCase().includes('us') || 
-        movie.cn.toLowerCase().includes('united states') ||
-        movie.cn.toLowerCase().includes('united kingdom') ||
-        movie.cn.toLowerCase().includes('uk') ||
-        movie.cn.toLowerCase().includes('canada')
-      ));
-
-    if (!isHollywood) return;
 
     try {
       if (!audioCtxRef.current) {
@@ -83,13 +69,13 @@ export default function Watch() {
         gainNode.connect(ctx.destination);
       }
 
-      // Automatically boost gain to 2.0 (2x boost) for Hollywood movies
-      gainNodeRef.current.gain.value = 2.0;
+      // Automatically boost gain to 2.5 (2.5x boost) for all videos
+      gainNodeRef.current.gain.value = 2.5;
       setBoostActive(true);
       if (audioCtxRef.current.state === 'suspended') {
         audioCtxRef.current.resume();
       }
-      console.log("[Auto Volume Boost]: Enabled 2.0x gain for Hollywood stream.");
+      console.log("[Auto Volume Boost]: Enabled 2.5x gain for stream.");
     } catch (err) {
       console.warn("[Auto Volume Boost Failed]:", err.message);
     }
