@@ -117,26 +117,81 @@ export default function Detail() {
     setOppositeLink(null);
     setOppositeSearching(true);
 
-    if (source === 'netmirror') {
-      api.external.okjatt.search(movie.title)
-        .then(results => {
-          if (results && results.length > 0) {
-            setOppositeLink(results[0]);
+    const getCleanBase = (t) => {
+      if (!t) return '';
+      return t
+        .toLowerCase()
+        .replace(/dubbed/g, '')
+        .replace(/dual audio/g, '')
+        .replace(/multi audio/g, '')
+        .replace(/hindi/g, '')
+        .replace(/english/g, '')
+        .replace(/telugu/g, '')
+        .replace(/tamil/g, '')
+        .replace(/malayalam/g, '')
+        .replace(/kannada/g, '')
+        .replace(/punjabi/g, '')
+        .replace(/bengali/g, '')
+        .replace(/japanese/g, '')
+        .replace(/korean/g, '')
+        .replace(/[\[\(]hin[\]\)]/g, '')
+        .replace(/[\[\(]eng[\]\)]/g, '')
+        .replace(/[\[\(]tel[\]\)]/g, '')
+        .replace(/[\[\(]tam[\]\)]/g, '')
+        .replace(/\[.*\]/g, '')
+        .replace(/\(.*\)/g, '')
+        .replace(/\b(19|20)\d{2}\b/g, '') // remove year
+        .replace(/s\d+ep\d+/g, '')
+        .replace(/s\d+/g, '')
+        .replace(/season\s+\d+/g, '')
+        .replace(/episode\s+\d+/g, '')
+        .replace(/ep\s+\d+/g, '')
+        .replace(/-download-\d+\.html$/, '')
+        .replace(/[^a-z0-9]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    };
+
+    const matchTitle = (a, b) => {
+      const cleanA = getCleanBase(a);
+      const cleanB = getCleanBase(b);
+      return cleanA === cleanB || cleanA.includes(cleanB) || cleanB.includes(cleanA);
+    };
+
+    const baseTitle = getCleanBase(movie.title);
+
+    const performSearch = async (query) => {
+      if (source === 'netmirror') {
+        return await api.external.okjatt.search(query) || [];
+      } else {
+        const res = await api.external.netmirror.search(query);
+        return res?.results || [];
+      }
+    };
+
+    const runSearch = async () => {
+      try {
+        let results = await performSearch(baseTitle);
+        if (results.length === 0) {
+          const words = baseTitle.split(' ');
+          if (words.length > 2) {
+            const shortQuery = words.slice(0, 2).join(' ');
+            results = await performSearch(shortQuery);
           }
-        })
-        .catch(err => console.log("Background search failed:", err))
-        .finally(() => setOppositeSearching(false));
-    } 
-    else if (source === 'okjatt') {
-      api.external.netmirror.search(movie.title)
-        .then(res => {
-          if (res && res.results && res.results.length > 0) {
-            setOppositeLink(res.results[0]);
-          }
-        })
-        .catch(err => console.log("Background search failed:", err))
-        .finally(() => setOppositeSearching(false));
-    }
+        }
+
+        const match = results.find(item => matchTitle(item.title, movie.title));
+        if (match) {
+          setOppositeLink(match);
+        }
+      } catch (err) {
+        console.warn("Background match search failed:", err);
+      } finally {
+        setOppositeSearching(false);
+      }
+    };
+
+    runSearch();
   }, [movie, source]);
 
   // Lazy load Netmirror Details and play
