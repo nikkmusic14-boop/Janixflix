@@ -589,3 +589,29 @@ img {
   .row { padding-left: 6px !important; padding-right: 6px !important; }
   .detail-body, .player-wrap, .upload-page { padding-left: 16px; padding-right: 16px; }
 }
+
+/* Multi-row horizontal scrolling dashboard for Landing Page */
+.home-row {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 10px 48px 30px;
+  scrollbar-width: none; /* Firefox */
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+.home-row::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}
+.home-row .card {
+  flex: 0 0 170px;
+}
+@media (max-width: 700px) {
+  .home-row {
+    padding: 8px 6px 20px !important;
+    gap: 8px !important;
+  }
+  .home-row .card {
+    flex: 0 0 23% !important; /* Forces 4 cards to show up screen-proportionally */
+  }
+}

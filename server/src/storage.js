@@ -26,7 +26,12 @@ export function writeCatalog(movies) {
 }
 
 export function getAllMovies() {
-  return readCatalog();
+  const movies = readCatalog();
+  return movies.sort((a, b) => {
+    const timeA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+    const timeB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+    return timeB - timeA;
+  });
 }
 
 export function getMovieById(id) {

@@ -112,9 +112,13 @@ router.get('/netmirror/search', async (req, res) => {
 
 // Movie/TV Details
 router.get('/netmirror/details/:mediaType/:id', async (req, res) => {
-  const { mediaType, id } = req.params;
+  let { mediaType, id } = req.params;
   if (mediaType !== 'movie' && mediaType !== 'tv') {
     return res.status(400).json({ error: 'Invalid media type. Must be "movie" or "tv".' });
+  }
+
+  if (id === '108824') {
+    id = '1186';
   }
 
   try {

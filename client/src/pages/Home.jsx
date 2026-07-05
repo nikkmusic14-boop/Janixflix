@@ -8,8 +8,8 @@ export default function Home() {
   const [searchParams] = useSearchParams();
   const q = searchParams.get('q') || '';
   
-  // Read active category directly from URL params: 'bollywood' | 'punjabi' | 'hollywood' | 'webseries' | 'tvshows' | 'anime'
-  const activeTab = searchParams.get('tab') || 'bollywood';
+  // Read active category directly from URL params: 'home' | 'bollywood' | 'southindian' | 'punjabi' | 'hollywood' | 'webseries' | 'tvshows' | 'anime'
+  const activeTab = searchParams.get('tab') || 'home';
   
   // Server selection state
   const [activeServer, setActiveServer] = useState('server1');
@@ -19,6 +19,12 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
+
+  // Home category content feeds
+  const [localMovies, setLocalMovies] = useState([]);
+  const [homeBollywood, setHomeBollywood] = useState([]);
+  const [homeSouth, setHomeSouth] = useState([]);
+  const [homePunjabi, setHomePunjabi] = useState([]);
 
   // Search result states
   const [searchLoading, setSearchLoading] = useState(false);
@@ -73,6 +79,23 @@ export default function Home() {
     const loadCategory = async () => {
       try {
         let results = [];
+
+        if (activeTab === 'home') {
+          const [localRes, bwoodRes, southRes, punjRes] = await Promise.all([
+            api.listMovies().catch(() => []),
+            api.external.okjatt.list('bollywood', 0).catch(() => ({ results: [] })),
+            api.external.okjatt.list('southindian', 0).catch(() => ({ results: [] })),
+            api.external.okjatt.list('punjabi', 0).catch(() => ({ results: [] }))
+          ]);
+          if (cancelled) return;
+          setLocalMovies(localRes || []);
+          setHomeBollywood(bwoodRes.results || []);
+          setHomeSouth(southRes.results || []);
+          setHomePunjabi(punjRes.results || []);
+          setMovies([]);
+          setLoading(false);
+          return;
+        }
 
         if (activeServer === 'server1' || activeTab === 'japanese') {
           // Server 1 (Netmirror) listing parameters
@@ -241,7 +264,65 @@ export default function Home() {
         </div>
       ) : (
         <div className="catalog-container">
-          {movies.length > 0 ? (
+          {activeTab === 'home' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', marginTop: '10px' }}>
+              {/* Row 1: 🆕 Last Uploaded Content */}
+              {localMovies.length > 0 && (
+                <div>
+                  <h3 style={{ borderLeft: '4px solid #00f3ff', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px', textShadow: '0 0 10px rgba(0, 243, 255, 0.3)' }}>
+                    🆕 Last Uploaded Content
+                  </h3>
+                  <div className="home-row">
+                    {localMovies.map((m) => (
+                      <MovieCard key={m.id} movie={{ ...m, source: 'local' }} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Row 2: 🇮🇳 Bollywood Hits */}
+              {homeBollywood.length > 0 && (
+                <div>
+                  <h3 style={{ borderLeft: '4px solid #0070f3', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
+                    🇮🇳 Bollywood Hits
+                  </h3>
+                  <div className="home-row">
+                    {homeBollywood.map((m) => (
+                      <MovieCard key={m.id} movie={{ ...m, source: 'okjatt' }} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Row 3: 🌴 South Indian Dubbed */}
+              {homeSouth.length > 0 && (
+                <div>
+                  <h3 style={{ borderLeft: '4px solid #00a000', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
+                    🌴 South Indian Dubbed
+                  </h3>
+                  <div className="home-row">
+                    {homeSouth.map((m) => (
+                      <MovieCard key={m.id} movie={{ ...m, source: 'okjatt' }} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Row 4: 🌾 Punjabi Hits */}
+              {homePunjabi.length > 0 && (
+                <div>
+                  <h3 style={{ borderLeft: '4px solid #ffcc00', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
+                    🌾 Punjabi Hits
+                  </h3>
+                  <div className="home-row">
+                    {homePunjabi.map((m) => (
+                      <MovieCard key={m.id} movie={{ ...m, source: 'okjatt' }} />
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          ) : movies.length > 0 ? (
             <div>
               {/* Featured Banner at page 0 */}
               {((activeServer === 'server2' && isServer2Series) ? page === 1 : page === 0) && movies[0] && (
