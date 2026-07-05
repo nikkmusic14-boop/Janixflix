@@ -86,7 +86,6 @@ export default function Watch() {
     const isSameOrigin = videoSrc.startsWith('/') || videoSrc.startsWith(window.location.origin);
 
     if (!isSameOrigin) {
-      console.log("[Auto Volume Boost]: Stream is cross-origin. Skipping boost to prevent browser muting.");
       return;
     }
 
@@ -579,7 +578,7 @@ export default function Watch() {
                   controls
                   autoPlay
                   playsInline
-                  src={activeNetmirrorUrl === netmirrorChromecastUrl ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl)}
+                  src={(window.location.hostname.includes('onrender.com') || activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl)}
                   style={{ width: '100%', height: '100%' }}
                   onPlay={handleAutoVolumeBoost}
                 >
