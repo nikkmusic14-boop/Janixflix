@@ -615,3 +615,14 @@ img {
     flex: 0 0 23% !important; /* Forces 4 cards to show up screen-proportionally */
   }
 }
+
+@keyframes pulse-loader {
+  0% {
+    transform: scale(0.93);
+    opacity: 0.55;
+  }
+  100% {
+    transform: scale(1.03);
+    opacity: 1;
+  }
+}

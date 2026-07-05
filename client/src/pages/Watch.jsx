@@ -528,8 +528,21 @@ export default function Watch() {
 
             {source === 'netmirror' && (
               netmirrorLoading ? (
-                <div className="loading" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  JaNixFlix is resolving secure stream parameters…
+                <div className="loading" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    fontFamily: 'Outfit, sans-serif', 
+                    fontWeight: 800, 
+                    fontSize: '36px', 
+                    letterSpacing: '1px',
+                    userSelect: 'none',
+                    animation: 'pulse-loader 1.5s ease-in-out infinite alternate'
+                  }}>
+                    <span style={{ color: '#00f3ff', textShadow: '0 0 15px rgba(0, 243, 255, 0.6), 0 0 30px rgba(0, 243, 255, 0.2)' }}>JANI</span>
+                    <span style={{ color: '#ffffff', fontWeight: 300, fontSize: '30px', margin: '0 5px', textShadow: '0 0 10px rgba(255, 255, 255, 0.8)', fontStyle: 'italic' }}>x</span>
+                    <span style={{ color: '#ff0055', textShadow: '0 0 15px rgba(255, 0, 85, 0.6), 0 0 30px rgba(255, 0, 85, 0.2)' }}>FLIX</span>
+                  </div>
                 </div>
               ) : activeNetmirrorUrl ? (
                 <video
@@ -554,8 +567,21 @@ export default function Watch() {
 
             {source === 'okjatt' && (
               okjattLoading ? (
-                <div className="loading" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  JaNixFlix is decrypting and fetching stream...
+                <div className="loading" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    fontFamily: 'Outfit, sans-serif', 
+                    fontWeight: 800, 
+                    fontSize: '36px', 
+                    letterSpacing: '1px',
+                    userSelect: 'none',
+                    animation: 'pulse-loader 1.5s ease-in-out infinite alternate'
+                  }}>
+                    <span style={{ color: '#00f3ff', textShadow: '0 0 15px rgba(0, 243, 255, 0.6), 0 0 30px rgba(0, 243, 255, 0.2)' }}>JANI</span>
+                    <span style={{ color: '#ffffff', fontWeight: 300, fontSize: '30px', margin: '0 5px', textShadow: '0 0 10px rgba(255, 255, 255, 0.8)', fontStyle: 'italic' }}>x</span>
+                    <span style={{ color: '#ff0055', textShadow: '0 0 15px rgba(255, 0, 85, 0.6), 0 0 30px rgba(255, 0, 85, 0.2)' }}>FLIX</span>
+                  </div>
                 </div>
               ) : okjattVideoUrl ? (
                 <video
