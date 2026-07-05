@@ -28,11 +28,6 @@ export default function Navbar() {
 
   return (
     <div className={`navbar ${scrolled ? 'scrolled' : ''}`} style={{
-      display: 'flex',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-      gap: '20px',
-      padding: '12px 48px',
       background: scrolled ? 'var(--bg)' : 'linear-gradient(180deg, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)',
       transition: 'background 0.3s ease'
     }}>
@@ -51,8 +46,10 @@ export default function Navbar() {
           display: 'flex', 
           gap: '6px', 
           alignItems: 'center', 
-          flexWrap: 'wrap',
-          maxWidth: 'calc(100% - 240px)'
+          flexWrap: 'nowrap',
+          overflowX: 'auto',
+          scrollbarWidth: 'none',
+          WebkitOverflowScrolling: 'touch',
         }}
       >
         <Link 
