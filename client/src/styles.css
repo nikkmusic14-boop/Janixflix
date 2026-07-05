@@ -518,6 +518,10 @@ img {
   gap: 24px 16px;
 }
 
+.catalog-container {
+  padding: 24px 48px;
+}
+
 .navbar-nav::-webkit-scrollbar {
   display: none;
 }
@@ -529,6 +533,10 @@ img {
   .navbar .search { padding: 4px 6px; margin-left: auto; }
   .navbar .search input { width: 85px; font-size: 11px; }
   .hide-mobile { display: none !important; }
+  
+  .catalog-container {
+    padding: 12px 6px !important;
+  }
   
   .movie-grid {
     grid-template-columns: repeat(4, 1fr) !important;
@@ -542,5 +550,6 @@ img {
   
   .hero, .detail-hero { padding: 0 16px 40px; }
   .hero-content h1 { font-size: 28px; }
-  .row, .detail-body, .player-wrap, .upload-page { padding-left: 16px; padding-right: 16px; }
+  .row { padding-left: 6px !important; padding-right: 6px !important; }
+  .detail-body, .player-wrap, .upload-page { padding-left: 16px; padding-right: 16px; }
 }
