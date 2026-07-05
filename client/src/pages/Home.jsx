@@ -83,15 +83,18 @@ export default function Home() {
         if (activeTab === 'home') {
           const [localRes, bwoodRes, southRes, punjRes] = await Promise.all([
             api.listMovies().catch(() => []),
-            api.external.okjatt.list('bollywood', 0).catch(() => ({ results: [] })),
-            api.external.okjatt.list('southindian', 0).catch(() => ({ results: [] })),
-            api.external.okjatt.list('punjabi', 0).catch(() => ({ results: [] }))
+            api.external.netmirror.list({ type: '1', cn: 'India', page: 0 }).catch(() => ({ results: [] })),
+            api.external.netmirror.search('South Indian', 0).catch(() => ({ results: [] })),
+            api.external.netmirror.search('Punjabi', 0).catch(() => ({ results: [] }))
           ]);
           if (cancelled) return;
           setLocalMovies(localRes || []);
-          setHomeBollywood(bwoodRes.results || []);
-          setHomeSouth(southRes.results || []);
-          setHomePunjabi(punjRes.results || []);
+          setHomeBollywood((bwoodRes.results || [])
+            .map(m => ({ ...m, source: 'netmirror' }))
+            .filter(m => !m.title.toLowerCase().includes('punjabi'))
+          );
+          setHomeSouth((southRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
+          setHomePunjabi((punjRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
           setMovies([]);
           setLoading(false);
           return;
@@ -288,7 +291,7 @@ export default function Home() {
                   </h3>
                   <div className="home-row">
                     {homeBollywood.map((m) => (
-                      <MovieCard key={m.id} movie={{ ...m, source: 'okjatt' }} />
+                      <MovieCard key={m.id} movie={{ ...m, source: 'netmirror' }} />
                     ))}
                   </div>
                 </div>
@@ -302,7 +305,7 @@ export default function Home() {
                   </h3>
                   <div className="home-row">
                     {homeSouth.map((m) => (
-                      <MovieCard key={m.id} movie={{ ...m, source: 'okjatt' }} />
+                      <MovieCard key={m.id} movie={{ ...m, source: 'netmirror' }} />
                     ))}
                   </div>
                 </div>
@@ -316,7 +319,7 @@ export default function Home() {
                   </h3>
                   <div className="home-row">
                     {homePunjabi.map((m) => (
-                      <MovieCard key={m.id} movie={{ ...m, source: 'okjatt' }} />
+                      <MovieCard key={m.id} movie={{ ...m, source: 'netmirror' }} />
                     ))}
                   </div>
                 </div>
