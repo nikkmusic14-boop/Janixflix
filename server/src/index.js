@@ -10,9 +10,7 @@ import externalRouter from './routes/external.js';
 const app = express();
 
 // ────────────────────────────────────────────────────────────
-// Middleware
-// ────────────────────────────────────────────────────────────
-app.use(cors({ origin: CLIENT_ORIGIN }));
+app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
 

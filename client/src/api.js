@@ -1,5 +1,4 @@
-// Central API client. Backend URL comes from env, defaults to local server.
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:4000' : 'https://janixflix-1.onrender.com');
 
 async function request(pathname, options = {}) {
   const res = await fetch(`${API_URL}${pathname}`, {
