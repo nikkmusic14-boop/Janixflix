@@ -40,6 +40,7 @@ export const api = {
   // Media URLs
   streamUrl: (id) => `${API_URL}/api/stream/${id}`,
   thumbnailUrl: (id) => `${API_URL}/api/stream/thumbnail/${id}`,
+  okjattProxyUrl: (url) => `${API_URL}/api/external/okjatt/proxy-stream?url=${encodeURIComponent(url)}`,
 
   // External APIs (Netmirror & OKJatt proxy/scrapers)
   external: {

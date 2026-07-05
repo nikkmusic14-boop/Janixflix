@@ -455,7 +455,7 @@ export default function Watch() {
                   controls
                   autoPlay
                   playsInline
-                  src={okjattVideoUrl}
+                  src={api.okjattProxyUrl(okjattVideoUrl)}
                   style={{ width: '100%', height: '100%' }}
                 >
                   Your browser does not support HTML5 direct video playback.

@@ -449,6 +449,45 @@ router.get('/okjatt/movie-source', async (req, res) => {
   }
 });
 
+// Proxy endpoint to stream OKJatt videos (bypasses HTTP-only connection refused and mixed content blocks)
+router.get('/okjatt/proxy-stream', async (req, res) => {
+  let { url } = req.query;
+  if (!url) return res.status(400).json({ error: 'Param "url" is required' });
+
+  try {
+    // Replace expired/dead linktosho.store domain with active checkyourlinks.shop domain
+    if (url.includes('linktosho.store')) {
+      url = url.replace('linktosho.store', 'checkyourlinks.shop');
+    }
+
+    const headers = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    };
+
+    if (req.headers.range) {
+      headers['Range'] = req.headers.range;
+    }
+
+    const response = await fetch(url, { headers });
+    res.status(response.status);
+
+    response.headers.forEach((val, key) => {
+      if (['content-type', 'content-length', 'content-range', 'accept-ranges'].includes(key)) {
+        res.setHeader(key, val);
+      }
+    });
+
+    if (response.body) {
+      Readable.fromWeb(response.body).pipe(res);
+    } else {
+      res.end();
+    }
+  } catch (err) {
+    console.error('[OKJatt Proxy Stream Error]:', err.message);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // ────────────────────────────────────────────────────────────
 // PARSING & SCRAPING HELPERS
 // ────────────────────────────────────────────────────────────
