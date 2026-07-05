@@ -49,9 +49,23 @@ export default function Watch() {
   const gainNodeRef = useRef(null);
   const sourceNodeRef = useRef(null);
 
-  // Toggle Web Audio API Volume Boost
-  const toggleVolumeBoost = () => {
+  // Automatic Web Audio API Volume Boost (2x for Hollywood streams)
+  const handleAutoVolumeBoost = () => {
     if (!videoRef.current) return;
+
+    // Check if it is a Hollywood / US movie or show
+    const isHollywood = 
+      params.get('tab') === 'hollywood' || 
+      params.get('tab') === 'hollywoodtvshows' ||
+      (movie?.cn && (
+        movie.cn.toLowerCase().includes('us') || 
+        movie.cn.toLowerCase().includes('united states') ||
+        movie.cn.toLowerCase().includes('united kingdom') ||
+        movie.cn.toLowerCase().includes('uk') ||
+        movie.cn.toLowerCase().includes('canada')
+      ));
+
+    if (!isHollywood) return;
 
     try {
       if (!audioCtxRef.current) {
@@ -69,20 +83,15 @@ export default function Watch() {
         gainNode.connect(ctx.destination);
       }
 
-      if (boostActive) {
-        gainNodeRef.current.gain.value = 1.0;
-        setBoostActive(false);
-      } else {
-        // Boost volume by 3x (300%)
-        gainNodeRef.current.gain.value = 3.0;
-        setBoostActive(true);
-        if (audioCtxRef.current.state === 'suspended') {
-          audioCtxRef.current.resume();
-        }
+      // Automatically boost gain to 2.0 (2x boost) for Hollywood movies
+      gainNodeRef.current.gain.value = 2.0;
+      setBoostActive(true);
+      if (audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
       }
+      console.log("[Auto Volume Boost]: Enabled 2.0x gain for Hollywood stream.");
     } catch (err) {
-      console.error("Volume Boost failed:", err);
-      alert("Volume Boost is not supported on this browser or stream source.");
+      console.warn("[Auto Volume Boost Failed]:", err.message);
     }
   };
 
@@ -516,6 +525,7 @@ export default function Watch() {
                 playsInline
                 poster={api.thumbnailUrl(id)}
                 src={api.streamUrl(id)}
+                onPlay={handleAutoVolumeBoost}
               >
                 Your browser does not support HTML5 video player.
               </video>
@@ -535,6 +545,7 @@ export default function Watch() {
                   playsInline
                   src={activeNetmirrorUrl === netmirrorChromecastUrl ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl)}
                   style={{ width: '100%', height: '100%' }}
+                  onPlay={handleAutoVolumeBoost}
                 >
                   Your browser does not support HTML5 direct video playback.
                 </video>
@@ -559,6 +570,7 @@ export default function Watch() {
                   playsInline
                   src={api.okjattProxyUrl(okjattVideoUrl)}
                   style={{ width: '100%', height: '100%' }}
+                  onPlay={handleAutoVolumeBoost}
                 >
                   Your browser does not support HTML5 direct video playback.
                 </video>
@@ -582,67 +594,44 @@ export default function Watch() {
             gap: '12px'
           }}>
             {/* Dynamic Server Switcher Option */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '14px', color: 'var(--text-dim)', fontWeight: 'bold' }}>📡 Switch Play Server:</span>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    onClick={source === 'okjatt' ? handleSwitchToServer1 : undefined}
-                    disabled={source === 'netmirror' || (source === 'okjatt' && !oppositeLink && !oppositeSearching) || oppositeSearching}
-                    style={{
-                      background: source === 'netmirror' ? '#0070f3' : '#333',
-                      color: '#fff',
-                      border: 'none',
-                      padding: '8px 16px',
-                      borderRadius: '4px',
-                      fontSize: '13px',
-                      fontWeight: 'bold',
-                      cursor: source === 'netmirror' ? 'default' : (source === 'okjatt' && !oppositeLink) ? 'not-allowed' : 'pointer',
-                      opacity: source === 'netmirror' ? 1 : (source === 'okjatt' && !oppositeLink) ? 0.4 : 1
-                    }}
-                  >
-                    Stream Server 1 (FHD) {oppositeSearching ? ' (Searching...)' : (source === 'okjatt' && !oppositeLink) ? ' (Unavailable)' : ''}
-                  </button>
-                  <button
-                    onClick={source === 'netmirror' ? handleSwitchToServer2 : undefined}
-                    disabled={source === 'okjatt' || (source === 'netmirror' && !oppositeLink && !oppositeSearching) || oppositeSearching}
-                    style={{
-                      background: source === 'okjatt' ? '#00a000' : '#333',
-                      color: '#fff',
-                      border: 'none',
-                      padding: '8px 16px',
-                      borderRadius: '4px',
-                      fontSize: '13px',
-                      fontWeight: 'bold',
-                      cursor: source === 'okjatt' ? 'default' : (source === 'netmirror' && !oppositeLink) ? 'not-allowed' : 'pointer',
-                      opacity: source === 'okjatt' ? 1 : (source === 'netmirror' && !oppositeLink) ? 0.4 : 1
-                    }}
-                  >
-                    Stream Server 2 (HD) {oppositeSearching ? ' (Searching...)' : (source === 'netmirror' && !oppositeLink) ? ' (Unavailable)' : ''}
-                  </button>
-                </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+              <span style={{ fontSize: '14px', color: 'var(--text-dim)', fontWeight: 'bold' }}>📡 Switch Play Server:</span>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={source === 'okjatt' ? handleSwitchToServer1 : undefined}
+                  disabled={source === 'netmirror' || (source === 'okjatt' && !oppositeLink && !oppositeSearching) || oppositeSearching}
+                  style={{
+                    background: source === 'netmirror' ? '#0070f3' : '#333',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    cursor: source === 'netmirror' ? 'default' : (source === 'okjatt' && !oppositeLink) ? 'not-allowed' : 'pointer',
+                    opacity: source === 'netmirror' ? 1 : (source === 'okjatt' && !oppositeLink) ? 0.4 : 1
+                  }}
+                >
+                  Stream Server 1 (FHD) {oppositeSearching ? ' (Searching...)' : (source === 'okjatt' && !oppositeLink) ? ' (Unavailable)' : ''}
+                </button>
+                <button
+                  onClick={source === 'netmirror' ? handleSwitchToServer2 : undefined}
+                  disabled={source === 'okjatt' || (source === 'netmirror' && !oppositeLink && !oppositeSearching) || oppositeSearching}
+                  style={{
+                    background: source === 'okjatt' ? '#00a000' : '#333',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '4px',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    cursor: source === 'okjatt' ? 'default' : (source === 'netmirror' && !oppositeLink) ? 'not-allowed' : 'pointer',
+                    opacity: source === 'okjatt' ? 1 : (source === 'netmirror' && !oppositeLink) ? 0.4 : 1
+                  }}
+                >
+                  Stream Server 2 (HD) {oppositeSearching ? ' (Searching...)' : (source === 'netmirror' && !oppositeLink) ? ' (Unavailable)' : ''}
+                </button>
               </div>
-
-              {/* Volume Booster Controller */}
-              <button
-                onClick={toggleVolumeBoost}
-                style={{
-                  background: boostActive ? 'linear-gradient(90deg, #ff0055 0%, #ff5500 100%)' : '#333',
-                  color: '#fff',
-                  border: 'none',
-                  padding: '8px 16px',
-                  borderRadius: '4px',
-                  fontSize: '13px',
-                  fontWeight: 'bold',
-                  cursor: 'pointer',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  boxShadow: boostActive ? '0 0 15px rgba(255, 0, 85, 0.4)' : 'none'
-                }}
-              >
-                🔊 {boostActive ? 'Volume Boosted (3x)' : 'Boost Volume (3x)'}
-              </button>
             </div>
 
             {/* Netmirror Quality Selector - Hidden on Render to avoid 403 proxy blocks */}
