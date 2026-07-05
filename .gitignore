@@ -10,8 +10,8 @@ server/storage/thumbnails/*
 !server/storage/thumbnails/.gitkeep
 
 # Build
-client/dist/
-dist/
+# client/dist/
+# dist/
 build/
 
 # Env
