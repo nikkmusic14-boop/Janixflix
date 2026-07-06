@@ -56,6 +56,43 @@ app.get('/google6466252c33b6da5c.html', (req, res) => {
   res.sendFile(path.resolve(__dirname, '..', '..', 'google6466252c33b6da5c.html'));
 });
 
+// Sitemap route
+app.get('/sitemap.xml', (req, res) => {
+  const host = req.get('host');
+  const protocol = req.protocol;
+  const baseUrl = `${protocol}://${host}`;
+
+  const tabs = [
+    '',
+    '?tab=bollywood',
+    '?tab=southindian',
+    '?tab=punjabi',
+    '?tab=hollywood',
+    '?tab=indianwebseries',
+    '?tab=indiantvshows',
+    '?tab=hollywoodtvshows',
+    '?tab=korean',
+    '?tab=japanese'
+  ];
+
+  let xml = '<?xml version="1.0" encoding="UTF-8"?>\n';
+  xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n';
+  
+  tabs.forEach(tab => {
+    const url = tab ? `${baseUrl}/${tab}` : `${baseUrl}/`;
+    xml += '  <url>\n';
+    xml += `    <loc>${url}</loc>\n`;
+    xml += '    <changefreq>daily</changefreq>\n';
+    xml += '    <priority>' + (tab === '' ? '1.0' : '0.8') + '</priority>\n';
+    xml += '  </url>\n';
+  });
+
+  xml += '</urlset>';
+
+  res.header('Content-Type', 'application/xml');
+  res.send(xml);
+});
+
 // Catch-all route to serve React's index.html for client-side routing
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) {
