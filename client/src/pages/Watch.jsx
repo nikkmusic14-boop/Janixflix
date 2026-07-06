@@ -45,6 +45,18 @@ export default function Watch() {
   // Universal Quality Selection
   const [selectedQuality, setSelectedQuality] = useState('1080p');
 
+  // Video playback buffering states
+  const [videoBuffering, setVideoBuffering] = useState(false);
+  const bufferingHandlers = {
+    onWaiting: () => setVideoBuffering(true),
+    onPlaying: () => setVideoBuffering(false),
+    onPause: () => setVideoBuffering(false),
+    onSeeking: () => setVideoBuffering(true),
+    onSeeked: () => setVideoBuffering(false),
+    onCanPlay: () => setVideoBuffering(false),
+    onStalled: () => setVideoBuffering(true),
+  };
+
   const handleQualityChange = (qLabel) => {
     setSelectedQuality(qLabel);
     
@@ -547,7 +559,11 @@ export default function Watch() {
                 playsInline
                 poster={api.thumbnailUrl(id)}
                 src={api.streamUrl(id)}
-                onPlay={handleAutoVolumeBoost}
+                onPlay={(e) => {
+                  handleAutoVolumeBoost();
+                  setVideoBuffering(false);
+                }}
+                {...bufferingHandlers}
               >
                 Your browser does not support HTML5 video player.
               </video>
@@ -580,7 +596,11 @@ export default function Watch() {
                   playsInline
                   src={(window.location.hostname.includes('onrender.com') || activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl)}
                   style={{ width: '100%', height: '100%' }}
-                  onPlay={handleAutoVolumeBoost}
+                  onPlay={(e) => {
+                    handleAutoVolumeBoost();
+                    setVideoBuffering(false);
+                  }}
+                  {...bufferingHandlers}
                 >
                   Your browser does not support HTML5 direct video playback.
                 </video>
@@ -618,7 +638,11 @@ export default function Watch() {
                   playsInline
                   src={api.okjattProxyUrl(okjattVideoUrl)}
                   style={{ width: '100%', height: '100%' }}
-                  onPlay={handleAutoVolumeBoost}
+                  onPlay={(e) => {
+                    handleAutoVolumeBoost();
+                    setVideoBuffering(false);
+                  }}
+                  {...bufferingHandlers}
                 >
                   Your browser does not support HTML5 direct video playback.
                 </video>
@@ -628,6 +652,38 @@ export default function Watch() {
                   <p>Please try switching stream servers below.</p>
                 </div>
               )
+            )}
+
+            {/* Custom Buffering Overlay with brand logo */}
+            {videoBuffering && (
+              <div style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                background: 'rgba(0, 0, 0, 0.75)',
+                zIndex: 10,
+                pointerEvents: 'none'
+              }}>
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  fontFamily: 'Outfit, sans-serif', 
+                  fontWeight: 800, 
+                  fontSize: '42px', 
+                  letterSpacing: '1.5px',
+                  userSelect: 'none',
+                  animation: 'pulse-loader 1.2s ease-in-out infinite alternate'
+                }}>
+                  <span style={{ color: '#00f3ff', textShadow: '0 0 15px rgba(0, 243, 255, 0.7), 0 0 30px rgba(0, 243, 255, 0.3)' }}>JANI</span>
+                  <span style={{ color: '#ffffff', fontWeight: 300, fontSize: '32px', margin: '0 6px', textShadow: '0 0 10px rgba(255, 255, 255, 0.9)', fontStyle: 'italic' }}>x</span>
+                  <span style={{ color: '#ff0055', textShadow: '0 0 15px rgba(255, 0, 85, 0.7), 0 0 30px rgba(255, 0, 85, 0.3)' }}>FLIX</span>
+                </div>
+              </div>
             )}
           </div>
 
