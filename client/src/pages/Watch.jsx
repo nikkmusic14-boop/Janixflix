@@ -271,6 +271,61 @@ export default function Watch() {
 
   // 4. Background Search for the opposite stream server link
   const movieTitle = movie?.title || title;
+
+  const getCleanBase = (t) => {
+    if (!t) return '';
+    return t
+      .toLowerCase()
+      .replace(/dubbed/g, '')
+      .replace(/dual audio/g, '')
+      .replace(/multi audio/g, '')
+      .replace(/hindi/g, '')
+      .replace(/english/g, '')
+      .replace(/telugu/g, '')
+      .replace(/tamil/g, '')
+      .replace(/malayalam/g, '')
+      .replace(/kannada/g, '')
+      .replace(/punjabi/g, '')
+      .replace(/bengali/g, '')
+      .replace(/japanese/g, '')
+      .replace(/korean/g, '')
+      .replace(/[\[\(]hin[\]\)]/g, '')
+      .replace(/[\[\(]eng[\]\)]/g, '')
+      .replace(/[\[\(]tel[\]\)]/g, '')
+      .replace(/[\[\(]tam[\]\)]/g, '')
+      .replace(/\[.*\]/g, '')
+      .replace(/\(.*\)/g, '')
+      .replace(/\b(19|20)\d{2}\b/g, '') // remove year
+      .replace(/s\d+ep\d+/g, '')
+      .replace(/s\d+/g, '')
+      .replace(/season\s+\d+/g, '')
+      .replace(/episode\s+\d+/g, '')
+      .replace(/ep\s+\d+/g, '')
+      .replace(/-download-\d+\.html$/, '')
+      .replace(/[^a-z0-9]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
+
+  const matchTitle = (a, b) => {
+    const cleanA = getCleanBase(a);
+    const cleanB = getCleanBase(b);
+    
+    const extractYear = (str) => {
+      if (!str) return null;
+      const match = str.match(/\b(19|20)\d{2}\b/);
+      return match ? match[0] : null;
+    };
+    
+    const yearA = extractYear(a);
+    const yearB = extractYear(b);
+    if (yearA && yearB && yearA !== yearB) {
+      return false;
+    }
+    
+    return cleanA === cleanB;
+  };
+
   useEffect(() => {
     const cleanSearchTitle = (t) => {
       if (!t) return '';
@@ -297,8 +352,10 @@ export default function Watch() {
       api.external.okjatt.search(searchTitle)
         .then(res => {
           if (res && res.length > 0) {
-            // Find closest title match or pick first
-            setOppositeLink(res[0]);
+            const match = res.find(item => matchTitle(item.title, movieTitle));
+            if (match) {
+              setOppositeLink(match);
+            }
           }
         })
         .catch(err => console.log("Opposite search failed:", err))
@@ -309,7 +366,10 @@ export default function Watch() {
       api.external.netmirror.search(searchTitle)
         .then(res => {
           if (res && res.results && res.results.length > 0) {
-            setOppositeLink(res.results[0]);
+            const match = res.results.find(item => matchTitle(item.title, movieTitle));
+            if (match) {
+              setOppositeLink(match);
+            }
           }
         })
         .catch(err => console.log("Opposite search failed:", err))
@@ -319,60 +379,6 @@ export default function Watch() {
 
   // 5. Background Search for different audio languages of the same movie (Server 1 only)
   useEffect(() => {
-    const getCleanBase = (t) => {
-      if (!t) return '';
-      return t
-        .toLowerCase()
-        .replace(/dubbed/g, '')
-        .replace(/dual audio/g, '')
-        .replace(/multi audio/g, '')
-        .replace(/hindi/g, '')
-        .replace(/english/g, '')
-        .replace(/telugu/g, '')
-        .replace(/tamil/g, '')
-        .replace(/malayalam/g, '')
-        .replace(/kannada/g, '')
-        .replace(/punjabi/g, '')
-        .replace(/bengali/g, '')
-        .replace(/japanese/g, '')
-        .replace(/korean/g, '')
-        .replace(/[\[\(]hin[\]\)]/g, '')
-        .replace(/[\[\(]eng[\]\)]/g, '')
-        .replace(/[\[\(]tel[\]\)]/g, '')
-        .replace(/[\[\(]tam[\]\)]/g, '')
-        .replace(/\[.*\]/g, '')
-        .replace(/\(.*\)/g, '')
-        .replace(/\b(19|20)\d{2}\b/g, '') // remove year
-        .replace(/s\d+ep\d+/g, '')
-        .replace(/s\d+/g, '')
-        .replace(/season\s+\d+/g, '')
-        .replace(/episode\s+\d+/g, '')
-        .replace(/ep\s+\d+/g, '')
-        .replace(/-download-\d+\.html$/, '')
-        .replace(/[^a-z0-9]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    };
-
-    const matchTitle = (a, b) => {
-      const cleanA = getCleanBase(a);
-      const cleanB = getCleanBase(b);
-      
-      const extractYear = (str) => {
-        if (!str) return null;
-        const match = str.match(/\b(19|20)\d{2}\b/);
-        return match ? match[0] : null;
-      };
-      
-      const yearA = extractYear(a);
-      const yearB = extractYear(b);
-      if (yearA && yearB && yearA !== yearB) {
-        return false;
-      }
-      
-      return cleanA === cleanB;
-    };
-
     const baseTitle = getCleanBase(movieTitle);
     if (!baseTitle) return;
 

@@ -29,9 +29,10 @@ export default function MovieCard({ movie }) {
   // For Netmirror/OKJatt, we also need to know the media type (movie vs tv) on detail page
   const mediaTypeParam = movie.media_type ? `&type=${movie.media_type}` : '';
   const okjattHrefParam = movie.href ? `&href=${encodeURIComponent(movie.href)}` : '';
+  const thumbParam = movie.thumbnail ? `&thumb=${encodeURIComponent(movie.thumbnail)}` : '';
 
   return (
-    <Link className="card" to={`/movie/${movie.id}?source=${movie.source || 'local'}${mediaTypeParam}${okjattHrefParam}`}>
+    <Link className="card" to={`/movie/${movie.id}?source=${movie.source || 'local'}${mediaTypeParam}${okjattHrefParam}${thumbParam}`}>
       <div className="poster">
         <img
           src={getThumbUrl()}

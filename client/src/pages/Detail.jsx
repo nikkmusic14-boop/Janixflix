@@ -75,7 +75,7 @@ export default function Detail() {
             id,
             title: titleFromUrl,
             description: 'Browse available episodes or stream directly in Hindi audio.',
-            thumbnail: '',
+            thumbnail: params.get('thumb') || '',
             year: '',
             genre: 'Premium Stream',
             rating: '',
@@ -196,6 +196,30 @@ export default function Detail() {
         const match = results.find(item => matchTitle(item.title, movie.title));
         if (match) {
           setOppositeLink(match);
+          if (source === 'okjatt') {
+            const oType = match.media_type || 'movie';
+            api.external.netmirror.getDetails(oType, match.id)
+              .then(data => {
+                if (data && data.results && data.results.length > 0) {
+                  const raw = data.results[0];
+                  const parsed = {
+                    id: raw.id,
+                    title: raw.title,
+                    description: raw.dis || 'No synopsis available.',
+                    thumbnail: raw.backdrop_path,
+                    year: raw.release_date,
+                    genre: Array.isArray(raw.genre) ? raw.genre.join(', ') : raw.genre,
+                    rating: raw.vote_average,
+                    seasons: raw.season || null,
+                    subjectid: raw.subjectid,
+                    dp: raw.dp,
+                    source: 'netmirror',
+                    mediaType: oType
+                  };
+                  setServer1Data(parsed);
+                }
+              }).catch(err => console.warn("Failed to prefetch Server 1 details:", err));
+          }
         }
       } catch (err) {
         console.warn("Background match search failed:", err);
