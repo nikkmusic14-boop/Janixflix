@@ -21,7 +21,6 @@ export default function Home() {
   const [page, setPage] = useState(0);
 
   // Home category content feeds
-  const [localMovies, setLocalMovies] = useState([]);
   const [homeBollywood, setHomeBollywood] = useState([]);
   const [homeSouth, setHomeSouth] = useState([]);
   const [homePunjabi, setHomePunjabi] = useState([]);
@@ -81,14 +80,12 @@ export default function Home() {
         let results = [];
 
         if (activeTab === 'home') {
-          const [localRes, bwoodRes, southRes, punjRes] = await Promise.all([
-            api.listMovies().catch(() => []),
+          const [bwoodRes, southRes, punjRes] = await Promise.all([
             api.external.netmirror.list({ type: '1', cn: 'India', page: 0 }).catch(() => ({ results: [] })),
             api.external.netmirror.search('South Indian', 0).catch(() => ({ results: [] })),
             api.external.netmirror.search('Punjabi', 0).catch(() => ({ results: [] }))
           ]);
           if (cancelled) return;
-          setLocalMovies(localRes || []);
           setHomeBollywood((bwoodRes.results || [])
             .map(m => ({ ...m, source: 'netmirror' }))
             .filter(m => !m.title.toLowerCase().includes('punjabi'))
@@ -269,20 +266,6 @@ export default function Home() {
         <div className="catalog-container">
           {activeTab === 'home' ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', marginTop: '10px' }}>
-              {/* Row 1: 🆕 Last Uploaded Content */}
-              {localMovies.length > 0 && (
-                <div>
-                  <h3 style={{ borderLeft: '4px solid #00f3ff', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px', textShadow: '0 0 10px rgba(0, 243, 255, 0.3)' }}>
-                    🆕 Last Uploaded Content
-                  </h3>
-                  <div className="home-row">
-                    {localMovies.map((m) => (
-                      <MovieCard key={m.id} movie={{ ...m, source: 'local' }} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Row 2: 🇮🇳 Bollywood Hits */}
               {homeBollywood.length > 0 && (
                 <div>
