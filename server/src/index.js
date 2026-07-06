@@ -51,6 +51,11 @@ app.use('/api/movies', moviesRouter);
 app.use('/api/stream', streamRouter);
 app.use('/api/external', externalRouter);
 
+// Google site verification route
+app.get('/google6466252c33b6da5c.html', (req, res) => {
+  res.sendFile(path.resolve(__dirname, '..', '..', 'google6466252c33b6da5c.html'));
+});
+
 // Catch-all route to serve React's index.html for client-side routing
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) {
