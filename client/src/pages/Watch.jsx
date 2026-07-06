@@ -644,7 +644,7 @@ export default function Watch() {
               ) : (
                 <div className="empty-state" style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <h3>Video stream failed to load</h3>
-                  <p>Please try switching stream mirrors below.</p>
+                  <p>Please try switching sever next to watch movie</p>
                 </div>
               )
             )}
@@ -686,7 +686,7 @@ export default function Watch() {
               ) : (
                 <div className="empty-state" style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <h3>Video stream failed to load</h3>
-                  <p>Please try switching stream servers below.</p>
+                  <p>Please try switching sever next to watch movie</p>
                 </div>
               )
             )}
