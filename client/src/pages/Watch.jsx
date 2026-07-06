@@ -62,7 +62,13 @@ export default function Watch() {
     
     if (source === 'netmirror' && netmirrorQualities.length > 0) {
       const numeric = qLabel.replace('p', '');
-      const match = netmirrorQualities.find(q => q.quality.toLowerCase().includes(numeric));
+      const match = netmirrorQualities.find(q => {
+        const label = q.quality.toLowerCase();
+        if (qLabel === '1080p') {
+          return label.includes('1080') || label.includes('fhd') || label.includes('full hd');
+        }
+        return label.includes(numeric);
+      });
       if (match) {
         setActiveNetmirrorUrl(match.url);
         return;
@@ -223,11 +229,33 @@ export default function Watch() {
         if (data.chromecastUrl) {
           setActiveNetmirrorUrl(data.chromecastUrl);
         } else if (data.qualities && data.qualities.length > 0) {
-          const q1080 = data.qualities.find(q => q.quality.toUpperCase() === '1080P');
+          // Look for a 1080p/FHD link
+          const q1080 = data.qualities.find(q => {
+            const label = q.quality.toLowerCase();
+            return label.includes('1080') || label.includes('fhd') || label.includes('full hd');
+          });
+          
           if (q1080) {
             setActiveNetmirrorUrl(q1080.url);
+            setSelectedQuality('1080p');
           } else {
-            setActiveNetmirrorUrl(data.qualities[0].url);
+            // Sort to select the highest quality link available
+            const sortedQualities = [...data.qualities].sort((a, b) => {
+              const getVal = (q) => {
+                const label = q.quality.toLowerCase();
+                if (label.includes('1080') || label.includes('fhd')) return 1080;
+                if (label.includes('720') || label.includes('hd')) return 720;
+                if (label.includes('480')) return 480;
+                if (label.includes('360')) return 360;
+                return 0;
+              };
+              return getVal(b) - getVal(a);
+            });
+            setActiveNetmirrorUrl(sortedQualities[0].url);
+            const bestLabel = sortedQualities[0].quality.toLowerCase();
+            if (bestLabel.includes('720')) setSelectedQuality('720p');
+            else if (bestLabel.includes('480')) setSelectedQuality('480p');
+            else setSelectedQuality('1080p');
           }
         } else {
           throw new Error('No streaming media links resolved from Server 1.');
@@ -846,33 +874,6 @@ export default function Watch() {
 
 
 
-            {/* Mirror Selector dropdown for Server 1 */}
-            {source === 'netmirror' && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '12px', marginTop: '4px' }}>
-                <span style={{ fontSize: '13px', color: 'var(--text-dim)' }}>⚡ Server Mirror:</span>
-                <select 
-                  value={mirrorIndex} 
-                  onChange={(e) => setMirrorIndex(Number(e.target.value))}
-                  style={{
-                    background: '#333',
-                    color: '#fff',
-                    border: '1px solid #444',
-                    padding: '4px 8px',
-                    borderRadius: '4px',
-                    fontSize: '12px',
-                    cursor: 'pointer',
-                    outline: 'none'
-                  }}
-                >
-                  {mirrors.map((m, idx) => (
-                    <option key={idx} value={idx}>Mirror Server {idx + 1}</option>
-                  ))}
-                </select>
-                <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
-                  (If the video is slow or fails to play, try switching mirrors)
-                </span>
-              </div>
-            )}
           </div>
         </div>
 
