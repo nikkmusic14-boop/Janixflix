@@ -15,6 +15,16 @@ const CLIENT_DIST_DIR = path.resolve(__dirname, '..', '..', 'client', 'dist');
 
 const app = express();
 
+// Security Headers Middleware
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Content-Security-Policy', "default-src 'self' *; img-src * 'self' data:; media-src * 'self' blob:; script-src 'self' 'unsafe-inline' 'unsafe-eval' *; style-src 'self' 'unsafe-inline' *;");
+  res.setHeader('Referrer-Policy', 'no-referrer-when-downgrade');
+  next();
+});
+
 // ────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
