@@ -335,7 +335,7 @@ export default function Watch() {
       .trim();
   };
 
-  const matchTitle = (a, b) => {
+  const matchTitle = (a, b, movieYear) => {
     const cleanA = getCleanBase(a);
     const cleanB = getCleanBase(b);
     
@@ -346,7 +346,7 @@ export default function Watch() {
     };
     
     const yearA = extractYear(a);
-    const yearB = extractYear(b);
+    const yearB = extractYear(b) || (movieYear ? movieYear.toString().match(/\b(19|20)\d{2}\b/)?.[0] : null);
     if (yearA && yearB && yearA !== yearB) {
       return false;
     }
@@ -375,12 +375,15 @@ export default function Watch() {
     setOppositeLink(null);
     setOppositeSearching(true);
 
+    const movieYearVal = movie?.year || movie?.release_date || '';
+    const mYearMatch = movieYearVal.toString().match(/\b(19|20)\d{2}\b/)?.[0] || null;
+
     if (source === 'netmirror') {
       // Search OKJatt (Server 2) for this title
       api.external.okjatt.search(searchTitle)
         .then(res => {
           if (res && res.length > 0) {
-            const match = res.find(item => matchTitle(item.title, movieTitle));
+            const match = res.find(item => matchTitle(item.title, movieTitle, mYearMatch));
             if (match) {
               setOppositeLink(match);
             }
@@ -394,7 +397,7 @@ export default function Watch() {
       api.external.netmirror.search(searchTitle)
         .then(res => {
           if (res && res.results && res.results.length > 0) {
-            const match = res.results.find(item => matchTitle(item.title, movieTitle));
+            const match = res.results.find(item => matchTitle(item.title, movieTitle, mYearMatch));
             if (match) {
               setOppositeLink(match);
             }

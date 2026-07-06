@@ -152,7 +152,7 @@ export default function Detail() {
         .trim();
     };
 
-    const matchTitle = (a, b) => {
+    const matchTitle = (a, b, movieYear) => {
       const cleanA = getCleanBase(a);
       const cleanB = getCleanBase(b);
       
@@ -163,7 +163,7 @@ export default function Detail() {
       };
       
       const yearA = extractYear(a);
-      const yearB = extractYear(b);
+      const yearB = extractYear(b) || (movieYear ? movieYear.toString().match(/\b(19|20)\d{2}\b/)?.[0] : null);
       if (yearA && yearB && yearA !== yearB) {
         return false;
       }
@@ -193,7 +193,8 @@ export default function Detail() {
           }
         }
 
-        const match = results.find(item => matchTitle(item.title, movie.title));
+        const movieYear = movie.year ? movie.year.toString().match(/\b(19|20)\d{2}\b/)?.[0] : null;
+        const match = results.find(item => matchTitle(item.title, movie.title, movieYear));
         if (match) {
           setOppositeLink(match);
           if (source === 'okjatt') {
