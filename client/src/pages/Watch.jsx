@@ -120,6 +120,19 @@ export default function Watch() {
   const handleQualityChange = (qLabel) => {
     setSelectedQuality(qLabel);
     
+    const video = videoRef.current;
+    if (video) {
+      // Save current progress immediately before quality change
+      const time = video.currentTime;
+      const cleanTitle = getCleanBase(movieTitle);
+      if (cleanTitle) {
+        const key = mediaType === 'tv' 
+          ? `janixflix_progress_tv_${cleanTitle}_s${activeSe}_e${activeEp}`
+          : `janixflix_progress_movie_${cleanTitle}`;
+        localStorage.setItem(key, time.toString());
+      }
+    }
+
     if (source === 'netmirror' && netmirrorQualities.length > 0) {
       const numeric = qLabel.replace('p', '');
       const match = netmirrorQualities.find(q => {
@@ -129,20 +142,24 @@ export default function Watch() {
         }
         return label.includes(numeric);
       });
-      if (match) {
-        setActiveNetmirrorUrl(match.url);
-        return;
-      }
-      setActiveNetmirrorUrl(netmirrorQualities[0].url);
+      
+      const targetUrl = match ? match.url : netmirrorQualities[0].url;
+      setActiveNetmirrorUrl(targetUrl);
+      
+      // Force video element reload in next tick after React updates the src
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.load();
+        }
+      }, 50);
     } else {
-      const currentVideo = videoRef.current;
-      if (currentVideo) {
-        const time = currentVideo.currentTime;
-        const paused = currentVideo.paused;
-        currentVideo.load();
-        currentVideo.currentTime = time;
+      if (video) {
+        const time = video.currentTime;
+        const paused = video.paused;
+        video.load();
+        video.currentTime = time;
         if (!paused) {
-          currentVideo.play().catch(() => {});
+          video.play().catch(() => {});
         }
       }
     }
@@ -868,7 +885,6 @@ export default function Watch() {
                 </div>
               ) : activeNetmirrorUrl ? (
                 <video
-                  key={activeNetmirrorUrl}
                   ref={videoRef}
                   controls
                   autoPlay
