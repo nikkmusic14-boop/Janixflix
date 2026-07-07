@@ -287,7 +287,7 @@ export default function Watch() {
         }
       }).catch(err => {
         console.error('[Stream Resolve Error]:', err.message);
-        setError('Failed to resolve streaming sources from Server 1.');
+        setError(err.message || 'Failed to resolve streaming sources from Server 1.');
       }).finally(() => {
         setNetmirrorLoading(false);
       });
@@ -564,10 +564,55 @@ export default function Watch() {
   if (loading) return <div className="loading" style={{ paddingTop: '100px' }}>Loading streaming content…</div>;
   if (error && !okjattLoading) {
     return (
-      <div className="empty-state" style={{ paddingTop: '120px' }}>
-        <h2>Playback Error</h2>
-        <p>{error}</p>
-        <Link to="/" className="btn btn-secondary" style={{ marginTop: '16px' }}>Back to Home</Link>
+      <div className="empty-state" style={{ paddingTop: '120px', maxWidth: '600px', margin: '0 auto', padding: '0 24px' }}>
+        <h2 style={{ color: 'var(--red)', textShadow: '0 0 10px rgba(255,0,85,0.2)' }}>Playback Error</h2>
+        <p style={{ color: 'var(--text-dim)', marginTop: '8px', marginBottom: '24px' }}>{error}</p>
+        
+        {source === 'netmirror' && (
+          <div style={{
+            background: 'var(--bg-elev)',
+            border: '1px solid rgba(0, 243, 255, 0.15)',
+            borderRadius: '8px',
+            padding: '20px',
+            marginBottom: '24px',
+            textAlign: 'center'
+          }}>
+            <h3 style={{ fontSize: '16px', marginBottom: '12px' }}>📡 Alternative Stream Available?</h3>
+            <p style={{ fontSize: '13px', color: 'var(--text-dim)', marginBottom: '16px' }}>
+              Server 1 database is currently offline or unreachable. We can try loading this title from Server 2 (Premium HD Stream).
+            </p>
+            {oppositeLink ? (
+              <button
+                onClick={handleSwitchToServer2}
+                style={{
+                  background: 'linear-gradient(90deg, #00f3ff 0%, #0070f3 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '10px 24px',
+                  borderRadius: '4px',
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  cursor: 'pointer',
+                  boxShadow: '0 0 15px rgba(0, 243, 255, 0.4)'
+                }}
+              >
+                ⚡ Switch to Server 2 (HD)
+              </button>
+            ) : oppositeSearching ? (
+              <div style={{ color: 'var(--cyan)', fontSize: '13.5px', fontWeight: 'bold' }}>
+                🔍 Searching Server 2 for "{movieTitle}"...
+              </div>
+            ) : (
+              <div style={{ color: '#aaa', fontSize: '13px' }}>
+                😔 Sorry, this title is not available on Server 2 either.
+              </div>
+            )}
+          </div>
+        )}
+
+        <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+          <Link to="/" className="btn btn-secondary">Back to Home</Link>
+        </div>
       </div>
     );
   }
