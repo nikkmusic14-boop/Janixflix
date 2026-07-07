@@ -234,18 +234,36 @@ export default function Watch() {
       : `janixflix_progress_movie_${cleanTitle}`;
       
     const savedTime = localStorage.getItem(key);
+    let didSeek = false;
+    
     if (savedTime) {
       const timeVal = parseFloat(savedTime);
       if (!isNaN(timeVal) && timeVal > 0 && timeVal < video.duration) {
         video.currentTime = timeVal;
+        didSeek = true;
         console.log(`Resuming playback at ${timeVal}s`);
       }
     }
 
+    if (!didSeek) {
+      video.play().then(() => {
+        setIsPaused(false);
+      }).catch(err => {
+        console.warn("Autoplay or resume failed to start automatically:", err.message);
+        setIsPaused(true);
+      });
+    }
+  };
+
+  const handleSeeked = (e) => {
+    const video = e.target;
+    if (!video) return;
+    
+    console.log("Seek complete, initiating playback...");
     video.play().then(() => {
       setIsPaused(false);
     }).catch(err => {
-      console.warn("Autoplay or resume failed to start automatically:", err.message);
+      console.warn("Play failed after seeking:", err.message);
       setIsPaused(true);
     });
   };
@@ -747,6 +765,7 @@ export default function Watch() {
                 }}
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
+                onSeeked={handleSeeked}
                 {...bufferingHandlers}
               >
                 Your browser does not support HTML5 video player.
@@ -795,6 +814,7 @@ export default function Watch() {
                   }}
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
+                  onSeeked={handleSeeked}
                   {...bufferingHandlers}
                 >
                   Your browser does not support HTML5 direct video playback.
@@ -848,6 +868,7 @@ export default function Watch() {
                   }}
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
+                  onSeeked={handleSeeked}
                   {...bufferingHandlers}
                 >
                   Your browser does not support HTML5 direct video playback.
