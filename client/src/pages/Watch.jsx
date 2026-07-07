@@ -241,11 +241,17 @@ export default function Watch() {
         console.log(`Resuming playback at ${timeVal}s`);
       }
     }
+
+    video.play().then(() => {
+      setIsPaused(false);
+    }).catch(err => {
+      console.warn("Autoplay or resume failed to start automatically:", err.message);
+      setIsPaused(true);
+    });
   };
 
   // Reset audio context and play state when stream changes
   useEffect(() => {
-    setIsPaused(true);
     if (audioCtxRef.current) {
       audioCtxRef.current.close().catch(() => {});
       audioCtxRef.current = null;
