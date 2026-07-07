@@ -468,6 +468,13 @@ img {
   object-fit: var(--video-fit, contain) !important;
 }
 
+.center-play-button:hover {
+  transform: translate(-50%, -50%) scale(1.1) !important;
+  background: rgba(7, 9, 22, 0.75) !important;
+  border-color: #00f3ff !important;
+  box-shadow: 0 0 35px rgba(0, 243, 255, 0.5) !important;
+}
+
 
 /* ── Upload page ── */
 .upload-page {

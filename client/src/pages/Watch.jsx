@@ -48,6 +48,9 @@ export default function Watch() {
   // Video screen layout fit state ('contain', 'fill', or 'cover')
   const [videoFit, setVideoFit] = useState('contain');
 
+  // Video playback pause state
+  const [isPaused, setIsPaused] = useState(true);
+
   // Video playback buffering states
   const [videoBuffering, setVideoBuffering] = useState(false);
   const bufferingHandlers = {
@@ -138,8 +141,18 @@ export default function Watch() {
     }
   };
 
-  // Reset audio context when stream changes
+  const togglePlayPause = () => {
+    if (!videoRef.current) return;
+    if (videoRef.current.paused) {
+      videoRef.current.play().catch(() => {});
+    } else {
+      videoRef.current.pause();
+    }
+  };
+
+  // Reset audio context and play state when stream changes
   useEffect(() => {
+    setIsPaused(true);
     if (audioCtxRef.current) {
       audioCtxRef.current.close().catch(() => {});
       audioCtxRef.current = null;
@@ -606,12 +619,21 @@ export default function Watch() {
                 controls
                 autoPlay
                 playsInline
+                preload="auto"
                 poster={api.thumbnailUrl(id)}
                 src={api.streamUrl(id)}
                 style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
                 onPlay={(e) => {
                   handleAutoVolumeBoost();
                   setVideoBuffering(false);
+                  setIsPaused(false);
+                }}
+                onPause={() => {
+                  setVideoBuffering(false);
+                  setIsPaused(true);
+                }}
+                onEnded={() => {
+                  setIsPaused(true);
                 }}
                 {...bufferingHandlers}
               >
@@ -644,11 +666,20 @@ export default function Watch() {
                   controls
                   autoPlay
                   playsInline
+                  preload="auto"
                   src={(window.location.hostname.includes('onrender.com') || activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl)}
                   style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
                   onPlay={(e) => {
                     handleAutoVolumeBoost();
                     setVideoBuffering(false);
+                    setIsPaused(false);
+                  }}
+                  onPause={() => {
+                    setVideoBuffering(false);
+                    setIsPaused(true);
+                  }}
+                  onEnded={() => {
+                    setIsPaused(true);
                   }}
                   {...bufferingHandlers}
                 >
@@ -686,11 +717,20 @@ export default function Watch() {
                   controls
                   autoPlay
                   playsInline
+                  preload="auto"
                   src={api.okjattProxyUrl(okjattVideoUrl)}
                   style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
                   onPlay={(e) => {
                     handleAutoVolumeBoost();
                     setVideoBuffering(false);
+                    setIsPaused(false);
+                  }}
+                  onPause={() => {
+                    setVideoBuffering(false);
+                    setIsPaused(true);
+                  }}
+                  onEnded={() => {
+                    setIsPaused(true);
                   }}
                   {...bufferingHandlers}
                 >
@@ -733,6 +773,48 @@ export default function Watch() {
                   <span style={{ color: '#ffffff', fontWeight: 300, fontSize: '32px', margin: '0 6px', textShadow: '0 0 10px rgba(255, 255, 255, 0.9)', fontStyle: 'italic' }}>x</span>
                   <span style={{ color: '#ff0055', textShadow: '0 0 15px rgba(255, 0, 85, 0.7), 0 0 30px rgba(255, 0, 85, 0.3)' }}>FLIX</span>
                 </div>
+              </div>
+            )}
+
+            {/* Center Play/Pause Button Overlay */}
+            {(!netmirrorLoading && !okjattLoading) && (
+              <div 
+                onClick={togglePlayPause}
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  zIndex: 15,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '74px',
+                  height: '74px',
+                  borderRadius: '50%',
+                  background: 'rgba(7, 9, 22, 0.55)',
+                  backdropFilter: 'blur(8px)',
+                  border: '2px solid rgba(0, 243, 255, 0.4)',
+                  boxShadow: '0 0 25px rgba(0, 243, 255, 0.3)',
+                  transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                  opacity: isPaused ? 1 : 0,
+                  transform: `translate(-50%, -50%) scale(${isPaused ? 1 : 0.85})`,
+                  pointerEvents: isPaused ? 'auto' : 'none',
+                }}
+                className="center-play-button"
+              >
+                {isPaused ? (
+                  /* Play SVG Icon */
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M8 5.14V18.86C8 19.67 8.89 20.16 9.58 19.72L20.36 12.86C20.97 12.47 20.97 11.53 20.36 11.14L9.58 4.28C8.89 3.84 8 4.33 8 5.14Z" fill="#00f3ff" />
+                  </svg>
+                ) : (
+                  /* Pause SVG Icon */
+                  <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" fill="#00f3ff" />
+                  </svg>
+                )
+                }
               </div>
             )}
           </div>

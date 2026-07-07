@@ -217,6 +217,11 @@ router.get('/netmirror/proxy-stream', async (req, res) => {
   let { url } = req.query;
   if (!url) return res.status(400).json({ error: 'Param "url" is required' });
 
+  const controller = new AbortController();
+  req.on('close', () => {
+    controller.abort();
+  });
+
   try {
     // Replace blocked hostname with the mobile stream proxy hostname
     if (url.includes('bcdnxw.hakunaymatata.com')) {
@@ -232,7 +237,7 @@ router.get('/netmirror/proxy-stream', async (req, res) => {
       headers['Range'] = req.headers.range;
     }
 
-    const response = await fetch(url, { headers });
+    const response = await fetch(url, { headers, signal: controller.signal });
     res.status(response.status);
 
     response.headers.forEach((val, key) => {
@@ -247,6 +252,10 @@ router.get('/netmirror/proxy-stream', async (req, res) => {
       res.end();
     }
   } catch (err) {
+    if (err.name === 'AbortError') {
+      console.log('[Netmirror Proxy Stream]: Upstream request aborted because client disconnected.');
+      return;
+    }
     console.error('[Netmirror Proxy Stream Error]:', err.message);
     res.status(500).json({ error: err.message });
   }
@@ -458,6 +467,11 @@ router.get('/okjatt/proxy-stream', async (req, res) => {
   let { url } = req.query;
   if (!url) return res.status(400).json({ error: 'Param "url" is required' });
 
+  const controller = new AbortController();
+  req.on('close', () => {
+    controller.abort();
+  });
+
   try {
     // Replace expired/dead linktosho.store domain with active checkyourlinks.shop domain
     if (url.includes('linktosho.store')) {
@@ -472,7 +486,7 @@ router.get('/okjatt/proxy-stream', async (req, res) => {
       headers['Range'] = req.headers.range;
     }
 
-    const response = await fetch(url, { headers });
+    const response = await fetch(url, { headers, signal: controller.signal });
     res.status(response.status);
 
     response.headers.forEach((val, key) => {
@@ -487,6 +501,10 @@ router.get('/okjatt/proxy-stream', async (req, res) => {
       res.end();
     }
   } catch (err) {
+    if (err.name === 'AbortError') {
+      console.log('[OKJatt Proxy Stream]: Upstream request aborted because client disconnected.');
+      return;
+    }
     console.error('[OKJatt Proxy Stream Error]:', err.message);
     res.status(500).json({ error: err.message });
   }
