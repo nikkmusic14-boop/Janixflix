@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 
@@ -195,14 +195,90 @@ export default function Watch() {
     }
   };
 
-  const togglePlayPause = () => {
+  const togglePlayPause = useCallback(() => {
     if (!videoRef.current) return;
     if (videoRef.current.paused) {
       videoRef.current.play().catch(() => {});
     } else {
       videoRef.current.pause();
     }
-  };
+  }, []);
+
+  const toggleFullscreen = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    
+    if (!document.fullscreenElement) {
+      if (video.requestFullscreen) {
+        video.requestFullscreen();
+      } else if (video.webkitRequestFullscreen) {
+        video.webkitRequestFullscreen();
+      } else if (video.msRequestFullscreen) {
+        video.msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+      }
+    }
+  }, []);
+
+  // Handle keyboard shortcuts (laptop keys)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      // Ignore if user is typing in inputs or textareas
+      if (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA') {
+        return;
+      }
+      
+      const video = videoRef.current;
+      if (!video) return;
+      
+      switch (e.key.toLowerCase()) {
+        case ' ': // Spacebar
+          e.preventDefault(); // Prevent page scrolling
+          togglePlayPause();
+          break;
+        case 'k': // YouTube play/pause shortcut
+          e.preventDefault();
+          togglePlayPause();
+          break;
+        case 'f': // F key for Fullscreen
+          e.preventDefault();
+          toggleFullscreen();
+          break;
+        case 'arrowright':
+        case 'l': // L key for Forward (3 seconds)
+          e.preventDefault();
+          video.currentTime = Math.min(video.duration, video.currentTime + 3);
+          break;
+        case 'arrowleft':
+        case 'j': // J key for Rewind (3 seconds)
+          e.preventDefault();
+          video.currentTime = Math.max(0, video.currentTime - 3);
+          break;
+        case 'arrowup': // Volume up by 10%
+          e.preventDefault();
+          video.volume = Math.min(1, video.volume + 0.1);
+          break;
+        case 'arrowdown': // Volume down by 10%
+          e.preventDefault();
+          video.volume = Math.max(0, video.volume - 0.1);
+          break;
+        default:
+          break;
+      }
+    };
+    
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [togglePlayPause, toggleFullscreen]);
 
   const handleTimeUpdate = (e) => {
     const video = e.target;
@@ -1141,6 +1217,27 @@ export default function Watch() {
                   </div>
                 </div>
               )}
+            </div>
+
+            {/* Keyboard Shortcuts Helper Panel */}
+            <div style={{ 
+              borderTop: '1px solid #333', 
+              paddingTop: '12px', 
+              marginTop: '8px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '6px'
+            }}>
+              <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                ⌨️ Keyboard Shortcuts:
+              </span>
+              <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', fontSize: '11px', color: '#888', fontFamily: 'Outfit, sans-serif' }}>
+                <span><kbd style={{ background: '#222', border: '1px solid #444', padding: '2px 6px', borderRadius: '4px', color: '#fff', fontSize: '10px' }}>Space</kbd> / <kbd style={{ background: '#222', border: '1px solid #444', padding: '2px 6px', borderRadius: '4px', color: '#fff', fontSize: '10px' }}>K</kbd> Play/Pause</span>
+                <span><kbd style={{ background: '#222', border: '1px solid #444', padding: '2px 6px', borderRadius: '4px', color: '#fff', fontSize: '10px' }}>F</kbd> Fullscreen</span>
+                <span><kbd style={{ background: '#222', border: '1px solid #444', padding: '2px 6px', borderRadius: '4px', color: '#fff', fontSize: '10px' }}>→</kbd> / <kbd style={{ background: '#222', border: '1px solid #444', padding: '2px 6px', borderRadius: '4px', color: '#fff', fontSize: '10px' }}>L</kbd> Forward 3s</span>
+                <span><kbd style={{ background: '#222', border: '1px solid #444', padding: '2px 6px', borderRadius: '4px', color: '#fff', fontSize: '10px' }}>←</kbd> / <kbd style={{ background: '#222', border: '1px solid #444', padding: '2px 6px', borderRadius: '4px', color: '#fff', fontSize: '10px' }}>J</kbd> Rewind 3s</span>
+                <span><kbd style={{ background: '#222', border: '1px solid #444', padding: '2px 6px', borderRadius: '4px', color: '#fff', fontSize: '10px' }}>↑</kbd> / <kbd style={{ background: '#222', border: '1px solid #444', padding: '2px 6px', borderRadius: '4px', color: '#fff', fontSize: '10px' }}>↓</kbd> Volume</span>
+              </div>
             </div>
 
 
