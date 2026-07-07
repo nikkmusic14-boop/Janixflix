@@ -554,7 +554,7 @@ export default function Watch() {
     if (tLower.includes('bengali')) return 'Bengali Audio';
     if (tLower.includes('punjabi')) return 'Punjabi Audio (Original)';
     
-    const country = (movie?.cn || '').toLowerCase();
+    const country = (movie?.country || '').toLowerCase();
     if (country.includes('japan')) {
       return 'Japanese Audio (English Subtitles)';
     }
@@ -566,7 +566,8 @@ export default function Watch() {
     }
     if (country.includes('india') || country.includes('in')) {
       const tabParam = params.get('tab') || '';
-      if (tabParam === 'southindian') return 'South Indian Audio (Original)';
+      if (tabParam === 'southindian' || tLower.includes('south')) return 'South Indian Audio (Original)';
+      if (tLower.includes('punjabi') || tLower.includes('punj')) return 'Punjabi Audio (Original)';
       return 'Hindi Audio (Original)';
     }
     
@@ -576,7 +577,7 @@ export default function Watch() {
     if (tabParam === 'southindian') return 'South Indian Audio (Original)';
     if (tabParam === 'hollywood') return 'English Audio (Original)';
     
-    return 'Hindi Audio (Dubbed/Dual)';
+    return 'Original Audio';
   };
   const currentLang = getCurrentAudioLanguage();
 
