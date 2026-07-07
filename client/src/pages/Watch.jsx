@@ -45,6 +45,9 @@ export default function Watch() {
   // Universal Quality Selection
   const [selectedQuality, setSelectedQuality] = useState('1080p');
 
+  // Video screen layout fit state ('contain', 'fill', or 'cover')
+  const [videoFit, setVideoFit] = useState('contain');
+
   // Video playback buffering states
   const [videoBuffering, setVideoBuffering] = useState(false);
   const bufferingHandlers = {
@@ -154,6 +157,15 @@ export default function Watch() {
       }
     };
   }, []);
+
+  // Adjust screen fit when source changes (Default to 'fill' for Server 2 / okjatt to make it full screen)
+  useEffect(() => {
+    if (source === 'okjatt') {
+      setVideoFit('fill');
+    } else {
+      setVideoFit('contain');
+    }
+  }, [source]);
 
 
 
@@ -596,6 +608,7 @@ export default function Watch() {
                 playsInline
                 poster={api.thumbnailUrl(id)}
                 src={api.streamUrl(id)}
+                style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
                 onPlay={(e) => {
                   handleAutoVolumeBoost();
                   setVideoBuffering(false);
@@ -632,7 +645,7 @@ export default function Watch() {
                   autoPlay
                   playsInline
                   src={(window.location.hostname.includes('onrender.com') || activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl)}
-                  style={{ width: '100%', height: '100%' }}
+                  style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
                   onPlay={(e) => {
                     handleAutoVolumeBoost();
                     setVideoBuffering(false);
@@ -674,7 +687,7 @@ export default function Watch() {
                   autoPlay
                   playsInline
                   src={api.okjattProxyUrl(okjattVideoUrl)}
-                  style={{ width: '100%', height: '100%' }}
+                  style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
                   onPlay={(e) => {
                     handleAutoVolumeBoost();
                     setVideoBuffering(false);
@@ -800,6 +813,42 @@ export default function Watch() {
                         }}
                       >
                         {qLabel === '1080p' ? '1080p (FHD)' : qLabel === '720p' ? '720p (HD)' : '480p (SD)'}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Screen Mode / Aspect Ratio Selector */}
+            {(!netmirrorLoading && !okjattLoading) && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '12px', marginTop: '4px' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>📺 Screen Mode:</span>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {[
+                    { value: 'contain', label: 'Fit (Original)' },
+                    { value: 'fill', label: 'Stretch (Full Screen)' },
+                    { value: 'cover', label: 'Zoom (Crop)' }
+                  ].map((fitOption) => {
+                    const isActive = videoFit === fitOption.value;
+                    return (
+                      <button
+                        key={fitOption.value}
+                        onClick={() => setVideoFit(fitOption.value)}
+                        style={{
+                          background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #0070f3 100%)' : '#222',
+                          color: '#fff',
+                          border: isActive ? '1px solid #00f3ff' : '1px solid #444',
+                          padding: '6px 16px',
+                          borderRadius: '4px',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer',
+                          boxShadow: isActive ? '0 0 10px rgba(0, 243, 255, 0.3)' : 'none',
+                          transition: 'all 0.2s'
+                        }}
+                      >
+                        {fitOption.label}
                       </button>
                     );
                   })}
