@@ -203,6 +203,18 @@ export default function Watch() {
             const raw = data.results[0];
             setMovie(raw);
             setSeasons(raw.season || []);
+
+            const firstSeasonNum = raw.season && raw.season.length > 0 ? raw.season[0].se : 1;
+            if (mediaType === 'tv' && (activeSe === 0 || activeEp === 0)) {
+              const targetSe = activeSe || firstSeasonNum;
+              const targetEp = activeEp || 1;
+              navigate(
+                `/watch/${id}?source=netmirror&type=tv&se=${targetSe}&ep=${targetEp}&subjectid=${id}&dp=${encodeURIComponent(dp || raw.dp || '')}&title=${encodeURIComponent(title || raw.title || '')}`,
+                { replace: true }
+              );
+              return;
+            }
+
             if (raw.season && raw.season.length > 0) {
               setActiveSeasonTab(activeSe || raw.season[0].se);
             }
@@ -233,6 +245,9 @@ export default function Watch() {
   useEffect(() => {
     const activeDp = dp || movie?.dp;
     if (source === 'netmirror' && subjectid && activeDp) {
+      if (mediaType === 'tv' && (activeSe === 0 || activeEp === 0)) {
+        return;
+      }
       setNetmirrorLoading(true);
       setNetmirrorQualities([]);
       setNetmirrorChromecastUrl(null);
