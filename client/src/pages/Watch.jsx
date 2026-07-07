@@ -205,9 +205,13 @@ export default function Watch() {
             setSeasons(raw.season || []);
 
             const firstSeasonNum = raw.season && raw.season.length > 0 ? raw.season[0].se : 1;
-            if (mediaType === 'tv' && (activeSe === 0 || activeEp === 0)) {
-              const targetSe = activeSe || firstSeasonNum;
-              const targetEp = activeEp || 1;
+            const currentSeason = raw.season && raw.season.find(s => s.se === activeSe);
+            const seasonExists = !!currentSeason;
+            const epExists = currentSeason && activeEp > 0 && activeEp <= Number(currentSeason.ep || 0);
+
+            if (mediaType === 'tv' && (activeSe === 0 || activeEp === 0 || !seasonExists || !epExists)) {
+              const targetSe = seasonExists ? activeSe : firstSeasonNum;
+              const targetEp = (seasonExists && epExists) ? activeEp : 1;
               navigate(
                 `/watch/${id}?source=netmirror&type=tv&se=${targetSe}&ep=${targetEp}&subjectid=${id}&dp=${encodeURIComponent(dp || raw.dp || '')}&title=${encodeURIComponent(title || raw.title || '')}`,
                 { replace: true }

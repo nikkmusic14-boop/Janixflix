@@ -2,6 +2,60 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 
+const getCleanBase = (t) => {
+  if (!t) return '';
+  return t
+    .toLowerCase()
+    .replace(/dubbed/g, '')
+    .replace(/dual audio/g, '')
+    .replace(/multi audio/g, '')
+    .replace(/hindi/g, '')
+    .replace(/english/g, '')
+    .replace(/telugu/g, '')
+    .replace(/tamil/g, '')
+    .replace(/malayalam/g, '')
+    .replace(/kannada/g, '')
+    .replace(/punjabi/g, '')
+    .replace(/bengali/g, '')
+    .replace(/japanese/g, '')
+    .replace(/korean/g, '')
+    .replace(/[\[\(]hin[\]\)]/g, '')
+    .replace(/[\[\(]eng[\]\)]/g, '')
+    .replace(/[\[\(]tel[\]\)]/g, '')
+    .replace(/[\[\(]tam[\]\)]/g, '')
+    .replace(/\[.*\]/g, '')
+    .replace(/\(.*\)/g, '')
+    .replace(/\b(19|20)\d{2}\b/g, '') // remove year
+    .replace(/s\d+ep\d+/g, '')
+    .replace(/s\d+/g, '')
+    .replace(/season\s+\d+/g, '')
+    .replace(/episode\s+\d+/g, '')
+    .replace(/ep\s+\d+/g, '')
+    .replace(/-download-\d+\.html$/, '')
+    .replace(/[^a-z0-9]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const matchTitle = (a, b, movieYear) => {
+  const cleanA = getCleanBase(a);
+  const cleanB = getCleanBase(b);
+  
+  const extractYear = (str) => {
+    if (!str) return null;
+    const match = str.match(/\b(19|20)\d{2}\b/);
+    return match ? match[0] : null;
+  };
+  
+  const yearA = extractYear(a);
+  const yearB = extractYear(b) || (movieYear ? movieYear.toString().match(/\b(19|20)\d{2}\b/)?.[0] : null);
+  if (yearA && yearB && yearA !== yearB) {
+    return false;
+  }
+  
+  return cleanA === cleanB;
+};
+
 export default function Detail() {
   const { id } = useParams();
   const [params] = useSearchParams();
@@ -26,6 +80,7 @@ export default function Detail() {
   // Background lookup states
   const [oppositeLink, setOppositeLink] = useState(null);
   const [oppositeSearching, setOppositeSearching] = useState(false);
+  const [audioTracks, setAudioTracks] = useState([]);
 
   // 1. Initial metadata loading
   useEffect(() => {
@@ -117,60 +172,6 @@ export default function Detail() {
     setOppositeLink(null);
     setOppositeSearching(true);
 
-    const getCleanBase = (t) => {
-      if (!t) return '';
-      return t
-        .toLowerCase()
-        .replace(/dubbed/g, '')
-        .replace(/dual audio/g, '')
-        .replace(/multi audio/g, '')
-        .replace(/hindi/g, '')
-        .replace(/english/g, '')
-        .replace(/telugu/g, '')
-        .replace(/tamil/g, '')
-        .replace(/malayalam/g, '')
-        .replace(/kannada/g, '')
-        .replace(/punjabi/g, '')
-        .replace(/bengali/g, '')
-        .replace(/japanese/g, '')
-        .replace(/korean/g, '')
-        .replace(/[\[\(]hin[\]\)]/g, '')
-        .replace(/[\[\(]eng[\]\)]/g, '')
-        .replace(/[\[\(]tel[\]\)]/g, '')
-        .replace(/[\[\(]tam[\]\)]/g, '')
-        .replace(/\[.*\]/g, '')
-        .replace(/\(.*\)/g, '')
-        .replace(/\b(19|20)\d{2}\b/g, '') // remove year
-        .replace(/s\d+ep\d+/g, '')
-        .replace(/s\d+/g, '')
-        .replace(/season\s+\d+/g, '')
-        .replace(/episode\s+\d+/g, '')
-        .replace(/ep\s+\d+/g, '')
-        .replace(/-download-\d+\.html$/, '')
-        .replace(/[^a-z0-9]/g, ' ')
-        .replace(/\s+/g, ' ')
-        .trim();
-    };
-
-    const matchTitle = (a, b, movieYear) => {
-      const cleanA = getCleanBase(a);
-      const cleanB = getCleanBase(b);
-      
-      const extractYear = (str) => {
-        if (!str) return null;
-        const match = str.match(/\b(19|20)\d{2}\b/);
-        return match ? match[0] : null;
-      };
-      
-      const yearA = extractYear(a);
-      const yearB = extractYear(b) || (movieYear ? movieYear.toString().match(/\b(19|20)\d{2}\b/)?.[0] : null);
-      if (yearA && yearB && yearA !== yearB) {
-        return false;
-      }
-      
-      return cleanA === cleanB;
-    };
-
     const baseTitle = getCleanBase(movie.title);
 
     const performSearch = async (query) => {
@@ -231,6 +232,65 @@ export default function Detail() {
 
     runSearch();
   }, [movie, source]);
+
+  // 3. Background search for different audio languages of the same movie (Server 1 only)
+  useEffect(() => {
+    if (source !== 'netmirror' || !movie?.title) {
+      setAudioTracks([]);
+      return;
+    }
+
+    const baseTitle = getCleanBase(movie.title);
+    if (!baseTitle) return;
+
+    const performSearch = async (query) => {
+      const res = await api.external.netmirror.search(query);
+      return res?.results || [];
+    };
+
+    const runSearch = async () => {
+      try {
+        let results = await performSearch(baseTitle);
+        if (results.length === 0) {
+          const words = baseTitle.split(' ');
+          if (words.length > 2) {
+            const shortQuery = words.slice(0, 2).join(' ');
+            results = await performSearch(shortQuery);
+          }
+        }
+
+        const tracks = [];
+        results.forEach(item => {
+          if (matchTitle(item.title, movie.title)) {
+            let lang = 'Original';
+            const tLower = item.title.toLowerCase();
+            if (tLower.includes('hindi') || tLower.includes('[hin]') || tLower.includes('dubbed') || tLower.includes('hin-')) lang = 'Hindi';
+            else if (tLower.includes('english') || tLower.includes('[eng]') || tLower.includes('eng-')) lang = 'English';
+            else if (tLower.includes('telugu') || tLower.includes('[tel]')) lang = 'Telugu';
+            else if (tLower.includes('tamil') || tLower.includes('[tam]')) lang = 'Tamil';
+            else if (tLower.includes('malayalam') || tLower.includes('[mal]')) lang = 'Malayalam';
+            else if (tLower.includes('kannada') || tLower.includes('[kan]')) lang = 'Kannada';
+            else if (tLower.includes('punjabi') || tLower.includes('[pun]')) lang = 'Punjabi';
+
+            if (!tracks.some(t => t.language === lang)) {
+              tracks.push({
+                language: lang,
+                id: item.id,
+                dp: item.dp,
+                href: item.path || item.href,
+                title: item.title
+              });
+            }
+          }
+        });
+        setAudioTracks(tracks);
+      } catch (err) {
+        console.error("Failed to resolve audio tracks in Details:", err);
+      }
+    };
+
+    runSearch();
+  }, [movie?.title, source]);
 
   // Lazy load Netmirror Details and play
   const playServer1FromScraper = async () => {
@@ -323,6 +383,22 @@ export default function Detail() {
 
   const isTv = mediaType === 'tv' || (server2Data && (server2Data.type === 'tv_series' || server2Data.type === 'tv_season'));
 
+  const getCurrentAudioLanguage = () => {
+    const titleLower = (movie?.title || '').toLowerCase();
+    if (titleLower.includes('hindi') || titleLower.includes('[hin]')) return 'Hindi Audio (Dubbed)';
+    if (titleLower.includes('telugu') || titleLower.includes('[tel]')) return 'Telugu Audio (Dubbed)';
+    if (titleLower.includes('tamil') || titleLower.includes('[tam]')) return 'Tamil Audio (Dubbed)';
+    if (titleLower.includes('malayalam') || titleLower.includes('[mal]')) return 'Malayalam Audio (Dubbed)';
+    if (titleLower.includes('punjabi') || titleLower.includes('[pun]')) return 'Punjabi Audio (Dubbed)';
+    if (movie?.country) {
+      const country = movie.country.toLowerCase();
+      if (country.includes('japan')) return 'Japanese Audio (English Subs)';
+      if (country.includes('korea')) return 'Korean Audio (English Subs)';
+    }
+    return 'English Audio (Original)';
+  };
+  const currentLang = getCurrentAudioLanguage();
+
   return (
     <div className="detail" style={{ paddingTop: '80px' }}>
       <div className="detail-hero">
@@ -343,17 +419,62 @@ export default function Detail() {
 
           {/* Audio Tracks indicator */}
           {source !== 'local' && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '24px', fontSize: '13px' }}>
-              <span style={{ color: 'var(--text-dim)' }}>🔊 Audio:</span>
-              <span style={{ 
-                background: 'rgba(229,9,20,0.15)', 
-                color: '#e50914', 
-                padding: '2px 8px', 
-                borderRadius: '3px',
-                fontWeight: 'bold'
-              }}>
-                Hindi Audio (Dubbed/Dual)
-              </span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '24px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px' }}>
+                <span style={{ color: 'var(--text-dim)' }}>🔊 Audio:</span>
+                <span style={{ 
+                  background: currentLang.includes('Hindi') ? 'rgba(255, 0, 127, 0.15)' : 'rgba(0, 243, 255, 0.15)', 
+                  color: currentLang.includes('Hindi') ? '#ff007f' : '#00f3ff', 
+                  border: currentLang.includes('Hindi') ? '1px solid rgba(255, 0, 127, 0.3)' : '1px solid rgba(0, 243, 255, 0.3)',
+                  padding: '2px 10px', 
+                  borderRadius: '12px',
+                  fontWeight: 'bold'
+                }}>
+                  {currentLang}
+                </span>
+              </div>
+
+              {/* Audio Switcher buttons if multiple tracks exist */}
+              {audioTracks.length > 1 && (
+                <div style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '12px', 
+                  flexWrap: 'wrap',
+                  background: 'rgba(255, 255, 255, 0.02)',
+                  padding: '10px 14px',
+                  borderRadius: '6px',
+                  border: '1px solid rgba(255, 255, 255, 0.05)',
+                  width: 'fit-content'
+                }}>
+                  <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>🔄 Switch Audio:</span>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {audioTracks.map((track) => {
+                      const isActive = track.id === movie.id || track.id === id;
+                      return (
+                        <Link
+                          key={track.id}
+                          to={`/detail/${track.id}?source=netmirror&type=${mediaType}&tab=${params.get('tab') || ''}`}
+                          style={{
+                            background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #ff007f 100%)' : '#222',
+                            color: '#fff',
+                            textDecoration: 'none',
+                            border: isActive ? 'none' : '1px solid #444',
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            boxShadow: isActive ? '0 0 10px rgba(0, 243, 255, 0.3)' : 'none',
+                            cursor: isActive ? 'default' : 'pointer'
+                          }}
+                        >
+                          {track.language}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
