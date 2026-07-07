@@ -2,6 +2,60 @@ import { useEffect, useState, useRef } from 'react';
 import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 
+const getCleanBase = (t) => {
+  if (!t) return '';
+  return t
+    .toLowerCase()
+    .replace(/dubbed/g, '')
+    .replace(/dual audio/g, '')
+    .replace(/multi audio/g, '')
+    .replace(/hindi/g, '')
+    .replace(/english/g, '')
+    .replace(/telugu/g, '')
+    .replace(/tamil/g, '')
+    .replace(/malayalam/g, '')
+    .replace(/kannada/g, '')
+    .replace(/punjabi/g, '')
+    .replace(/bengali/g, '')
+    .replace(/japanese/g, '')
+    .replace(/korean/g, '')
+    .replace(/[\[\(]hin[\]\)]/g, '')
+    .replace(/[\[\(]eng[\]\)]/g, '')
+    .replace(/[\[\(]tel[\]\)]/g, '')
+    .replace(/[\[\(]tam[\]\)]/g, '')
+    .replace(/\[.*\]/g, '')
+    .replace(/\(.*\)/g, '')
+    .replace(/\b(19|20)\d{2}\b/g, '') // remove year
+    .replace(/s\d+ep\d+/g, '')
+    .replace(/s\d+/g, '')
+    .replace(/season\s+\d+/g, '')
+    .replace(/episode\s+\d+/g, '')
+    .replace(/ep\s+\d+/g, '')
+    .replace(/-download-\d+\.html$/, '')
+    .replace(/[^a-z0-9]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+};
+
+const matchTitle = (a, b, movieYear) => {
+  const cleanA = getCleanBase(a);
+  const cleanB = getCleanBase(b);
+  
+  const extractYear = (str) => {
+    if (!str) return null;
+    const match = str.match(/\b(19|20)\d{2}\b/);
+    return match ? match[0] : null;
+  };
+  
+  const yearA = extractYear(a);
+  const yearB = extractYear(b) || (movieYear ? movieYear.toString().match(/\b(19|20)\d{2}\b/)?.[0] : null);
+  if (yearA && yearB && yearA !== yearB) {
+    return false;
+  }
+  
+  return cleanA === cleanB;
+};
+
 export default function Watch() {
   const { id } = useParams();
   const [params] = useSearchParams();
@@ -147,6 +201,45 @@ export default function Watch() {
       videoRef.current.play().catch(() => {});
     } else {
       videoRef.current.pause();
+    }
+  };
+
+  const handleTimeUpdate = (e) => {
+    const video = e.target;
+    if (!video || video.duration === 0) return;
+    
+    const cleanTitle = getCleanBase(movieTitle);
+    if (!cleanTitle) return;
+    
+    const key = mediaType === 'tv' 
+      ? `janixflix_progress_tv_${cleanTitle}_s${activeSe}_e${activeEp}`
+      : `janixflix_progress_movie_${cleanTitle}`;
+      
+    if (video.currentTime > video.duration * 0.96) {
+      localStorage.removeItem(key);
+    } else {
+      localStorage.setItem(key, video.currentTime.toString());
+    }
+  };
+
+  const handleLoadedMetadata = (e) => {
+    const video = e.target;
+    if (!video) return;
+    
+    const cleanTitle = getCleanBase(movieTitle);
+    if (!cleanTitle) return;
+    
+    const key = mediaType === 'tv' 
+      ? `janixflix_progress_tv_${cleanTitle}_s${activeSe}_e${activeEp}`
+      : `janixflix_progress_movie_${cleanTitle}`;
+      
+    const savedTime = localStorage.getItem(key);
+    if (savedTime) {
+      const timeVal = parseFloat(savedTime);
+      if (!isNaN(timeVal) && timeVal > 0 && timeVal < video.duration) {
+        video.currentTime = timeVal;
+        console.log(`Resuming playback at ${timeVal}s`);
+      }
     }
   };
 
@@ -343,60 +436,6 @@ export default function Watch() {
 
   // 4. Background Search for the opposite stream server link
   const movieTitle = movie?.title || title;
-
-  const getCleanBase = (t) => {
-    if (!t) return '';
-    return t
-      .toLowerCase()
-      .replace(/dubbed/g, '')
-      .replace(/dual audio/g, '')
-      .replace(/multi audio/g, '')
-      .replace(/hindi/g, '')
-      .replace(/english/g, '')
-      .replace(/telugu/g, '')
-      .replace(/tamil/g, '')
-      .replace(/malayalam/g, '')
-      .replace(/kannada/g, '')
-      .replace(/punjabi/g, '')
-      .replace(/bengali/g, '')
-      .replace(/japanese/g, '')
-      .replace(/korean/g, '')
-      .replace(/[\[\(]hin[\]\)]/g, '')
-      .replace(/[\[\(]eng[\]\)]/g, '')
-      .replace(/[\[\(]tel[\]\)]/g, '')
-      .replace(/[\[\(]tam[\]\)]/g, '')
-      .replace(/\[.*\]/g, '')
-      .replace(/\(.*\)/g, '')
-      .replace(/\b(19|20)\d{2}\b/g, '') // remove year
-      .replace(/s\d+ep\d+/g, '')
-      .replace(/s\d+/g, '')
-      .replace(/season\s+\d+/g, '')
-      .replace(/episode\s+\d+/g, '')
-      .replace(/ep\s+\d+/g, '')
-      .replace(/-download-\d+\.html$/, '')
-      .replace(/[^a-z0-9]/g, ' ')
-      .replace(/\s+/g, ' ')
-      .trim();
-  };
-
-  const matchTitle = (a, b, movieYear) => {
-    const cleanA = getCleanBase(a);
-    const cleanB = getCleanBase(b);
-    
-    const extractYear = (str) => {
-      if (!str) return null;
-      const match = str.match(/\b(19|20)\d{2}\b/);
-      return match ? match[0] : null;
-    };
-    
-    const yearA = extractYear(a);
-    const yearB = extractYear(b) || (movieYear ? movieYear.toString().match(/\b(19|20)\d{2}\b/)?.[0] : null);
-    if (yearA && yearB && yearA !== yearB) {
-      return false;
-    }
-    
-    return cleanA === cleanB;
-  };
 
   useEffect(() => {
     const cleanSearchTitle = (t) => {
@@ -700,6 +739,8 @@ export default function Watch() {
                 onEnded={() => {
                   setIsPaused(true);
                 }}
+                onTimeUpdate={handleTimeUpdate}
+                onLoadedMetadata={handleLoadedMetadata}
                 {...bufferingHandlers}
               >
                 Your browser does not support HTML5 video player.
@@ -746,6 +787,8 @@ export default function Watch() {
                   onEnded={() => {
                     setIsPaused(true);
                   }}
+                  onTimeUpdate={handleTimeUpdate}
+                  onLoadedMetadata={handleLoadedMetadata}
                   {...bufferingHandlers}
                 >
                   Your browser does not support HTML5 direct video playback.
@@ -797,6 +840,8 @@ export default function Watch() {
                   onEnded={() => {
                     setIsPaused(true);
                   }}
+                  onTimeUpdate={handleTimeUpdate}
+                  onLoadedMetadata={handleLoadedMetadata}
                   {...bufferingHandlers}
                 >
                   Your browser does not support HTML5 direct video playback.
