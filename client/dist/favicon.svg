@@ -17,6 +17,6 @@
   <rect width="512" height="512" rx="128" fill="url(#g2)" stroke="rgba(0, 243, 255, 0.12)" stroke-width="8"/>
   <!-- Outer glowing ring -->
   <circle cx="256" cy="256" r="190" fill="none" stroke="url(#g1)" stroke-width="16" filter="url(#glow)" opacity="0.9"/>
-  <!-- Stylized Play Icon in Center -->
-  <polygon points="210,176 350,256 210,336" fill="url(#g1)" filter="url(#glow)"/>
+  <!-- Stylized Glowing Heart in Center -->
+  <path d="M256,395 C230,370 120,290 120,185 C120,120 170,70 220,70 C236,70 248,92 256,105 C264,92 276,70 292,70 C342,70 392,120 392,185 C392,290 282,370 256,395 Z" fill="url(#g1)" filter="url(#glow)"/>
 </svg>
