@@ -4,12 +4,12 @@ import { api } from '../api.js';
 export default function MovieCard({ movie }) {
   const getThumbUrl = () => {
     if (movie.source === 'netmirror') {
-      return movie.backdrop_path || movie.thumbnail || '';
+      return movie.backdrop_path || movie.thumbnail || movie.poster_path || movie.image || '';
     }
     if (movie.source === 'okjatt') {
-      return movie.thumbnail || '';
+      return movie.thumbnail || movie.poster_path || movie.backdrop_path || movie.image || '';
     }
-    return api.thumbnailUrl(movie.id);
+    return movie.poster_path || movie.backdrop_path || movie.thumbnail || api.thumbnailUrl(movie.id);
   };
 
   const getSourceBadge = () => {
