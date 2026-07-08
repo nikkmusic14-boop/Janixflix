@@ -49,6 +49,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/movie/:id" element={<Detail />} />
+        <Route path="/detail/:id" element={<Detail />} />
         <Route path="/watch/:id" element={<Watch />} />
       </Routes>
       <footer className="footer">JANIxFlix • Premium Streaming Portal</footer>
