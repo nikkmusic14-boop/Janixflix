@@ -15,11 +15,17 @@ const MIRRORS = [
 
 // Helper to fetch with timeout
 async function fetchWithTimeout(url, options = {}) {
-  const { timeout = 8000, ...fetchOpts } = options;
+  const { timeout = 8000, headers = {}, ...fetchOpts } = options;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
   try {
-    const response = await fetch(url, { ...fetchOpts, signal: controller.signal });
+    const defaultHeaders = {
+      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+      'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+      'Accept-Language': 'en-US,en;q=0.5',
+      ...headers
+    };
+    const response = await fetch(url, { ...fetchOpts, headers: defaultHeaders, signal: controller.signal });
     clearTimeout(timer);
     return response;
   } catch (err) {
@@ -35,7 +41,10 @@ async function fetchWithTimeout(url, options = {}) {
 // Filter and Categories Listing
 router.get('/netmirror/filter', async (req, res) => {
   try {
-    const url = new URL('https://api2.imdb3.shop/api/movies/filter');
+    const urls = [
+      new URL('https://api2.imdb3.shop/api/movies/filter'),
+      new URL('https://api2.imdb4.shop/api/movies/filter')
+    ];
     
     // Copy query parameters to modify them
     const params = { ...req.query };
@@ -43,13 +52,13 @@ router.get('/netmirror/filter', async (req, res) => {
     // Translate "cn" (country code) to the "country" parameter name expected by the API
     if (params.cn) {
       if (params.cn === 'India') {
-        url.searchParams.set('country', 'India');
+        params.country = 'India';
       } else if (params.cn === 'US') {
-        url.searchParams.set('country', 'United States');
+        params.country = 'United States';
       } else if (params.cn === 'Japan') {
-        url.searchParams.set('country', 'Japan');
+        params.country = 'Japan';
       } else {
-        url.searchParams.set('country', params.cn);
+        params.country = params.cn;
       }
       delete params.cn;
     }
@@ -58,26 +67,34 @@ router.get('/netmirror/filter', async (req, res) => {
     if (params.genre_ids) {
       const gId = Array.isArray(params.genre_ids) ? params.genre_ids[0] : params.genre_ids;
       if (gId) {
-        url.searchParams.set('genre_id', gId);
+        params.genre_id = gId;
       }
       delete params.genre_ids;
     }
 
-    // Forward the remaining query params
-    for (const key in params) {
-      if (Array.isArray(params[key])) {
-        params[key].forEach(val => url.searchParams.append(`${key}[]`, val));
-      } else {
-        url.searchParams.set(key, params[key]);
+    let response;
+    for (const baseUrl of urls) {
+      // Apply params to the URL
+      for (const key in params) {
+        if (Array.isArray(params[key])) {
+          params[key].forEach(val => baseUrl.searchParams.append(`${key}[]`, val));
+        } else {
+          baseUrl.searchParams.set(key, params[key]);
+        }
+      }
+      
+      try {
+        response = await fetchWithTimeout(baseUrl.toString());
+        if (response.ok) {
+          const data = await response.json();
+          return res.json(data);
+        }
+      } catch (err) {
+        console.warn(`Netmirror filter failed on URL ${baseUrl.toString()}:`, err.message);
       }
     }
-
-    const response = await fetchWithTimeout(url.toString());
-    if (!response.ok) {
-      throw new Error(`Netmirror filter failed with status ${response.status}`);
-    }
-    const data = await response.json();
-    res.json(data);
+    
+    throw new Error('Netmirror filter failed on all endpoints');
   } catch (err) {
     console.error('[Netmirror Filter Error]:', err.message);
     res.status(500).json({ error: err.message });
@@ -122,13 +139,25 @@ router.get('/netmirror/details/:mediaType/:id', async (req, res) => {
   }
 
   try {
-    const url = `https://api2.imdb3.shop/api/${mediaType}/${id}`;
-    const response = await fetchWithTimeout(url);
-    if (!response.ok) {
-      throw new Error(`Netmirror details failed with status ${response.status}`);
+    const urls = [
+      `https://api2.imdb3.shop/api/${mediaType}/${id}`,
+      `https://api2.imdb4.shop/api/${mediaType}/${id}`
+    ];
+    
+    let response;
+    for (const url of urls) {
+      try {
+        response = await fetchWithTimeout(url);
+        if (response.ok) {
+          const data = await response.json();
+          return res.json(data);
+        }
+      } catch (err) {
+        console.warn(`Netmirror details failed on URL ${url}:`, err.message);
+      }
     }
-    const data = await response.json();
-    res.json(data);
+    
+    throw new Error(`Netmirror details failed on all endpoints`);
   } catch (err) {
     console.error('[Netmirror Details Error]:', err.message);
     res.status(500).json({ error: err.message });
@@ -197,15 +226,17 @@ router.get('/netmirror/video-sources', async (req, res) => {
       }
     }
 
-    // Extract Chromecast URL (has cast=1 and cexp/ctoken parameters which last 3 hours and bypass standard CORS/referer blocks)
-    let chromecastUrl = null;
-    const ccRegex = /url:\s*'([^']+\&cast=1[^']*)'/;
-    const ccMatch = html.match(ccRegex);
-    if (ccMatch) {
-      chromecastUrl = ccMatch[1];
+    // Extract Chromecast URL
+    const chromecastRegex = /url:\s*'([^']+cast=1[^']+)'/;
+    const chromecastMatch = html.match(chromecastRegex);
+    const chromecastUrl = chromecastMatch ? chromecastMatch[1] : null;
+
+    console.log(`[Netmirror Stream] ID: ${id}, Qualities: ${qualities.length}, Chromecast: ${!!chromecastUrl}`);
+    if (qualities.length === 0 && !chromecastUrl) {
+      console.log(`[Netmirror Stream] No URLs matched. HTML Length: ${html.length}`);
     }
 
-    res.json({ qualities, chromecastUrl });
+    res.json({ qualities, chromecastUrl, mirrors: MIRRORS });
   } catch (err) {
     console.error('[Netmirror Video Sources Error]:', err.message);
     res.status(500).json({ error: err.message });
