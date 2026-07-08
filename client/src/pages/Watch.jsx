@@ -876,7 +876,7 @@ export default function Watch() {
       }}>
         {/* The video screen container */}
         <div style={{ flex: '1 1 700px' }}>
-          <div className="player" style={{ position: 'relative', overflow: 'hidden', width: '100%', background: '#000' }}>
+          <div className="player" style={{ position: 'relative', overflow: 'hidden', width: '100%', aspectRatio: '16/9', background: '#000' }}>
             {source === 'local' && (
               <video
                 ref={videoRef}
