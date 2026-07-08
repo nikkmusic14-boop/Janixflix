@@ -59,7 +59,9 @@ export function useHistory() {
         id: movie.id,
         title: movie.title,
         dp: movie.dp,
-        poster_path: movie.poster_path || movie.backdrop_path,
+        poster_path: movie.poster_path || movie.backdrop_path || movie.thumbnail,
+        backdrop_path: movie.backdrop_path || movie.poster_path || movie.thumbnail,
+        thumbnail: movie.thumbnail || movie.poster_path || movie.backdrop_path,
         media_type: movie.media_type,
         source: movie.source || 'netmirror',
         type: movie.type, // might be 'tv' or 'movie' from component context
