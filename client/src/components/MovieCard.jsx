@@ -13,17 +13,17 @@ export default function MovieCard({ movie }) {
     return movie.poster_path || movie.backdrop_path || movie.thumbnail || api.thumbnailUrl(movie.id);
   };
 
+  const isTheaterPrint = (movie) => {
+    const q = (movie.quality || '').toLowerCase();
+    const t = (movie.title || '').toLowerCase();
+    const theaterKeywords = ['cam', 'ts', 'hdcam', 'hdts', 'predvd', 'dvdscr', 'theater', 'print'];
+    return theaterKeywords.some(keyword => q.includes(keyword) || t.includes(keyword));
+  };
+
   const getSourceBadge = () => {
-    if (movie.source === 'netmirror') {
-      return <span className="badge" style={{ background: '#0070f3' }}>WEB-DL</span>;
-    }
-    if (movie.source === 'okjatt') {
-      return <span className="badge" style={{ background: '#00a000' }}>WEB-DL</span>;
-    }
-    if (movie.featured) {
-      return <span className="badge">WEB-DL</span>;
-    }
-    return <span className="badge" style={{ background: '#e50914' }}>WEB-DL</span>;
+    const label = isTheaterPrint(movie) ? 'PVC' : 'WEB-DL';
+    const bg = label === 'PVC' ? '#ff9800' : '#00a000'; // Orange for PVC, Green for WEB-DL
+    return <span className="badge" style={{ background: bg }}>{label}</span>;
   };
 
   // For Netmirror/OKJatt, we also need to know the media type (movie vs tv) on detail page
