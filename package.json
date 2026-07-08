@@ -2,6 +2,9 @@
   "name": "janixflix",
   "version": "1.0.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "description": "JaNixFlix - self-hosted movie streaming platform (full stack)",
   "scripts": {
     "postinstall": "npm install --prefix server",
