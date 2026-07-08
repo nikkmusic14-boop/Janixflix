@@ -53,7 +53,15 @@ app.use((req, res, next) => {
   }
   next();
 });
-app.use(express.static(CLIENT_DIST_DIR));
+app.use(express.static(CLIENT_DIST_DIR, {
+  setHeaders: (res, filepath) => {
+    if (path.basename(filepath) === 'index.html') {
+      res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+    } else {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+  }
+}));
 
 // ────────────────────────────────────────────────────────────
 // Routes
@@ -122,6 +130,7 @@ app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api')) {
     return next();
   }
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
   res.sendFile(path.join(CLIENT_DIST_DIR, 'index.html'));
 });
 

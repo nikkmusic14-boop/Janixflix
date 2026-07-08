@@ -111,6 +111,26 @@ export default function Watch() {
     }
   }, [source, mediaType, seasons, activeSe, activeEp, okjattEpisodes, href, id, subjectid, dp, movie, title, navigate]);
 
+  const handlePrevEp = useCallback(() => {
+    if (source === 'netmirror' && mediaType === 'tv') {
+      if (activeEp > 1) {
+        navigate(`/watch/${id}?source=netmirror&type=tv&se=${activeSe}&ep=${activeEp - 1}&subjectid=${subjectid}&dp=${encodeURIComponent(dp)}&title=${encodeURIComponent(movie?.title || title)}`, { replace: true });
+      } else if (activeSe > 1) {
+        const prevSeason = seasons.find(s => s.se === activeSe - 1);
+        if (prevSeason) {
+          const prevTotalEp = Number(prevSeason.ep || 0);
+          navigate(`/watch/${id}?source=netmirror&type=tv&se=${activeSe - 1}&ep=${prevTotalEp}&subjectid=${subjectid}&dp=${encodeURIComponent(dp)}&title=${encodeURIComponent(movie?.title || title)}`, { replace: true });
+        }
+      }
+    } else if (source === 'okjatt') {
+      const currentIndex = okjattEpisodes.findIndex(ep => ep.path === href);
+      if (currentIndex !== -1 && currentIndex > 0) {
+        const prev = okjattEpisodes[currentIndex - 1];
+        navigate(`/watch/${id}?source=okjatt&href=${encodeURIComponent(prev.path)}&title=${encodeURIComponent(prev.title)}`, { replace: true });
+      }
+    }
+  }, [source, mediaType, seasons, activeSe, activeEp, okjattEpisodes, href, id, subjectid, dp, movie, title, navigate]);
+
   // Video playback buffering states
   const [videoBuffering, setVideoBuffering] = useState(false);
   const bufferingHandlers = {
@@ -1040,29 +1060,39 @@ export default function Watch() {
               boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
               backdropFilter: 'blur(4px)',
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <span style={{ fontSize: '13px', color: '#888', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>▶ Auto-Play Next:</span>
-                <button
-                  onClick={toggleAutoPlay}
-                  style={{
-                    background: autoPlayNext ? 'linear-gradient(90deg, #00f3ff 0%, #0070f3 100%)' : '#333',
-                    color: '#fff',
-                    border: 'none',
-                    padding: '6px 14px',
-                    borderRadius: '20px',
-                    fontSize: '11px',
-                    fontWeight: '800',
-                    cursor: 'pointer',
-                    boxShadow: autoPlayNext ? '0 0 10px rgba(0, 243, 255, 0.4)' : 'none',
-                    transition: 'all 0.3s ease',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px'
-                  }}
-                >
-                  {autoPlayNext ? 'ON' : 'OFF'}
-                </button>
-              </div>
+              {/* Previous Episode Button */}
+              <button
+                onClick={handlePrevEp}
+                style={{
+                  background: 'linear-gradient(90deg, #333 0%, #222 100%)',
+                  color: '#fff',
+                  border: '1px solid #444',
+                  padding: '10px 24px',
+                  borderRadius: '6px',
+                  fontSize: '13.5px',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.border = '1px solid #00f3ff';
+                  e.currentTarget.style.boxShadow = '0 0 15px rgba(0, 243, 255, 0.2)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.border = '1px solid #444';
+                  e.currentTarget.style.boxShadow = 'none';
+                }}
+              >
+                <span style={{ fontSize: '15px' }}>⏮</span>
+                <span>Prev Episode</span>
+              </button>
 
+              {/* Next Episode Button */}
               <button
                 onClick={handleNextEp}
                 style={{
@@ -1081,6 +1111,14 @@ export default function Watch() {
                   gap: '8px',
                   textTransform: 'uppercase',
                   letterSpacing: '0.5px'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.boxShadow = '0 0 25px rgba(255, 0, 85, 0.7)';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.boxShadow = '0 0 15px rgba(255, 0, 85, 0.4)';
+                  e.currentTarget.style.transform = 'none';
                 }}
               >
                 <span>Next Episode</span>
