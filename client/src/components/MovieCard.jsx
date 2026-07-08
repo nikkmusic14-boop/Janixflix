@@ -15,16 +15,15 @@ export default function MovieCard({ movie }) {
 
   const getSourceBadge = () => {
     if (movie.source === 'netmirror') {
-      return <span className="badge" style={{ background: '#0070f3' }}>FHD</span>;
+      return <span className="badge" style={{ background: '#0070f3' }}>WEB-DL</span>;
     }
     if (movie.source === 'okjatt') {
-      const q = movie.quality ? movie.quality.toUpperCase() : 'HD';
-      return <span className="badge" style={{ background: '#00a000' }}>{q}</span>;
+      return <span className="badge" style={{ background: '#00a000' }}>WEB-DL</span>;
     }
     if (movie.featured) {
-      return <span className="badge">Featured</span>;
+      return <span className="badge">WEB-DL</span>;
     }
-    return null;
+    return <span className="badge" style={{ background: '#e50914' }}>WEB-DL</span>;
   };
 
   // For Netmirror/OKJatt, we also need to know the media type (movie vs tv) on detail page
