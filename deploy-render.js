@@ -49,13 +49,13 @@ async function triggerDeploy() {
     });
 
     console.log(`Response Status: ${res.status} (${res.statusText})`);
-    const data = await res.json();
+    const text = await res.text();
+    const data = text ? JSON.parse(text) : {};
     
     if (res.ok) {
       console.log(`✅ Success! Deployment triggered successfully.`);
-      console.log(`- Deploy ID: ${data.id}`);
-      console.log(`- Status: ${data.status}`);
-      console.log(`- Clear Cache Option: ${data.clearCache}`);
+      if (data.id) console.log(`- Deploy ID: ${data.id}`);
+      if (data.status) console.log(`- Status: ${data.status}`);
     } else {
       console.error(`❌ API Error:`, data);
     }
