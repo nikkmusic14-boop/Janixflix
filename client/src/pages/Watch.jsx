@@ -105,6 +105,46 @@ export default function Watch() {
   // Video playback pause state
   const [isPaused, setIsPaused] = useState(true);
 
+  // Auto-play Next Episode
+  const [autoPlayNext, setAutoPlayNext] = useState(() => {
+    return localStorage.getItem('janixflix_autoplay') !== 'false';
+  });
+
+  const toggleAutoPlay = () => {
+    setAutoPlayNext(prev => {
+      const next = !prev;
+      localStorage.setItem('janixflix_autoplay', next.toString());
+      return next;
+    });
+  };
+
+  const handleNextEp = useCallback(() => {
+    if (source === 'netmirror' && mediaType === 'tv') {
+      const currentSeason = seasons.find(s => s.se === activeSe);
+      if (!currentSeason) return;
+      const totalEp = Number(currentSeason.ep || 0);
+      if (activeEp < totalEp) {
+        navigate(`/watch/${id}?source=netmirror&type=tv&se=${activeSe}&ep=${activeEp + 1}&subjectid=${subjectid}&dp=${encodeURIComponent(dp)}&title=${encodeURIComponent(movie?.title || title)}`, { replace: true });
+      } else {
+        const nextSeason = seasons.find(s => s.se === activeSe + 1);
+        if (nextSeason) {
+          navigate(`/watch/${id}?source=netmirror&type=tv&se=${activeSe + 1}&ep=1&subjectid=${subjectid}&dp=${encodeURIComponent(dp)}&title=${encodeURIComponent(movie?.title || title)}`, { replace: true });
+        }
+      }
+    } else if (source === 'okjatt') {
+      const currentIndex = okjattEpisodes.findIndex(ep => ep.path === href);
+      if (currentIndex !== -1) {
+        // Okjatt episodes could be sorted either way. Let's try currentIndex - 1 and currentIndex + 1.
+        // Usually, later episodes are at the bottom (currentIndex + 1), but sometimes top (currentIndex - 1).
+        // We will default to currentIndex + 1 for next.
+        if (currentIndex < okjattEpisodes.length - 1) {
+          const next = okjattEpisodes[currentIndex + 1];
+          navigate(`/watch/${id}?source=okjatt&href=${encodeURIComponent(next.path)}&title=${encodeURIComponent(next.title)}`, { replace: true });
+        }
+      }
+    }
+  }, [source, mediaType, seasons, activeSe, activeEp, okjattEpisodes, href, id, subjectid, dp, movie, title, navigate]);
+
   // Video playback buffering states
   const [videoBuffering, setVideoBuffering] = useState(false);
   const bufferingHandlers = {
@@ -858,6 +898,9 @@ export default function Watch() {
                 }}
                 onEnded={() => {
                   setIsPaused(true);
+                  if (autoPlayNext) {
+                    handleNextEp();
+                  }
                 }}
                 onTimeUpdate={handleTimeUpdate}
                 onLoadedMetadata={handleLoadedMetadata}
@@ -906,6 +949,9 @@ export default function Watch() {
                   }}
                   onEnded={() => {
                     setIsPaused(true);
+                    if (autoPlayNext) {
+                      handleNextEp();
+                    }
                   }}
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
@@ -960,6 +1006,9 @@ export default function Watch() {
                   }}
                   onEnded={() => {
                     setIsPaused(true);
+                    if (autoPlayNext) {
+                      handleNextEp();
+                    }
                   }}
                   onTimeUpdate={handleTimeUpdate}
                   onLoadedMetadata={handleLoadedMetadata}
@@ -1094,7 +1143,7 @@ export default function Watch() {
               </div>
             )}
 
-            {/* Screen Mode / Aspect Ratio Selector */}
+            {/* Screen Mode / Auto Play Selector */}
             {(!netmirrorLoading && !okjattLoading) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '12px', marginTop: '4px' }}>
                 <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>📺 Screen Mode:</span>
@@ -1127,6 +1176,49 @@ export default function Watch() {
                     );
                   })}
                 </div>
+                
+                {/* Auto Play Next Episode Toggle */}
+                {hasSidebar && (
+                  <>
+                    <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold', marginLeft: '12px', borderLeft: '1px solid #444', paddingLeft: '24px' }}>▶ Auto-Play:</span>
+                    <button
+                      onClick={toggleAutoPlay}
+                      style={{
+                        background: autoPlayNext ? 'linear-gradient(90deg, #00a000 0%, #00cc00 100%)' : '#333',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '6px 16px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        boxShadow: autoPlayNext ? '0 0 10px rgba(0, 160, 0, 0.4)' : 'none',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      {autoPlayNext ? 'ON' : 'OFF'}
+                    </button>
+                    
+                    {/* Next Episode Button */}
+                    <button
+                      onClick={handleNextEp}
+                      style={{
+                        background: '#0070f3',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '6px 16px',
+                        borderRadius: '4px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s',
+                        marginLeft: '8px'
+                      }}
+                    >
+                      Next Ep ⏭
+                    </button>
+                  </>
+                )}
               </div>
             )}
 
