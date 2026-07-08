@@ -536,8 +536,10 @@ export default function Home() {
                       background: '#0a0b1e'
                     }}>
                       <img 
-                        src={movies[0].poster_path || movies[0].image || movies[0].thumbnail || 'https://images.unsplash.com/photo-1574375927938-d5a98e8edd86?q=80&w=1000'} 
+                        src={movies[0].poster_path || movies[0].thumbnail || movies[0].backdrop_path || movies[0].image || 'https://images.unsplash.com/photo-1574375927938-d5a98e8edd86?q=80&w=1000'} 
                         alt={movies[0].title}
+                        loading="lazy"
+                        onError={(e) => { e.target.onerror = null; e.target.src = 'https://images.unsplash.com/photo-1574375927938-d5a98e8edd86?q=80&w=1000'; }}
                         style={{
                           width: '100%',
                           height: '100%',
