@@ -24,5 +24,18 @@
     "featured": false,
     "rating": 7.5,
     "createdAt": "2026-07-05T09:16:10.395Z"
+  },
+  {
+    "id": "satluj",
+    "title": "Satluj",
+    "description": "Satluj (2026) Punjabi Movie ZEE5 WEB-DL 2160p Hindi Dual Audio H.265 DDP 5.1 Atmos",
+    "genre": "Punjabi",
+    "year": 2026,
+    "duration": 7200,
+    "videoFile": "Satluj.2026.2160p.ZEE5.WEB-DL.Hindi.DDP5.1.Atmos.H.265-Vegamovies.is.mkv",
+    "thumbnail": null,
+    "featured": true,
+    "rating": 9.0,
+    "createdAt": "2026-07-08T21:30:00.000Z"
   }
 ]

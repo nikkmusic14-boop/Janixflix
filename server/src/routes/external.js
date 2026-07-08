@@ -190,6 +190,22 @@ router.get('/netmirror/stream-url', (req, res) => {
 // Get direct video stream sources for a Netmirror movie/episode
 router.get('/netmirror/video-sources', async (req, res) => {
   const { id, se = 0, ep = 0, dp, title, mirrorIndex = 0 } = req.query;
+
+  if (
+    (title && title.toLowerCase().includes('satluj')) || 
+    (dp && dp.toLowerCase().includes('satluj')) || 
+    (id && id.toLowerCase().includes('satluj'))
+  ) {
+    const localUrl = `${req.protocol}://${req.get('host')}/api/stream/satluj`;
+    return res.json({
+      qualities: [
+        { quality: '2160p ZEE5 WEB-DL', url: localUrl }
+      ],
+      chromecastUrl: localUrl,
+      mirrors: []
+    });
+  }
+
   if (!id || !dp) {
     return res.status(400).json({ error: 'Params "id" and "dp" are required' });
   }
@@ -371,6 +387,12 @@ router.get('/okjatt/search', async (req, res) => {
 // Direct Media Link Scraper for OKJatt movies/episodes
 router.get('/okjatt/movie-source', async (req, res) => {
   const { path: mediaPath } = req.query;
+
+  if (mediaPath && mediaPath.toLowerCase().includes('satluj')) {
+    const localUrl = `${req.protocol}://${req.get('host')}/api/stream/satluj`;
+    return res.json({ videoUrl: localUrl });
+  }
+
   if (!mediaPath) return res.status(400).json({ error: 'Param "path" is required' });
 
   try {
