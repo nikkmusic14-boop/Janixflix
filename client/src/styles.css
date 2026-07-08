@@ -13,10 +13,19 @@
   --radius: 8px;
 }
 
+/* Hide scrollbars globally while keeping full scrolling capability */
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  scrollbar-width: none !important; /* Firefox */
+  -ms-overflow-style: none !important; /* IE and Edge */
 }
 
 html, body, #root {

@@ -736,13 +736,31 @@ export default function Watch() {
           }
         });
         setAudioTracks(tracks);
+
+        // Auto-redirect to Hindi track if current is not Hindi and a Hindi track is available
+        const langPref = params.get('lang_pref');
+        if (langPref !== 'user' && source === 'netmirror' && tracks.length > 0) {
+          const isCurrentHindi = (movie?.title || title || '').toLowerCase().includes('hindi') || 
+                                 (movie?.title || title || '').toLowerCase().includes('[hin]') || 
+                                 (movie?.title || title || '').toLowerCase().includes('dubbed') || 
+                                 (movie?.title || title || '').toLowerCase().includes('hin-') ||
+                                 (params.get('tab') === 'bollywood');
+                                 
+          if (!isCurrentHindi) {
+            const hindiTrack = tracks.find(t => t.language === 'Hindi');
+            if (hindiTrack && hindiTrack.id !== id) {
+              console.log("[Auto-Language-Fallback]: Redirecting to Hindi track player:", hindiTrack.title);
+              navigate(`/watch/${hindiTrack.id}?source=netmirror&type=${mediaType}&subjectid=${hindiTrack.id}&dp=${encodeURIComponent(hindiTrack.dp || '')}&title=${encodeURIComponent(hindiTrack.title)}&se=${activeSe}&ep=${activeEp}&tab=${params.get('tab') || ''}`, { replace: true });
+            }
+          }
+        }
       } catch (err) {
         console.error("Failed to resolve audio tracks:", err);
       }
     };
 
     runSearch();
-  }, [movieTitle, source]);
+  }, [movieTitle, source, params, id, mediaType, activeSe, activeEp, navigate]);
 
   // Handle switching to Server 1 (FHD)
   const handleSwitchToServer1 = async () => {
@@ -1338,7 +1356,7 @@ export default function Watch() {
                           onClick={() => {
                             if (isActive) return;
                             if (source === 'netmirror') {
-                              navigate(`/watch/${track.id}?source=netmirror&type=${mediaType}&subjectid=${track.id}&dp=${encodeURIComponent(track.dp || '')}&title=${encodeURIComponent(track.title)}&se=${activeSe}&ep=${activeEp}`);
+                              navigate(`/watch/${track.id}?source=netmirror&type=${mediaType}&subjectid=${track.id}&dp=${encodeURIComponent(track.dp || '')}&title=${encodeURIComponent(track.title)}&se=${activeSe}&ep=${activeEp}&lang_pref=user`);
                             } else {
                               navigate(`/watch/${track.id}?source=okjatt&href=${encodeURIComponent(track.href)}&title=${encodeURIComponent(track.title)}`);
                             }

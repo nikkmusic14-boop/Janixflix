@@ -262,13 +262,32 @@ export default function Detail() {
           }
         });
         setAudioTracks(tracks);
+
+        // Auto-redirect to Hindi track if current is not Hindi and a Hindi track is available
+        const langPref = params.get('lang_pref');
+        if (langPref !== 'user' && source === 'netmirror' && tracks.length > 0 && movie?.title) {
+          const isCurrentHindi = movie.title.toLowerCase().includes('hindi') || 
+                                 movie.title.toLowerCase().includes('[hin]') || 
+                                 movie.title.toLowerCase().includes('dubbed') || 
+                                 movie.title.toLowerCase().includes('hin-') ||
+                                 (movie.genre && movie.genre.toLowerCase().includes('bollywood')) ||
+                                 (params.get('tab') === 'bollywood');
+                                 
+          if (!isCurrentHindi) {
+            const hindiTrack = tracks.find(t => t.language === 'Hindi');
+            if (hindiTrack && hindiTrack.id !== movie.id && hindiTrack.id !== id) {
+              console.log("[Auto-Language-Fallback]: Redirecting to Hindi track:", hindiTrack.title);
+              navigate(`/detail/${hindiTrack.id}?source=netmirror&type=${mediaType}&tab=${params.get('tab') || ''}`, { replace: true });
+            }
+          }
+        }
       } catch (err) {
         console.error("Failed to resolve audio tracks in Details:", err);
       }
     };
 
     runSearch();
-  }, [movie?.title, source]);
+  }, [movie?.title, source, params, id, mediaType, navigate]);
 
   // Lazy load Netmirror Details and play
   const playServer1FromScraper = async () => {
@@ -432,7 +451,7 @@ export default function Detail() {
                       return (
                         <Link
                           key={track.id}
-                          to={`/detail/${track.id}?source=netmirror&type=${mediaType}&tab=${params.get('tab') || ''}`}
+                          to={`/detail/${track.id}?source=netmirror&type=${mediaType}&tab=${params.get('tab') || ''}&lang_pref=user`}
                           style={{
                             background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #ff007f 100%)' : '#222',
                             color: '#fff',
