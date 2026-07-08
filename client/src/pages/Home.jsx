@@ -436,18 +436,21 @@ export default function Home() {
               {((activeServer === 'server2' && isServer2Series) ? page === 1 : page === 0) && movies[0] && (
                 <div style={{
                   position: 'relative',
-                  height: '380px',
+                  minHeight: '380px',
                   borderRadius: '12px',
                   overflow: 'hidden',
                   marginBottom: '40px',
-                  background: `linear-gradient(90deg, rgba(10, 11, 30, 0.95) 0%, rgba(10, 11, 30, 0.75) 50%, rgba(10, 11, 30, 0.2) 100%), url(${movies[0].image || movies[0].thumbnail || 'https://images.unsplash.com/photo-1574375927938-d5a98e8edd86?q=80&w=1000'}) no-repeat center/cover`,
+                  background: `linear-gradient(90deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.8) 40%, rgba(0, 0, 0, 0.4) 100%), url(${movies[0].backdrop_path || movies[0].image || movies[0].thumbnail || 'https://images.unsplash.com/photo-1574375927938-d5a98e8edd86?q=80&w=1000'}) no-repeat center/cover`,
                   border: '1px solid rgba(0, 243, 255, 0.15)',
-                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.7), 0 0 15px rgba(0, 243, 255, 0.05)',
+                  boxShadow: '0 8px 32px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 243, 255, 0.05)',
                   display: 'flex',
                   alignItems: 'center',
-                  padding: '40px 60px'
+                  justifyContent: 'space-between',
+                  padding: '40px',
+                  gap: '30px',
+                  flexWrap: 'wrap'
                 }}>
-                  <div style={{ maxWidth: '580px', zIndex: 2 }}>
+                  <div style={{ flex: '1 1 350px', zIndex: 2, minWidth: '300px' }}>
                     <span style={{ 
                       background: 'rgba(0, 243, 255, 0.15)', 
                       border: '1px solid var(--cyan)',
@@ -463,7 +466,7 @@ export default function Home() {
                       ⚡ FEATURED STREAM
                     </span>
                     <h1 style={{ 
-                      fontSize: '38px', 
+                      fontSize: 'clamp(28px, 5vw, 38px)', 
                       fontFamily: 'Outfit, sans-serif', 
                       color: '#fff', 
                       margin: '14px 0 16px 0',
@@ -480,7 +483,8 @@ export default function Home() {
                       display: '-webkit-box',
                       WebkitLineClamp: '3',
                       WebkitBoxOrient: 'vertical',
-                      overflow: 'hidden'
+                      overflow: 'hidden',
+                      textShadow: '0 1px 4px rgba(0,0,0,0.8)'
                     }}>
                       Stream this title in high definition with instant server caching. Experience seamless dual-audio options and custom streaming capabilities exclusively on JaNixFlix.
                     </p>
@@ -514,19 +518,17 @@ export default function Home() {
                   
                   {/* Featured Anime Image Box on the Right */}
                   <div style={{
-                    position: 'absolute',
-                    right: '8%',
-                    top: '50%',
-                    transform: 'translateY(-50%)',
+                    flex: '0 0 auto',
                     zIndex: 2,
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    pointerEvents: 'none'
+                    pointerEvents: 'none',
+                    margin: '0 auto'
                   }}>
                     <div style={{
-                      width: '200px',
-                      height: '280px',
+                      width: '180px',
+                      height: '260px',
                       borderRadius: '12px',
                       border: '2px solid rgba(0, 243, 255, 0.4)',
                       boxShadow: '0 10px 30px rgba(0, 243, 255, 0.2)',
@@ -534,7 +536,7 @@ export default function Home() {
                       background: '#0a0b1e'
                     }}>
                       <img 
-                        src={movies[0].poster_path || movies[0].thumbnail || movies[0].image || 'https://images.unsplash.com/photo-1574375927938-d5a98e8edd86?q=80&w=1000'} 
+                        src={movies[0].poster_path || movies[0].image || movies[0].thumbnail || 'https://images.unsplash.com/photo-1574375927938-d5a98e8edd86?q=80&w=1000'} 
                         alt={movies[0].title}
                         style={{
                           width: '100%',
