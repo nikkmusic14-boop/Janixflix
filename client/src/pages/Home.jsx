@@ -436,40 +436,41 @@ export default function Home() {
               {((activeServer === 'server2' && isServer2Series) ? page === 1 : page === 0) && movies[0] && (
                 <div style={{
                   position: 'relative',
-                  minHeight: '380px',
+                  minHeight: 'clamp(280px, 40vw, 380px)',
                   borderRadius: '12px',
                   overflow: 'hidden',
                   marginBottom: '40px',
-                  background: `linear-gradient(90deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.8) 40%, rgba(0, 0, 0, 0.4) 100%), url(${movies[0].backdrop_path || movies[0].image || movies[0].thumbnail || 'https://images.unsplash.com/photo-1574375927938-d5a98e8edd86?q=80&w=1000'}) no-repeat center/cover`,
+                  background: `linear-gradient(90deg, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.85) 45%, rgba(0, 0, 0, 0.4) 100%), url(${movies[0].backdrop_path || movies[0].image || movies[0].thumbnail || 'https://images.unsplash.com/photo-1574375927938-d5a98e8edd86?q=80&w=1000'}) no-repeat center/cover`,
                   border: '1px solid rgba(0, 243, 255, 0.15)',
                   boxShadow: '0 8px 32px rgba(0, 0, 0, 0.9), 0 0 15px rgba(0, 243, 255, 0.05)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  padding: '40px',
-                  gap: '30px',
-                  flexWrap: 'wrap'
+                  padding: 'clamp(20px, 4vw, 40px)',
+                  gap: 'clamp(12px, 3vw, 30px)',
+                  flexWrap: 'nowrap'
                 }}>
-                  <div style={{ flex: '1 1 350px', zIndex: 2, minWidth: '300px' }}>
+                  <div style={{ flex: '1 1 180px', zIndex: 2 }}>
                     <span style={{ 
                       background: 'rgba(0, 243, 255, 0.15)', 
                       border: '1px solid var(--cyan)',
                       color: 'var(--cyan)', 
-                      padding: '4px 12px', 
+                      padding: '4px 10px', 
                       borderRadius: '4px', 
-                      fontSize: '11px', 
+                      fontSize: 'clamp(9px, 2vw, 11px)', 
                       fontWeight: 'bold',
                       letterSpacing: '1px',
                       textTransform: 'uppercase',
-                      textShadow: '0 0 8px var(--cyan)'
+                      textShadow: '0 0 8px var(--cyan)',
+                      display: 'inline-block'
                     }}>
                       ⚡ FEATURED STREAM
                     </span>
                     <h1 style={{ 
-                      fontSize: 'clamp(28px, 5vw, 38px)', 
+                      fontSize: 'clamp(20px, 4vw, 38px)', 
                       fontFamily: 'Outfit, sans-serif', 
                       color: '#fff', 
-                      margin: '14px 0 16px 0',
+                      margin: '10px 0 12px 0',
                       textShadow: '0 2px 12px rgba(0,0,0,0.8)',
                       lineHeight: '1.2'
                     }}>
@@ -477,9 +478,9 @@ export default function Home() {
                     </h1>
                     <p style={{ 
                       color: 'var(--text-dim)', 
-                      fontSize: '13.5px', 
-                      lineHeight: '1.6',
-                      marginBottom: '28px',
+                      fontSize: 'clamp(11px, 2vw, 13.5px)', 
+                      lineHeight: '1.5',
+                      marginBottom: 'clamp(16px, 3vw, 28px)',
                       display: '-webkit-box',
                       WebkitLineClamp: '3',
                       WebkitBoxOrient: 'vertical',
@@ -500,16 +501,16 @@ export default function Home() {
                         background: 'linear-gradient(90deg, var(--cyan) 0%, #00bcff 100%)',
                         color: '#000',
                         border: 'none',
-                        padding: '12px 28px',
+                        padding: 'clamp(8px, 2vw, 12px) clamp(16px, 3vw, 28px)',
                         borderRadius: '6px',
-                        fontSize: '14px',
+                        fontSize: 'clamp(12px, 2vw, 14px)',
                         fontWeight: 'bold',
                         cursor: 'pointer',
                         transition: 'all 0.3s',
                         boxShadow: '0 0 15px rgba(0, 243, 255, 0.45)',
                         display: 'inline-flex',
                         alignItems: 'center',
-                        gap: '8px'
+                        gap: '6px'
                       }}
                     >
                       ▶ Play Title
@@ -523,13 +524,12 @@ export default function Home() {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    pointerEvents: 'none',
-                    margin: '0 auto'
+                    pointerEvents: 'none'
                   }}>
                     <div style={{
-                      width: '180px',
-                      height: '260px',
-                      borderRadius: '12px',
+                      width: 'clamp(110px, 28vw, 180px)',
+                      height: 'clamp(160px, 40vw, 260px)',
+                      borderRadius: '8px',
                       border: '2px solid rgba(0, 243, 255, 0.4)',
                       boxShadow: '0 10px 30px rgba(0, 243, 255, 0.2)',
                       overflow: 'hidden',
