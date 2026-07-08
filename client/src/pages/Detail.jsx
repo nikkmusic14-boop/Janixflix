@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
+import { useHistory } from '../hooks/useHistory';
 
 const getCleanBase = (t) => {
   if (!t) return '';
@@ -60,6 +61,7 @@ export default function Detail() {
   const { id } = useParams();
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const { addViewHistory } = useHistory();
 
   // Route parameters
   const source = params.get('source') || 'local';
@@ -153,7 +155,7 @@ export default function Detail() {
             source: 'local',
             mediaType: 'movie'
           };
-          setMovie(parsed);
+          setMovie(local);
         }
       } catch (err) {
         if (!cancelled) setError(err.message);
@@ -165,6 +167,16 @@ export default function Detail() {
     loadData();
     return () => { cancelled = true; };
   }, [id, source, mediaType, href]);
+
+  // Record history when movie loads
+  useEffect(() => {
+    if (movie && movie.title) {
+      addViewHistory({
+        ...movie,
+        poster_path: movie.thumbnail || movie.poster_path
+      });
+    }
+  }, [movie]);
 
   // 2. Background search for the alternate server match
   useEffect(() => {

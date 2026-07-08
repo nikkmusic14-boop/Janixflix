@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { useHistory } from '../hooks/useHistory';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
@@ -9,6 +10,9 @@ export default function Navbar() {
 
   const activeTab = searchParams.get('tab') || 'bollywood';
   const hasQuery = !!searchParams.get('q');
+  
+  const { searchHistory, addSearchHistory, removeSearchHistory } = useHistory();
+  const [showHistory, setShowHistory] = useState(false);
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -18,7 +22,13 @@ export default function Navbar() {
 
   function submitSearch(e) {
     e.preventDefault();
-    navigate(query.trim() ? `/?q=${encodeURIComponent(query.trim())}` : '/');
+    if (query.trim()) {
+      addSearchHistory(query.trim());
+      setShowHistory(false);
+      navigate(`/?q=${encodeURIComponent(query.trim())}`);
+    } else {
+      navigate('/');
+    }
   }
 
   // Synchronize query text with search input when URL changes
@@ -115,7 +125,7 @@ export default function Navbar() {
       </nav>
 
       {/* Right-aligned Search Input & Social Links */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto', flexWrap: 'wrap' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginLeft: 'auto', flexWrap: 'wrap', position: 'relative' }}>
         <form className="search" onSubmit={submitSearch} style={{ margin: '0' }}>
           <span onClick={submitSearch} style={{ cursor: 'pointer', userSelect: 'none' }}>🔍</span>
           <input
@@ -123,8 +133,70 @@ export default function Navbar() {
             placeholder="Titles, genres..."
             value={query}
             onChange={(e) => setQuery(e.target.value)}
+            onFocus={() => setShowHistory(true)}
+            onBlur={() => setTimeout(() => setShowHistory(false), 200)}
           />
         </form>
+        
+        {/* Search History Dropdown */}
+        {showHistory && searchHistory.length > 0 && (
+          <div style={{
+            position: 'absolute',
+            top: '45px',
+            left: 0,
+            width: '200px',
+            background: 'var(--bg-elev)',
+            border: '1px solid var(--border)',
+            borderRadius: '8px',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.5)',
+            zIndex: 100,
+            overflow: 'hidden'
+          }}>
+            <div style={{ padding: '8px 12px', fontSize: '11px', color: 'var(--text-dim)', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between' }}>
+              <span>Recent Searches</span>
+            </div>
+            {searchHistory.map((term, idx) => (
+              <div 
+                key={idx} 
+                style={{ 
+                  padding: '10px 12px', 
+                  fontSize: '13px', 
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}
+                className="search-history-item"
+              >
+                <span 
+                  style={{ flex: 1 }}
+                  onClick={() => {
+                    setQuery(term);
+                    addSearchHistory(term);
+                    navigate(`/?q=${encodeURIComponent(term)}`);
+                  }}
+                >
+                  🕒 {term}
+                </span>
+                <span 
+                  style={{ fontSize: '12px', color: 'var(--text-dim)', padding: '0 4px' }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeSearchHistory(term);
+                  }}
+                  title="Remove"
+                >
+                  ✕
+                </span>
+              </div>
+            ))}
+            <style>{`
+              .search-history-item:hover {
+                background: rgba(255, 255, 255, 0.05);
+              }
+            `}</style>
+          </div>
+        )}
 
         {/* Telegram icon link */}
         <a 

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import MovieCard from '../components/MovieCard.jsx';
+import { useHistory } from '../hooks/useHistory';
 
 export default function Home() {
   const navigate = useNavigate();
@@ -10,6 +11,8 @@ export default function Home() {
   
   // Read active category directly from URL params: 'home' | 'bollywood' | 'southindian' | 'punjabi' | 'hollywood' | 'webseries' | 'tvshows' | 'anime'
   const activeTab = searchParams.get('tab') || 'home';
+  
+  const { viewHistory } = useHistory();
   
   // Server selection state
   const [activeServer, setActiveServer] = useState('server1');
@@ -298,6 +301,23 @@ export default function Home() {
         <div className="catalog-container">
           {activeTab === 'home' ? (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', marginTop: '10px' }}>
+              
+              {/* Row 1: 🕒 Recently Viewed */}
+              {viewHistory && viewHistory.length > 0 && (
+                <div>
+                  <h3 style={{ borderLeft: '4px solid #ff007f', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
+                    🕒 Recently Viewed
+                  </h3>
+                  <div className="home-row" style={{ overflowX: 'auto', display: 'flex', gap: '16px', padding: '0 48px 16px', scrollbarWidth: 'thin' }}>
+                    {viewHistory.map((m) => (
+                      <div key={m.id} style={{ minWidth: '160px', width: '160px', flexShrink: 0 }}>
+                        <MovieCard movie={m} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Row 2: 🇮🇳 Bollywood Hits */}
               {homeBollywood.length > 0 && (
                 <div>
