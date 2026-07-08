@@ -133,69 +133,86 @@ export default function Home() {
           return;
         }
 
-        if (activeServer === 'server1' || activeTab === 'japanese') {
-          // Server 1 (Netmirror) listing parameters
-          const params = { page };
+        let fetchedAccumulator = [];
+        let currentPageToFetch = page;
+        
+        // Loop up to 3 times to get enough unique items (at least 18) to fill the grid
+        for (let attempt = 0; attempt < 3; attempt++) {
+          let newItems = [];
           
-          if (activeTab === 'bollywood' || activeTab === 'southindian') {
-            params.type = '1';
-            params.cn = 'India';
-            const data = await api.external.netmirror.list(params);
-            if (cancelled) return;
-            results = (data.results || [])
-              .map(m => ({ ...m, source: 'netmirror' }))
-              .filter(m => !m.title.toLowerCase().includes('punjabi'));
-          } else if (activeTab === 'punjabi') {
-            const data = await api.external.netmirror.search('Punjabi', page);
-            if (cancelled) return;
-            results = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
-          } else {
-            if (activeTab === 'hollywood') {
+          if (activeServer === 'server1' || activeTab === 'japanese') {
+            const params = { page: currentPageToFetch };
+            
+            if (activeTab === 'bollywood' || activeTab === 'southindian') {
               params.type = '1';
-              params.cn = 'US';
-            } else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') {
-              params.type = '2';
               params.cn = 'India';
-            } else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') {
-              params.type = '2';
-              params.cn = 'US';
-            } else if (activeTab === 'japanese') {
-              params.cn = 'Japan';
-            } else if (activeTab === 'korean') {
-              params.cn = 'Korea';
+              const data = await api.external.netmirror.list(params);
+              if (cancelled) return;
+              newItems = (data.results || [])
+                .map(m => ({ ...m, source: 'netmirror' }))
+                .filter(m => !m.title.toLowerCase().includes('punjabi'));
+            } else if (activeTab === 'punjabi') {
+              const data = await api.external.netmirror.search('Punjabi', currentPageToFetch);
+              if (cancelled) return;
+              newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
+            } else {
+              if (activeTab === 'hollywood') {
+                params.type = '1';
+                params.cn = 'US';
+              } else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') {
+                params.type = '2';
+                params.cn = 'India';
+              } else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') {
+                params.type = '2';
+                params.cn = 'US';
+              } else if (activeTab === 'japanese') {
+                params.cn = 'Japan';
+              } else if (activeTab === 'korean') {
+                params.cn = 'Korea';
+              }
+              const data = await api.external.netmirror.list(params);
+              if (cancelled) return;
+              newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
+              if (activeTab === 'japanese') {
+                newItems = newItems.filter(m => {
+                  const titleLower = m.title.toLowerCase();
+                  const cnLower = (m.cn || '').toLowerCase();
+                  
+                  // Exclude any title from Korea
+                  if (cnLower.includes('korea') || cnLower === 'kr' || titleLower.includes('korean') || titleLower.includes('korea')) {
+                    return false;
+                  }
+                  
+                  return true;
+                });
+              }
             }
-            const data = await api.external.netmirror.list(params);
-            if (cancelled) return;
-            results = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
-            if (activeTab === 'japanese') {
-              results = results.filter(m => {
-                const titleLower = m.title.toLowerCase();
-                const cnLower = (m.cn || '').toLowerCase();
-                
-                // Exclude any title from Korea
-                if (cnLower.includes('korea') || cnLower === 'kr' || titleLower.includes('korean') || titleLower.includes('korea')) {
-                  return false;
-                }
-                
-                return true;
-              });
-            }
-          }
-        } else {
-          // Server 2 (OKJatt) scraped category keys
-          let categoryKey = 'bollywood';
-          if (activeTab === 'southindian') categoryKey = 'southindian';
-          else if (activeTab === 'punjabi') categoryKey = 'punjabi';
-          else if (activeTab === 'hollywood') categoryKey = 'hollywood';
-          else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') categoryKey = 'indianwebseries';
-          else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') categoryKey = 'hollywoodtvshows';
+          } else {
+            // Server 2 (OKJatt) scraped category keys
+            let categoryKey = 'bollywood';
+            if (activeTab === 'southindian') categoryKey = 'southindian';
+            else if (activeTab === 'punjabi') categoryKey = 'punjabi';
+            else if (activeTab === 'hollywood') categoryKey = 'hollywood';
+            else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') categoryKey = 'indianwebseries';
+            else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') categoryKey = 'hollywoodtvshows';
 
-          const data = await api.external.okjatt.list(categoryKey, page);
-          if (cancelled) return;
-          results = data.results || [];
+            const data = await api.external.okjatt.list(categoryKey, currentPageToFetch);
+            if (cancelled) return;
+            newItems = data.results || [];
+          }
+
+          fetchedAccumulator = [...fetchedAccumulator, ...newItems];
+          const uniqueList = deDuplicateMovies(fetchedAccumulator);
+          
+          if (uniqueList.length >= 18 || newItems.length === 0) {
+            results = uniqueList;
+            break;
+          }
+          
+          currentPageToFetch++;
         }
 
-        setMovies(deDuplicateMovies(results));
+        setMovies(results);
         setLoading(false);
       } catch (err) {
         if (!cancelled) {
