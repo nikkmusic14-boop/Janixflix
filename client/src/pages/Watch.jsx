@@ -1060,6 +1060,69 @@ export default function Watch() {
 
           </div>
 
+          {/* Quick Player Navigation / Control Bar */}
+          {hasSidebar && (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: 'linear-gradient(135deg, rgba(20, 20, 20, 0.95) 0%, rgba(10, 10, 10, 0.95) 100%)',
+              padding: '12px 20px',
+              borderRadius: '8px',
+              marginTop: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.05)',
+              boxShadow: '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+              backdropFilter: 'blur(4px)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <span style={{ fontSize: '13px', color: '#888', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '0.5px' }}>▶ Auto-Play Next:</span>
+                <button
+                  onClick={toggleAutoPlay}
+                  style={{
+                    background: autoPlayNext ? 'linear-gradient(90deg, #00f3ff 0%, #0070f3 100%)' : '#333',
+                    color: '#fff',
+                    border: 'none',
+                    padding: '6px 14px',
+                    borderRadius: '20px',
+                    fontSize: '11px',
+                    fontWeight: '800',
+                    cursor: 'pointer',
+                    boxShadow: autoPlayNext ? '0 0 10px rgba(0, 243, 255, 0.4)' : 'none',
+                    transition: 'all 0.3s ease',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}
+                >
+                  {autoPlayNext ? 'ON' : 'OFF'}
+                </button>
+              </div>
+
+              <button
+                onClick={handleNextEp}
+                style={{
+                  background: 'linear-gradient(90deg, #ff0055 0%, #ff007f 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  padding: '10px 24px',
+                  borderRadius: '6px',
+                  fontSize: '13.5px',
+                  fontWeight: '800',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 0 15px rgba(255, 0, 85, 0.4)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px'
+                }}
+              >
+                <span>Next Episode</span>
+                <span style={{ fontSize: '15px' }}>⏭</span>
+              </button>
+            </div>
+          )}
+
           {/* Server Switcher / Audio Details Bar */}
           <div style={{ 
             marginTop: '20px', 
@@ -1176,49 +1239,6 @@ export default function Watch() {
                     );
                   })}
                 </div>
-                
-                {/* Auto Play Next Episode Toggle */}
-                {hasSidebar && (
-                  <>
-                    <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold', marginLeft: '12px', borderLeft: '1px solid #444', paddingLeft: '24px' }}>▶ Auto-Play:</span>
-                    <button
-                      onClick={toggleAutoPlay}
-                      style={{
-                        background: autoPlayNext ? 'linear-gradient(90deg, #00a000 0%, #00cc00 100%)' : '#333',
-                        color: '#fff',
-                        border: 'none',
-                        padding: '6px 16px',
-                        borderRadius: '20px',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        boxShadow: autoPlayNext ? '0 0 10px rgba(0, 160, 0, 0.4)' : 'none',
-                        transition: 'all 0.2s'
-                      }}
-                    >
-                      {autoPlayNext ? 'ON' : 'OFF'}
-                    </button>
-                    
-                    {/* Next Episode Button */}
-                    <button
-                      onClick={handleNextEp}
-                      style={{
-                        background: '#0070f3',
-                        color: '#fff',
-                        border: 'none',
-                        padding: '6px 16px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s',
-                        marginLeft: '8px'
-                      }}
-                    >
-                      Next Ep ⏭
-                    </button>
-                  </>
-                )}
               </div>
             )}
 

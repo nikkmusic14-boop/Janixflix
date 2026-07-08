@@ -29,6 +29,30 @@ app.use((req, res, next) => {
 app.use(cors());
 app.use(express.json());
 app.use(morgan('dev'));
+
+// Render Free Tier Keep-Alive Self-Pinging
+let keepAliveStarted = false;
+app.use((req, res, next) => {
+  if (!keepAliveStarted) {
+    const host = req.get('host') || '';
+    if (host.includes('onrender.com')) {
+      keepAliveStarted = true;
+      const protocol = req.protocol || 'https';
+      const fullUrl = `${protocol}://${host}`;
+      console.log(`[Keep-Alive] Render host detected. Initiating self-ping loop targeting: ${fullUrl}`);
+      
+      setInterval(async () => {
+        try {
+          const pingRes = await fetch(`${fullUrl}/api`);
+          console.log(`[Keep-Alive] Pinged ${fullUrl}/api - Status: ${pingRes.status}`);
+        } catch (err) {
+          console.warn(`[Keep-Alive] Ping failed:`, err.message);
+        }
+      }, 10 * 60 * 1000); // Ping every 10 minutes
+    }
+  }
+  next();
+});
 app.use(express.static(CLIENT_DIST_DIR));
 
 // ────────────────────────────────────────────────────────────
