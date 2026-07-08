@@ -23,6 +23,8 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
+  const [allMovies, setAllMovies] = useState([]);
+  const [lastApiPageFetched, setLastApiPageFetched] = useState(-1);
 
   // Home category content feeds
   const [homeBollywood, setHomeBollywood] = useState([]);
@@ -46,6 +48,8 @@ export default function Home() {
     const startPage = (defaultServer === 'server2' && isSeries) ? 1 : 0;
     setActiveServer(defaultServer);
     setPage(startPage);
+    setAllMovies([]);
+    setLastApiPageFetched(startPage - 1);
   }, [activeTab]);
 
   // Handle server switching
@@ -54,6 +58,8 @@ export default function Home() {
     const isSeries = activeTab === 'indianwebseries' || activeTab === 'indiantvshows' || activeTab === 'hollywoodtvshows' || activeTab === 'webseries' || activeTab === 'tvshows';
     const startPage = (server === 'server2' && isSeries) ? 1 : 0;
     setPage(startPage);
+    setAllMovies([]);
+    setLastApiPageFetched(startPage - 1);
   };
 
   // 1. Unified Search Logic
@@ -133,86 +139,98 @@ export default function Home() {
           return;
         }
 
-        let fetchedAccumulator = [];
-        let currentPageToFetch = page;
-        
-        // Loop up to 3 times to get enough unique items (at least 18) to fill the grid
-        for (let attempt = 0; attempt < 3; attempt++) {
-          let newItems = [];
+        const isSeries = activeTab === 'indianwebseries' || activeTab === 'indiantvshows' || activeTab === 'hollywoodtvshows' || activeTab === 'webseries' || activeTab === 'tvshows';
+        const startPage = (activeServer === 'server2' && isSeries) ? 1 : 0;
+
+        let targetCount = 27;
+        let startIndex = 0;
+        if (page > startPage) {
+          const k = page - startPage;
+          targetCount = 27 + k * 18;
+          startIndex = 27 + (k - 1) * 18;
+        }
+        const endIndex = targetCount;
+
+        let tempAllMovies = [...allMovies];
+        let currentLastApi = lastApiPageFetched;
+
+        if (tempAllMovies.length < targetCount) {
+          let apiPagePointer = lastApiPageFetched + 1;
+          let attempts = 0;
           
-          if (activeServer === 'server1' || activeTab === 'japanese') {
-            const params = { page: currentPageToFetch };
+          while (tempAllMovies.length < targetCount && attempts < 5) {
+            let newItems = [];
             
-            if (activeTab === 'bollywood' || activeTab === 'southindian') {
-              params.type = '1';
-              params.cn = 'India';
-              const data = await api.external.netmirror.list(params);
-              if (cancelled) return;
-              newItems = (data.results || [])
-                .map(m => ({ ...m, source: 'netmirror' }))
-                .filter(m => !m.title.toLowerCase().includes('punjabi'));
-            } else if (activeTab === 'punjabi') {
-              const data = await api.external.netmirror.search('Punjabi', currentPageToFetch);
-              if (cancelled) return;
-              newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
-            } else {
-              if (activeTab === 'hollywood') {
+            if (activeServer === 'server1' || activeTab === 'japanese') {
+              const params = { page: apiPagePointer };
+              
+              if (activeTab === 'bollywood' || activeTab === 'southindian') {
                 params.type = '1';
-                params.cn = 'US';
-              } else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') {
-                params.type = '2';
                 params.cn = 'India';
-              } else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') {
-                params.type = '2';
-                params.cn = 'US';
-              } else if (activeTab === 'japanese') {
-                params.cn = 'Japan';
-              } else if (activeTab === 'korean') {
-                params.cn = 'Korea';
+                const data = await api.external.netmirror.list(params);
+                if (cancelled) return;
+                newItems = (data.results || [])
+                  .map(m => ({ ...m, source: 'netmirror' }))
+                  .filter(m => !m.title.toLowerCase().includes('punjabi'));
+              } else if (activeTab === 'punjabi') {
+                const data = await api.external.netmirror.search('Punjabi', apiPagePointer);
+                if (cancelled) return;
+                newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
+              } else {
+                if (activeTab === 'hollywood') {
+                  params.type = '1';
+                  params.cn = 'US';
+                } else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') {
+                  params.type = '2';
+                  params.cn = 'India';
+                } else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') {
+                  params.type = '2';
+                  params.cn = 'US';
+                } else if (activeTab === 'japanese') {
+                  params.cn = 'Japan';
+                } else if (activeTab === 'korean') {
+                  params.cn = 'Korea';
+                }
+                const data = await api.external.netmirror.list(params);
+                if (cancelled) return;
+                newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
+                if (activeTab === 'japanese') {
+                  newItems = newItems.filter(m => {
+                    const titleLower = m.title.toLowerCase();
+                    const cnLower = (m.cn || '').toLowerCase();
+                    return !(cnLower.includes('korea') || cnLower === 'kr' || titleLower.includes('korean') || titleLower.includes('korea'));
+                  });
+                }
               }
-              const data = await api.external.netmirror.list(params);
+            } else {
+              let categoryKey = 'bollywood';
+              if (activeTab === 'southindian') categoryKey = 'southindian';
+              else if (activeTab === 'punjabi') categoryKey = 'punjabi';
+              else if (activeTab === 'hollywood') categoryKey = 'hollywood';
+              else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') categoryKey = 'indianwebseries';
+              else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') categoryKey = 'hollywoodtvshows';
+
+              const data = await api.external.okjatt.list(categoryKey, apiPagePointer);
               if (cancelled) return;
-              newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
-              if (activeTab === 'japanese') {
-                newItems = newItems.filter(m => {
-                  const titleLower = m.title.toLowerCase();
-                  const cnLower = (m.cn || '').toLowerCase();
-                  
-                  // Exclude any title from Korea
-                  if (cnLower.includes('korea') || cnLower === 'kr' || titleLower.includes('korean') || titleLower.includes('korea')) {
-                    return false;
-                  }
-                  
-                  return true;
-                });
-              }
+              newItems = data.results || [];
             }
-          } else {
-            // Server 2 (OKJatt) scraped category keys
-            let categoryKey = 'bollywood';
-            if (activeTab === 'southindian') categoryKey = 'southindian';
-            else if (activeTab === 'punjabi') categoryKey = 'punjabi';
-            else if (activeTab === 'hollywood') categoryKey = 'hollywood';
-            else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') categoryKey = 'indianwebseries';
-            else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') categoryKey = 'hollywoodtvshows';
 
-            const data = await api.external.okjatt.list(categoryKey, currentPageToFetch);
-            if (cancelled) return;
-            newItems = data.results || [];
-          }
+            if (newItems.length === 0) {
+              break;
+            }
 
-          fetchedAccumulator = [...fetchedAccumulator, ...newItems];
-          const uniqueList = deDuplicateMovies(fetchedAccumulator);
-          
-          if (uniqueList.length >= 18 || newItems.length === 0) {
-            results = uniqueList;
-            break;
+            tempAllMovies = deDuplicateMovies([...tempAllMovies, ...newItems]);
+            currentLastApi = apiPagePointer;
+            apiPagePointer++;
+            attempts++;
           }
           
-          currentPageToFetch++;
+          setAllMovies(tempAllMovies);
+          setLastApiPageFetched(currentLastApi);
         }
 
-        setMovies(results);
+        const pageItems = tempAllMovies.slice(startIndex, endIndex);
+        setMovies(pageItems);
         setLoading(false);
       } catch (err) {
         if (!cancelled) {
@@ -281,6 +299,8 @@ export default function Home() {
     activeTab === 'webseries' ||
     activeTab === 'tvshows'
   );
+
+  const startPage = isServer2Series ? 1 : 0;
 
   return (
     <div style={{ paddingTop: '100px' }}>
@@ -590,17 +610,11 @@ export default function Home() {
               }}>
                 <button
                   onClick={() => {
-                    if (isServer2Series) {
-                      if (page > 1) setPage(page - 1);
-                    } else {
-                      if (page > 0) setPage(page - 1);
-                    }
+                    if (page > startPage) setPage(page - 1);
                   }}
-                  disabled={isServer2Series ? (page <= 1) : (page === 0)}
+                  disabled={page === startPage}
                   className="btn"
-                  style={paginationButtonStyle(
-                    isServer2Series ? (page <= 1) : (page === 0)
-                  )}
+                  style={paginationButtonStyle(page === startPage)}
                 >
                   ← Previous Page
                 </button>
@@ -609,8 +623,9 @@ export default function Home() {
                 </span>
                 <button
                   onClick={() => setPage(page + 1)}
+                  disabled={movies.length < (page === startPage ? 27 : 18)}
                   className="btn"
-                  style={paginationButtonStyle(false)}
+                  style={paginationButtonStyle(movies.length < (page === startPage ? 27 : 18))}
                 >
                   Next Page →
                 </button>
