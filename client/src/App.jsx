@@ -89,13 +89,13 @@ export default function App() {
             </p>
           </div>
 
-          {/* Founder Profile Column */}
+          {/* Disclaimer Column */}
           <div style={{ flex: '1 1 350px' }}>
             <h4 style={{ color: '#fff', fontSize: '15px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px', borderBottom: '2px solid #ff0055', display: 'inline-block', paddingBottom: '4px' }}>
-              Meet The Founder
+              Disclaimer
             </h4>
             <p style={{ color: '#888', fontSize: '13.5px', lineHeight: '1.6', margin: 0 }}>
-              Hi! I am <strong>Nikkpreet Singh Gill</strong>, a developer from Punjab. I built this streaming portal to help fellow entertainment enthusiasts watch their favorite content completely free of cost. My goal is to ensure that everyone can enjoy premium entertainment without the burden of expensive subscription fees or spammy ads. This website is made with love to help you browse and watch freely!
+              <strong>JANIxFLIX</strong> does not store any files on our server. All content is provided by non-affiliated third parties. We index external streaming links for educational and preview purposes only. If you own copyrighted materials and wish them to be removed, please contact the respective hosting providers.
             </p>
           </div>
 
@@ -147,8 +147,7 @@ export default function App() {
           fontSize: '12px',
           color: '#555'
         }}>
-          <span>&copy; {new Date().getFullYear()} JANIxFLIX. All rights reserved. Created with ❤️ by Nikkpreet.</span>
-          <span style={{ color: '#888' }}>Made in Punjab, India 🇮🇳</span>
+          <span>&copy; {new Date().getFullYear()} JANIxFLIX. All rights reserved. Created with ❤️ for entertainment enthusiasts.</span>
         </div>
       </footer>
     </>
