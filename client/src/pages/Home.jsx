@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import MovieCard from '../components/MovieCard.jsx';
+import { deDuplicateMovies } from '../utils.js';
 import { useHistory } from '../hooks/useHistory';
 
 export default function Home() {
@@ -65,8 +66,8 @@ export default function Home() {
         api.external.netmirror.search(q).then(res => res.results || []).catch(() => []),
         api.external.okjatt.search(q).catch(() => [])
       ]).then(([netmirror, okjatt]) => {
-        setNetmirrorResults(netmirror.map(m => ({ ...m, source: 'netmirror' })));
-        setOkjattResults(okjatt);
+        setNetmirrorResults(deDuplicateMovies(netmirror).map(m => ({ ...m, source: 'netmirror' })));
+        setOkjattResults(deDuplicateMovies(okjatt));
         setSearchLoading(false);
       }).catch(err => {
         setError(err.message);
@@ -108,18 +109,18 @@ export default function Home() {
             api.external.netmirror.list({ cn: 'Japan', page: 0 }).catch(() => ({ results: [] }))
           ]);
           if (cancelled) return;
-          setHomeBollywood((bwoodRes.results || [])
+          setHomeBollywood(deDuplicateMovies(bwoodRes.results || [])
             .map(m => ({ ...m, source: 'netmirror' }))
             .filter(m => !m.title.toLowerCase().includes('punjabi'))
           );
-          setHomeSouth((southRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
-          setHomePunjabi((punjRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
-          setHomeHollywood((hollywoodRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
-          setHomeIndianWebSeries((indianWebSeriesRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
-          setHomeHollywoodTV((hollywoodTVRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
-          setHomeKorean((koreanRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
+          setHomeSouth(deDuplicateMovies(southRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
+          setHomePunjabi(deDuplicateMovies(punjRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
+          setHomeHollywood(deDuplicateMovies(hollywoodRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
+          setHomeIndianWebSeries(deDuplicateMovies(indianWebSeriesRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
+          setHomeHollywoodTV(deDuplicateMovies(hollywoodTVRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
+          setHomeKorean(deDuplicateMovies(koreanRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
           
-          let jpnMovies = (japaneseRes.results || []).map(m => ({ ...m, source: 'netmirror' }));
+          let jpnMovies = deDuplicateMovies(japaneseRes.results || []).map(m => ({ ...m, source: 'netmirror' }));
           jpnMovies = jpnMovies.filter(m => {
             const titleLower = m.title.toLowerCase();
             const cnLower = (m.cn || '').toLowerCase();
@@ -194,7 +195,7 @@ export default function Home() {
           results = data.results || [];
         }
 
-        setMovies(results);
+        setMovies(deDuplicateMovies(results));
         setLoading(false);
       } catch (err) {
         if (!cancelled) {

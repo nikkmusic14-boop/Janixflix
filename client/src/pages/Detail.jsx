@@ -2,41 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { useHistory } from '../hooks/useHistory';
-
-const getCleanBase = (t) => {
-  if (!t) return '';
-  return t
-    .toLowerCase()
-    .replace(/dubbed/g, '')
-    .replace(/dual audio/g, '')
-    .replace(/multi audio/g, '')
-    .replace(/hindi/g, '')
-    .replace(/english/g, '')
-    .replace(/telugu/g, '')
-    .replace(/tamil/g, '')
-    .replace(/malayalam/g, '')
-    .replace(/kannada/g, '')
-    .replace(/punjabi/g, '')
-    .replace(/bengali/g, '')
-    .replace(/japanese/g, '')
-    .replace(/korean/g, '')
-    .replace(/[\[\(]hin[\]\)]/g, '')
-    .replace(/[\[\(]eng[\]\)]/g, '')
-    .replace(/[\[\(]tel[\]\)]/g, '')
-    .replace(/[\[\(]tam[\]\)]/g, '')
-    .replace(/\[.*\]/g, '')
-    .replace(/\(.*\)/g, '')
-    .replace(/\b(19|20)\d{2}\b/g, '') // remove year
-    .replace(/s\d+ep\d+/g, '')
-    .replace(/s\d+/g, '')
-    .replace(/season\s+\d+/g, '')
-    .replace(/episode\s+\d+/g, '')
-    .replace(/ep\s+\d+/g, '')
-    .replace(/-download-\d+\.html$/, '')
-    .replace(/[^a-z0-9]/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-};
+import { getCleanBase } from '../utils.js';
 
 const matchTitle = (a, b, movieYear) => {
   const cleanA = getCleanBase(a);

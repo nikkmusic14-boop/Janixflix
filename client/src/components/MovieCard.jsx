@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { api } from '../api.js';
+import { getDisplayTitle } from '../utils.js';
 
 export default function MovieCard({ movie }) {
   const getThumbUrl = () => {
@@ -42,7 +43,7 @@ export default function MovieCard({ movie }) {
         {getSourceBadge()}
       </div>
       <div className="info">
-        <div className="title">{movie.title}</div>
+        <div className="title">{getDisplayTitle(movie.title)}</div>
         <div className="sub">
           {[
             movie.release_date || movie.year,
