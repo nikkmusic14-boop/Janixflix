@@ -1,0 +1,1 @@
+const fetch = require('node-fetch'); fetch('https://api.allorigins.win/get?url=https://okjatt.bond/').then(function(r){return r.json()}).then(function(d){console.log(d.status.http_code)}).catch(console.error)  

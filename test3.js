@@ -1,0 +1,1 @@
+async function test() { try { const r = await fetch('https://okjatt.bond'); console.log('STATUS:', r.status); const text = await r.text(); console.log(text.substring(0,200)); } catch(e){ console.error(e); } }; test();  

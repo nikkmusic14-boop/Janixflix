@@ -18,6 +18,14 @@ async function fetchWithTimeout(url, options = {}) {
   const { timeout = 8000, headers = {}, ...fetchOpts } = options;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeout);
+  
+  let targetUrl = url;
+  const isOkjatt = targetUrl.includes('okjatt.bond');
+  
+  if (isOkjatt) {
+    targetUrl = 'https://translate.google.com/translate?sl=auto&tl=en&u=' + encodeURIComponent(url);
+  }
+
   try {
     const defaultHeaders = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
@@ -25,8 +33,24 @@ async function fetchWithTimeout(url, options = {}) {
       'Accept-Language': 'en-US,en;q=0.5',
       ...headers
     };
-    const response = await fetch(url, { ...fetchOpts, headers: defaultHeaders, signal: controller.signal });
+    
+    // We fetch and immediately intercept if it's an Okjatt HTML scrape
+    const response = await fetch(targetUrl, { ...fetchOpts, headers: defaultHeaders, signal: controller.signal });
     clearTimeout(timer);
+    
+    if (isOkjatt && !fetchOpts.stream) {
+       // Wrap the response so we can hook .text()
+       const originalText = response.text.bind(response);
+       response.text = async () => {
+         let html = await originalText();
+         // Normalize Google Translate links back to their original form
+         html = html.replace(/https:\/\/translate\.google\.com\/website\?[^"'\s]*u=([^"'\s]+)/g, (m, p1) => {
+           return decodeURIComponent(p1.replace(/&amp;/g, '&'));
+         });
+         return html;
+       };
+    }
+    
     return response;
   } catch (err) {
     clearTimeout(timer);
@@ -687,6 +711,8 @@ function parseOKJattSearch(html) {
 }
 
 function extractVideoSource(html) {
+  const OKJATT_BASE = 'https://okjatt.bond';
+
   // Try video tag source
   const sourceMatch = html.match(/<source[^>]*src="([^"]+)"/) || 
                       html.match(/<source[^>]*src='([^']+)'/);
