@@ -512,18 +512,38 @@ export default function Home() {
                     </button>
                   </div>
                   
-                  {/* Background overlay layer */}
+                  {/* Featured Anime Image Box on the Right */}
                   <div style={{
                     position: 'absolute',
                     right: '8%',
                     top: '50%',
                     transform: 'translateY(-50%)',
-                    width: '320px',
-                    height: '320px',
-                    background: 'radial-gradient(circle, rgba(0, 243, 255, 0.12) 0%, transparent 70%)',
-                    zIndex: 1,
+                    zIndex: 2,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
                     pointerEvents: 'none'
-                  }} />
+                  }}>
+                    <div style={{
+                      width: '200px',
+                      height: '280px',
+                      borderRadius: '12px',
+                      border: '2px solid rgba(0, 243, 255, 0.4)',
+                      boxShadow: '0 10px 30px rgba(0, 243, 255, 0.2)',
+                      overflow: 'hidden',
+                      background: '#0a0b1e'
+                    }}>
+                      <img 
+                        src={movies[0].poster_path || movies[0].thumbnail || movies[0].image || 'https://images.unsplash.com/photo-1574375927938-d5a98e8edd86?q=80&w=1000'} 
+                        alt={movies[0].title}
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'cover'
+                        }}
+                      />
+                    </div>
+                  </div>
                 </div>
               )}
 
