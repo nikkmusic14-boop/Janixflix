@@ -194,7 +194,8 @@ router.get('/netmirror/video-sources', async (req, res) => {
   if (
     (title && title.toLowerCase().includes('satluj')) || 
     (dp && dp.toLowerCase().includes('satluj')) || 
-    (id && id.toLowerCase().includes('satluj'))
+    (id && id.toLowerCase().includes('satluj')) ||
+    (id === '122059')
   ) {
     const localUrl = `${req.protocol}://${req.get('host')}/api/stream/satluj`;
     return res.json({
