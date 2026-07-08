@@ -89,15 +89,7 @@ export default function App() {
             </p>
           </div>
 
-          {/* Disclaimer Column */}
-          <div style={{ flex: '1 1 350px' }}>
-            <h4 style={{ color: '#fff', fontSize: '15px', fontWeight: 'bold', textTransform: 'uppercase', letterSpacing: '1px', marginBottom: '16px', borderBottom: '2px solid #ff0055', display: 'inline-block', paddingBottom: '4px' }}>
-              Disclaimer
-            </h4>
-            <p style={{ color: '#888', fontSize: '13.5px', lineHeight: '1.6', margin: 0 }}>
-              <strong>JANIxFLIX</strong> does not store any files on our server. All content is provided by non-affiliated third parties. We index external streaming links for educational and preview purposes only. If you own copyrighted materials and wish them to be removed, please contact the respective hosting providers.
-            </p>
-          </div>
+
 
           {/* Mission Column */}
           <div style={{ flex: '1 1 250px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
