@@ -34,12 +34,12 @@ export default function App() {
       }
     };
 
-    window.addEventListener('contextmenu', blockContextMenu);
-    window.addEventListener('keydown', blockShortcuts);
+    // window.addEventListener('contextmenu', blockContextMenu);
+    // window.addEventListener('keydown', blockShortcuts);
 
     return () => {
-      window.removeEventListener('contextmenu', blockContextMenu);
-      window.removeEventListener('keydown', blockShortcuts);
+      // window.removeEventListener('contextmenu', blockContextMenu);
+      // window.removeEventListener('keydown', blockShortcuts);
     };
   }, []);
 

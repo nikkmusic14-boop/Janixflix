@@ -1,4 +1,5 @@
-const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:4000' : 'https://janixflix-1.onrender.com');
+const API_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:4000' : window.location.origin);
+
 
 async function request(pathname, options = {}) {
   const res = await fetch(`${API_URL}${pathname}`, {
