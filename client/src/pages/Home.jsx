@@ -52,6 +52,11 @@ export default function Home() {
     setLastApiPageFetched(startPage - 1);
   }, [activeTab]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [page]);
+
   // Handle server switching
   const handleServerChange = (server) => {
     setActiveServer(server);

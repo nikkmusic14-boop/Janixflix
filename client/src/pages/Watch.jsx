@@ -131,6 +131,52 @@ export default function Watch() {
     }
   }, [source, mediaType, seasons, activeSe, activeEp, okjattEpisodes, href, id, subjectid, dp, movie, title, navigate]);
 
+  const triggerServer2Fallback = useCallback(async () => {
+    try {
+      const baseTitle = getCleanBase(movie?.title || title);
+      if (baseTitle) {
+        let results = await api.external.okjatt.search(baseTitle);
+        if (results && results.length === 0) {
+          const words = baseTitle.split(' ');
+          if (words.length > 2) {
+            const shortQuery = words.slice(0, 2).join(' ');
+            results = await api.external.okjatt.search(shortQuery);
+          }
+        }
+        
+        const movieYear = movie?.release_date ? movie.release_date.match(/\b(19|20)\d{2}\b/)?.[0] : null;
+        const match = results && results.find(item => matchTitle(item.title, movie?.title || title, movieYear));
+        if (match) {
+          console.log('[Fallback Found Server 2 Match]:', match.title);
+          const data = await api.external.okjatt.getMediaSource(match.path || match.href);
+          if (data && data.videoUrl) {
+            let targetHref = match.path || match.href;
+            if (mediaType === 'tv' && data.episodes && data.episodes.length > 0) {
+              const epNumStr = `ep${activeEp}`;
+              const epMatch = data.episodes.find(ep => ep.title.toLowerCase().includes(epNumStr) || ep.path.toLowerCase().includes(`ep-${activeEp}`));
+              if (epMatch) {
+                targetHref = epMatch.path;
+              } else if (data.episodes[activeEp - 1]) {
+                targetHref = data.episodes[activeEp - 1].path;
+              }
+            }
+            
+            navigate(`/watch/${id}?source=okjatt&href=${encodeURIComponent(targetHref)}&title=${encodeURIComponent(match.title)}`, { replace: true });
+            return true;
+          }
+        }
+      }
+    } catch (fallbackErr) {
+      console.error('[Fallback Search failed]:', fallbackErr.message);
+    }
+    return false;
+  }, [id, mediaType, activeEp, movie, title, navigate]);
+
+  const handleVideoError = useCallback(() => {
+    console.warn("[Video Error]: Server 1 failed during playback. Attempting auto-fallback to Server 2...");
+    triggerServer2Fallback();
+  }, [triggerServer2Fallback]);
+
   // Video playback buffering states
   const [videoBuffering, setVideoBuffering] = useState(false);
   const bufferingHandlers = {
@@ -543,9 +589,12 @@ export default function Watch() {
         } else {
           throw new Error('No streaming media links resolved from Server 1.');
         }
-      }).catch(err => {
+      }).catch(async (err) => {
         console.error('[Stream Resolve Error]:', err.message);
-        setError(err.message || 'Failed to resolve streaming sources from Server 1.');
+        const fallbackSuccess = await triggerServer2Fallback();
+        if (!fallbackSuccess) {
+          setError(err.message || 'Failed to resolve streaming sources from Server 1.');
+        }
       }).finally(() => {
         setNetmirrorLoading(false);
       });
@@ -924,6 +973,7 @@ export default function Watch() {
                   preload="auto"
                   src={(window.location.hostname.includes('onrender.com') || activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl)}
                   style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
+                  onError={handleVideoError}
                   onPlay={(e) => {
                     handleAutoVolumeBoost();
                     setVideoBuffering(false);
