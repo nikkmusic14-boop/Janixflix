@@ -247,7 +247,11 @@ router.get('/netmirror/proxy-stream', async (req, res) => {
     });
 
     if (response.body) {
-      Readable.fromWeb(response.body).pipe(res);
+      const stream = Readable.fromWeb(response.body);
+      stream.on('error', (err) => {
+        console.error('[Netmirror Proxy Stream pipe error]:', err.message);
+      });
+      stream.pipe(res);
     } else {
       res.end();
     }
@@ -496,7 +500,11 @@ router.get('/okjatt/proxy-stream', async (req, res) => {
     });
 
     if (response.body) {
-      Readable.fromWeb(response.body).pipe(res);
+      const stream = Readable.fromWeb(response.body);
+      stream.on('error', (err) => {
+        console.error('[OKJatt Proxy Stream pipe error]:', err.message);
+      });
+      stream.pipe(res);
     } else {
       res.end();
     }
