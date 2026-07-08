@@ -543,6 +543,16 @@ export default function Watch() {
       setActiveNetmirrorUrl('');
       setError('');
 
+      if (String(subjectid) === '122059') {
+        const driveLink = "https://drive.google.com/file/d/1fopIoNNpdvC_J49Y8cXquDT7f1-S4lEt/view?usp=drive_link";
+        setActiveNetmirrorUrl(driveLink);
+        setNetmirrorChromecastUrl(driveLink);
+        setNetmirrorQualities([{ quality: '1080p', url: driveLink }]);
+        setSelectedQuality('1080p');
+        setNetmirrorLoading(false);
+        return;
+      }
+
       api.external.netmirror.getVideoSources({
         id: subjectid,
         se: activeSe,
