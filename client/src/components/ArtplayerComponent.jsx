@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import Artplayer from 'artplayer';
+import Hls from 'hls.js';
 
 export default function ArtplayerComponent({ option, getInstance, ...rest }) {
   const artRef = useRef();
@@ -11,6 +12,21 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
       fullscreenWeb: true,
       fullscreen: true,
       autoOrientation: true,
+      customType: {
+        m3u8: function (video, url) {
+          if (Hls.isSupported()) {
+            const hls = new Hls();
+            hls.loadSource(url);
+            hls.attachMedia(video);
+            art.hls = hls;
+            art.on('destroy', () => hls.destroy());
+          } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+            video.src = url;
+          } else {
+            art.notice.show = 'Unsupported video format: m3u8';
+          }
+        },
+      },
       plugins: [
         (art) => {
           art.on('fullscreen', (state) => {

@@ -977,6 +977,7 @@ export default function Watch() {
               <ArtplayerComponent
                 option={{
                   url: movie?.videoFile?.startsWith('http') ? movie.videoFile : api.streamUrl(id),
+                  type: (movie?.videoFile?.includes('.m3u8') || api.streamUrl(id).includes('.m3u8')) ? 'm3u8' : 'auto',
                   poster: api.thumbnailUrl(id),
                   autoplay: true,
                   volume: 1,
@@ -1050,6 +1051,7 @@ export default function Watch() {
                   <ArtplayerComponent
                     option={{
                       url: (window.location.hostname.includes('onrender.com') || activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl),
+                      type: activeNetmirrorUrl?.includes('.m3u8') ? 'm3u8' : 'auto',
                       quality: netmirrorQualities && netmirrorQualities.length > 0 ? netmirrorQualities.map(q => ({
                         html: q.quality,
                         url: (window.location.hostname.includes('onrender.com') || q.url === netmirrorChromecastUrl) ? q.url : api.external.netmirror.getProxyUrl(q.url),
@@ -1135,6 +1137,7 @@ export default function Watch() {
                   <ArtplayerComponent
                     option={{
                       url: api.hicineProxyUrl(hicineVideoUrl),
+                      type: hicineVideoUrl?.includes('.m3u8') ? 'm3u8' : 'auto',
                       autoplay: true,
                       volume: 1,
                       isLive: false,
