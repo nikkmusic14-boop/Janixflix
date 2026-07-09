@@ -49,6 +49,30 @@ export default function Detail() {
   const [oppositeLink, setOppositeLink] = useState(null);
   const [oppositeSearching, setOppositeSearching] = useState(false);
   const [audioTracks, setAudioTracks] = useState([]);
+  
+  const [hicineSeasonsData, setHicineSeasonsData] = useState({});
+  const [fetchingHicineSeasons, setFetchingHicineSeasons] = useState(false);
+
+  useEffect(() => {
+    if (activeServerTab === 'server2' && server2Data?.type === 'tv_series' && server2Data.seasons) {
+      setFetchingHicineSeasons(true);
+      Promise.all(
+        server2Data.seasons.map(async (s) => {
+          try {
+            const resolved = await api.external.hicine.getMediaSource(s.path);
+            return { path: s.path, episodes: resolved?.episodes || [] };
+          } catch (e) {
+            return { path: s.path, episodes: [] };
+          }
+        })
+      ).then((results) => {
+        const newData = {};
+        results.forEach(r => { newData[r.path] = r.episodes; });
+        setHicineSeasonsData(newData);
+        setFetchingHicineSeasons(false);
+      });
+    }
+  }, [server2Data, activeServerTab]);
 
   // 1. Initial metadata loading
   useEffect(() => {
@@ -597,20 +621,39 @@ export default function Detail() {
                 {activeServerTab === 'server2' && server2Data && (
                   <div>
                     {server2Data.type === 'tv_series' && server2Data.seasons && (
-                      <div>
-                        <h4 style={{ color: '#fff', marginBottom: '12px' }}>Select Season:</h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                          {server2Data.seasons.map((s, idx) => (
-                            <button
-                              key={idx}
-                              onClick={() => handleLoadHicineSeason(s.path)}
-                              className="btn btn-secondary"
-                              style={{ padding: '12px', justifyContent: 'flex-start' }}
-                            >
-                              📂 {s.title}
-                            </button>
-                          ))}
-                        </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+                        {fetchingHicineSeasons ? (
+                           <div className="loading" style={{ fontSize: '14px', margin: '20px 0' }}>Loading seasons...</div>
+                        ) : (
+                          server2Data.seasons.map((season, sIdx) => {
+                            const episodes = hicineSeasonsData[season.path] || [];
+                            if (episodes.length === 0) return null;
+                            return (
+                              <div key={sIdx}>
+                                <h4 style={{ color: '#fff', marginBottom: '12px' }}>
+                                  {season.title} ({episodes.length} Episodes)
+                                </h4>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '8px' }}>
+                                  {episodes.map((ep, idx) => {
+                                    // Extract episode number from title if possible, else just use index+1
+                                    const epMatch = ep.title.match(/Episode\s+(\d+)/i);
+                                    const epNum = epMatch ? epMatch[1] : (idx + 1);
+                                    return (
+                                      <Link
+                                        key={idx}
+                                        to={`/watch/${id}?source=hicine&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(ep.title)}`}
+                                        className="btn btn-secondary"
+                                        style={{ padding: '8px 12px', justifyContent: 'center', fontSize: '13px' }}
+                                      >
+                                        Episode {epNum}
+                                      </Link>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
                       </div>
                     )}
 
