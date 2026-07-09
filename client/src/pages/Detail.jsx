@@ -246,12 +246,8 @@ export default function Detail() {
     if (!baseTitle) return;
 
     const performSearch = async (query) => {
-      if (source === 'netmirror') {
-        const res = await api.external.netmirror.search(query);
-        return res?.results || [];
-      } else {
-        return await api.external.hicine.search(query) || [];
-      }
+      const res = await api.external.netmirror.search(query);
+      return res?.results || [];
     };
 
     const runSearch = async () => {
@@ -475,14 +471,11 @@ export default function Detail() {
                   <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>🔄 Switch Audio:</span>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {audioTracks.map((track) => {
-                      const isActive = source === 'netmirror' ? (track.id === movie.id || track.id === id) : (track.href === href || track.id === id);
-                      const targetTo = source === 'netmirror' 
-                        ? `/detail/${track.id}?source=netmirror&type=${mediaType}&tab=${params.get('tab') || ''}&lang_pref=user`
-                        : `/detail/${track.id}?source=hicine&href=${encodeURIComponent(track.href)}&title=${encodeURIComponent(track.title)}`;
+                      const isActive = source === 'netmirror' && track.id.toString() === id?.toString();
                       return (
                         <Link
-                          key={track.id || track.href}
-                          to={targetTo}
+                          key={track.id}
+                          to={`/detail/${track.id}?source=netmirror&type=${mediaType}&tab=${params.get('tab') || ''}&lang_pref=user`}
                           style={{
                             background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #ff007f 100%)' : '#222',
                             color: '#fff',

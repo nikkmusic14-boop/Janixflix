@@ -692,12 +692,8 @@ export default function Watch() {
     if (!baseTitle) return;
 
     const performSearch = async (query) => {
-      if (source === 'netmirror') {
-        const res = await api.external.netmirror.search(query);
-        return res?.results || [];
-      } else {
-        return await api.external.hicine.search(query) || [];
-      }
+      const res = await api.external.netmirror.search(query);
+      return res?.results || [];
     };
 
     const runSearch = async () => {
@@ -1372,19 +1368,13 @@ export default function Watch() {
                   <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>🔄 Switch Language:</span>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {audioTracks.map((track) => {
-                      const isActive = source === 'netmirror' 
-                        ? track.id === subjectid 
-                        : (track.href === href || track.id === id);
+                      const isActive = source === 'netmirror' && track.id.toString() === subjectid?.toString();
                       return (
                         <button
-                          key={track.id || track.href}
+                          key={track.id}
                           onClick={() => {
                             if (isActive) return;
-                            if (source === 'netmirror') {
-                              navigate(`/watch/${track.id}?source=netmirror&type=${mediaType}&subjectid=${track.id}&dp=${encodeURIComponent(track.dp || '')}&title=${encodeURIComponent(track.title)}&se=${activeSe}&ep=${activeEp}&lang_pref=user`);
-                            } else {
-                              navigate(`/watch/${track.id}?source=hicine&href=${encodeURIComponent(track.href)}&title=${encodeURIComponent(track.title)}`);
-                            }
+                            navigate(`/watch/${track.id}?source=netmirror&type=${mediaType}&subjectid=${track.id}&dp=${encodeURIComponent(track.dp || '')}&title=${encodeURIComponent(track.title)}&se=${activeSe}&ep=${activeEp}&lang_pref=user`);
                           }}
                           style={{
                             background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #ff007f 100%)' : '#222',
