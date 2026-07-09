@@ -246,6 +246,31 @@ export default function Watch() {
   const gainNodeRef = useRef(null);
   const sourceNodeRef = useRef(null);
 
+  // Global Fullscreen listener for iframes to force landscape on mobile
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      if (document.fullscreenElement) {
+        if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
+          window.screen.orientation.lock('landscape').catch((e) => console.log('Orientation lock failed:', e));
+        }
+      } else {
+        if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
+          window.screen.orientation.unlock();
+        }
+      }
+    };
+    
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+    
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+      document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+    };
+  }, []);
+
   // Automatic Web Audio API Volume Boost (2.5x for ALL streams)
   const handleAutoVolumeBoost = () => {
     if (!videoRef.current) return;
