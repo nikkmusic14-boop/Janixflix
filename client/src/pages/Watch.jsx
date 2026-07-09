@@ -911,7 +911,7 @@ export default function Watch() {
       </div>
 
       <h1>
-        {movieTitle} 
+        {cleanHicineTitle(movieTitle)} 
         {source === 'netmirror' && mediaType === 'tv' && ` — Season ${activeSe} Ep ${activeEp}`}
       </h1>
 
@@ -925,7 +925,7 @@ export default function Watch() {
       }}>
         {/* The video screen container */}
         <div style={{ flex: '1 1 700px', maxWidth: '100%', minWidth: 0 }}>
-          <div className="player" style={{ position: 'relative', overflow: 'hidden', width: '100%', aspectRatio: '16/9', background: '#000' }}>
+          <div className="player" style={{ position: 'relative', overflow: 'hidden', width: '100%', aspectRatio: '16/9', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {source === 'local' && movie?.videoFile?.includes('drive.google.com') ? (
               <div style={{ width: '100%', height: '100%', position: 'relative' }}>
                 <iframe
