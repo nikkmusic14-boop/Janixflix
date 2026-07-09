@@ -924,7 +924,7 @@ export default function Watch() {
         alignItems: 'flex-start'
       }}>
         {/* The video screen container */}
-        <div style={{ flex: '1 1 700px' }}>
+        <div style={{ flex: '1 1 700px', maxWidth: '100%', minWidth: 0 }}>
           <div className="player" style={{ position: 'relative', overflow: 'hidden', width: '100%', aspectRatio: '16/9', background: '#000' }}>
             {source === 'local' && movie?.videoFile?.includes('drive.google.com') ? (
               <iframe
