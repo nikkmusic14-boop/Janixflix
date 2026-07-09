@@ -16,7 +16,7 @@ export default function Home() {
   const { viewHistory } = useHistory();
   
   // Server selection state
-  const [activeServer, setActiveServer] = useState('server1');
+  const [activeServer, setActiveServer] = useState('server2');
   
   // Catalog contents
   const [movies, setMovies] = useState([]);
@@ -43,7 +43,7 @@ export default function Home() {
 
   // Reset page and active server when category changes in URL
   useEffect(() => {
-    const defaultServer = (activeTab === 'southindian' || activeTab === 'anime') ? 'server2' : 'server1';
+    const defaultServer = 'server2';
     const isSeries = activeTab === 'indianwebseries' || activeTab === 'indiantvshows' || activeTab === 'hollywoodtvshows' || activeTab === 'webseries' || activeTab === 'tvshows';
     const startPage = (defaultServer === 'server2' && isSeries) ? 1 : 0;
     setActiveServer(defaultServer);
@@ -331,12 +331,12 @@ export default function Home() {
           justifyContent: 'center',
           gap: '12px' 
         }}>
-          <button
+          {/* <button
             onClick={() => handleServerChange('server1')}
             style={serverButtonStyle(activeServer === 'server1', '#0070f3')}
           >
             ⚡ Stream Server 1 (FHD)
-          </button>
+          </button> */}
           <button
             onClick={() => handleServerChange('server2')}
             style={serverButtonStyle(activeServer === 'server2', '#00a000')}

@@ -1357,7 +1357,7 @@ export default function Watch() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
               <span style={{ fontSize: '14px', color: 'var(--text-dim)', fontWeight: 'bold' }}>📡 Switch Play Server:</span>
               <div style={{ display: 'flex', gap: '8px' }}>
-                <button
+                {/* <button
                   onClick={source === 'hicine' ? handleSwitchToServer1 : undefined}
                   disabled={source === 'netmirror' || source === 'local' || (source === 'hicine' && !oppositeLink && !oppositeSearching) || oppositeSearching}
                   style={{
@@ -1373,7 +1373,7 @@ export default function Watch() {
                   }}
                 >
                   Stream Server 1 (FHD) {oppositeSearching ? ' (Searching...)' : (source === 'hicine' && !oppositeLink) ? ' (Unavailable)' : ''}
-                </button>
+                </button> */}
                 <button
                   onClick={(source === 'netmirror' || source === 'local') ? handleSwitchToServer2 : undefined}
                   disabled={source === 'hicine' || ((source === 'netmirror' || source === 'local') && !oppositeLink && !oppositeSearching) || oppositeSearching}
