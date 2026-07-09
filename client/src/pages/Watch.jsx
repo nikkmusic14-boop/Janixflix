@@ -1313,37 +1313,63 @@ export default function Watch() {
 
             {/* Screen Mode / Auto Play Selector */}
             {(!netmirrorLoading && !hicineLoading) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '12px', marginTop: '4px' }}>
-                <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>📺 Screen Mode:</span>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {[
-                    { value: 'contain', label: 'Fit (Original)' },
-                    { value: 'fill', label: 'Stretch (Full Screen)' },
-                    { value: 'cover', label: 'Zoom (Crop)' }
-                  ].map((fitOption) => {
-                    const isActive = videoFit === fitOption.value;
-                    return (
-                      <button
-                        key={fitOption.value}
-                        onClick={() => setVideoFit(fitOption.value)}
-                        style={{
-                          background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #0070f3 100%)' : '#222',
-                          color: '#fff',
-                          border: isActive ? '1px solid #00f3ff' : '1px solid #444',
-                          padding: '6px 16px',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          fontWeight: 'bold',
-                          cursor: 'pointer',
-                          boxShadow: isActive ? '0 0 10px rgba(0, 243, 255, 0.3)' : 'none',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        {fitOption.label}
-                      </button>
-                    );
-                  })}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '12px', marginTop: '4px', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>📺 Screen Mode:</span>
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                    {[
+                      { value: 'contain', label: 'Fit (Original)' },
+                      { value: 'fill', label: 'Stretch (Full Screen)' },
+                      { value: 'cover', label: 'Zoom (Crop)' }
+                    ].map((fitOption) => {
+                      const isActive = videoFit === fitOption.value;
+                      return (
+                        <button
+                          key={fitOption.value}
+                          onClick={() => setVideoFit(fitOption.value)}
+                          style={{
+                            background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #0070f3 100%)' : '#222',
+                            color: '#fff',
+                            border: isActive ? '1px solid #00f3ff' : '1px solid #444',
+                            padding: '6px 16px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            boxShadow: isActive ? '0 0 10px rgba(0, 243, 255, 0.3)' : 'none',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          {fitOption.label}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
+
+                {/* Auto Play Toggle */}
+                {hasSidebar && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>Auto Play Next Ep:</span>
+                    <button
+                      onClick={toggleAutoPlay}
+                      style={{
+                        background: autoPlayNext ? 'linear-gradient(90deg, #00f3ff 0%, #0070f3 100%)' : '#333',
+                        color: '#fff',
+                        border: autoPlayNext ? '1px solid #00f3ff' : '1px solid #444',
+                        padding: '6px 14px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        boxShadow: autoPlayNext ? '0 0 10px rgba(0, 243, 255, 0.4)' : 'none',
+                        transition: 'all 0.3s'
+                      }}
+                    >
+                      {autoPlayNext ? 'ON' : 'OFF'}
+                    </button>
+                  </div>
+                )}
               </div>
             )}
 
