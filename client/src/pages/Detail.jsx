@@ -235,9 +235,9 @@ export default function Detail() {
     runSearch();
   }, [movie, source]);
 
-  // 3. Background search for different audio languages of the same movie (Server 1 only)
+  // 3. Background search for different audio languages of the same movie
   useEffect(() => {
-    if (source !== 'netmirror' || !movie?.title) {
+    if (!movie?.title) {
       setAudioTracks([]);
       return;
     }
@@ -246,8 +246,12 @@ export default function Detail() {
     if (!baseTitle) return;
 
     const performSearch = async (query) => {
-      const res = await api.external.netmirror.search(query);
-      return res?.results || [];
+      if (source === 'netmirror') {
+        const res = await api.external.netmirror.search(query);
+        return res?.results || [];
+      } else {
+        return await api.external.hicine.search(query) || [];
+      }
     };
 
     const runSearch = async () => {
@@ -456,7 +460,7 @@ export default function Detail() {
               </div>
 
               {/* Audio Switcher buttons if multiple tracks exist */}
-              {(audioTracks.length > 1 || (!audioTracks.some(t => t.language === 'Hindi') && source === 'netmirror')) && (
+              {(audioTracks.length > 1 || !audioTracks.some(t => t.language === 'Hindi')) && (
                 <div style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
@@ -471,11 +475,14 @@ export default function Detail() {
                   <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>🔄 Switch Audio:</span>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                     {audioTracks.map((track) => {
-                      const isActive = track.id === movie.id || track.id === id;
+                      const isActive = source === 'netmirror' ? (track.id === movie.id || track.id === id) : (track.href === href || track.id === id);
+                      const targetTo = source === 'netmirror' 
+                        ? `/detail/${track.id}?source=netmirror&type=${mediaType}&tab=${params.get('tab') || ''}&lang_pref=user`
+                        : `/detail/${track.id}?source=hicine&href=${encodeURIComponent(track.href)}&title=${encodeURIComponent(track.title)}`;
                       return (
                         <Link
-                          key={track.id}
-                          to={`/detail/${track.id}?source=netmirror&type=${mediaType}&tab=${params.get('tab') || ''}&lang_pref=user`}
+                          key={track.id || track.href}
+                          to={targetTo}
                           style={{
                             background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #ff007f 100%)' : '#222',
                             color: '#fff',
@@ -502,14 +509,15 @@ export default function Detail() {
                           background: '#222',
                           color: '#fff',
                           textDecoration: 'none',
-                          border: '1px dashed #ff007f',
+                          border: '1px solid #ff007f',
                           padding: '4px 12px',
                           borderRadius: '20px',
                           fontSize: '12px',
-                          fontWeight: 'bold'
+                          fontWeight: 'bold',
+                          boxShadow: '0 0 5px rgba(255, 0, 127, 0.3)'
                         }}
                       >
-                        🔍 Search Hindi
+                        Hindi 🔍
                       </Link>
                     )}
                   </div>
