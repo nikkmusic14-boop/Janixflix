@@ -1075,7 +1075,7 @@ export default function Watch() {
                   <ArtplayerComponent
                     option={{
                       url: api.external.netmirror.getProxyUrl(activeNetmirrorUrl),
-                      type: 'm3u8',
+                      type: 'auto',
                       quality: netmirrorQualities && netmirrorQualities.length > 0 ? netmirrorQualities.map(q => {
                         let label = q.quality;
                         if (label === '1080' || label === '1080p') label = '1080p (FHD)';

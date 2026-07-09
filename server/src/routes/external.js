@@ -316,13 +316,16 @@ router.get(['/netmirror/proxy-stream', '/netmirror/proxy-stream/stream.m3u8', '/
       // Do not copy content-length for M3U8 as we might rewrite it
       if (['content-type', 'content-range', 'accept-ranges'].includes(key)) {
         res.setHeader(key, val);
-      } else if (key === 'content-length' && !url.includes('.m3u8') && !url.includes('.mp4')) {
+      } else if (key === 'content-length' && (!url.includes('.m3u8') && !url.includes('.mp4') || url.includes('cast=1'))) {
         res.setHeader(key, val);
       }
     });
 
+    const contentType = response.headers.get('content-type') || '';
+    const isM3U8 = contentType.includes('mpegurl') || contentType.includes('x-mpegurl') || ((url.includes('.m3u8') || url.includes('.mp4')) && !url.includes('cast=1') && !url.includes('.ts'));
+
     // If it's an m3u8 playlist, rewrite the paths to proxy the .ts files
-    if ((url.includes('.m3u8') || url.includes('.mp4')) && !url.includes('.ts')) {
+    if (isM3U8) {
        const bodyText = await response.text();
        if (bodyText.startsWith('#EXTM3U')) {
            const parsedUrl = new URL(url);
@@ -660,19 +663,53 @@ router.get(['/hicine/proxy-stream', '/hicine/proxy-stream/stream.m3u8', '/hicine
     res.status(response.status);
 
     response.headers.forEach((val, key) => {
-      if (['content-type', 'content-length', 'content-range', 'accept-ranges'].includes(key)) {
+      if (['content-type', 'content-range', 'accept-ranges'].includes(key)) {
+        res.setHeader(key, val);
+      } else if (key === 'content-length' && (!url.includes('.m3u8') && !url.includes('.mp4') || url.includes('cast=1'))) {
         res.setHeader(key, val);
       }
     });
 
-    if (response.body) {
-      const stream = Readable.fromWeb(response.body);
-      stream.on('error', (err) => {
-        console.error('[Hicine Proxy Stream pipe error]:', err.message);
-      });
-      stream.pipe(res);
+    const contentType = response.headers.get('content-type') || '';
+    const isM3U8 = contentType.includes('mpegurl') || contentType.includes('x-mpegurl') || ((url.includes('.m3u8') || url.includes('.mp4')) && !url.includes('cast=1') && !url.includes('.ts'));
+
+    if (isM3U8) {
+       const bodyText = await response.text();
+       if (bodyText.startsWith('#EXTM3U')) {
+           const parsedUrl = new URL(url);
+           const rewritten = bodyText.split('\n').map(line => {
+               if (line.trim() && !line.startsWith('#')) {
+                   let tsUrl = line.startsWith('http') ? line : new URL(line, parsedUrl.href).href;
+                   try {
+                       const tsUrlObj = new URL(tsUrl);
+                       for (const [key, val] of parsedUrl.searchParams.entries()) {
+                           if (!tsUrlObj.searchParams.has(key)) {
+                               tsUrlObj.searchParams.append(key, val);
+                           }
+                       }
+                       tsUrl = tsUrlObj.href;
+                   } catch (e) {}
+                   
+                   return `/api/external/hicine/proxy-stream/stream.ts?url=${encodeURIComponent(tsUrl)}`;
+               }
+               return line;
+           }).join('\n');
+           res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+           res.setHeader('Content-Length', Buffer.byteLength(rewritten));
+           return res.send(rewritten);
+       } else {
+           return res.send(bodyText);
+       }
     } else {
-      res.end();
+      if (response.body) {
+        const stream = Readable.fromWeb(response.body);
+        stream.on('error', (err) => {
+          console.error('[Hicine Proxy Stream pipe error]:', err.message);
+        });
+        stream.pipe(res);
+      } else {
+        res.end();
+      }
     }
   } catch (err) {
     if (err.name === 'AbortError') {
