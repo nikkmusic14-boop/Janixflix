@@ -1403,25 +1403,44 @@ export default function Watch() {
                       );
                     })}
 
-                    {/* Fallback Search Hindi Button */}
+                    {/* Hindi Playback Button */}
                     {!audioTracks.some(t => t.language === 'Hindi') && (
                       <button
-                        onClick={() => {
-                          navigate(`/?q=${encodeURIComponent((movieTitle || '').replace(/\[.*\]/g, '').trim() + ' Hindi')}`);
+                        onClick={async () => {
+                          const base = (movieTitle || '').replace(/\[.*\]/g, '').trim();
+                          // Immediately show loading
+                          const btn = document.getElementById('btn-hindi-auto');
+                          if(btn) btn.innerText = 'Loading...';
+                          
+                          try {
+                            const res = await api.external.netmirror.search(base + ' Hindi');
+                            const tracks = res?.results || [];
+                            const hindiTrack = tracks.find(r => r.title.toLowerCase().includes('hindi') || r.title.toLowerCase().includes('hin'));
+                            
+                            if (hindiTrack) {
+                              navigate(`/watch/${hindiTrack.id}?source=netmirror&type=${mediaType}&subjectid=${hindiTrack.id}&dp=${encodeURIComponent(hindiTrack.dp || '')}&title=${encodeURIComponent(hindiTrack.title)}&se=${activeSe}&ep=${activeEp}&lang_pref=user`);
+                            } else {
+                              if(btn) btn.innerText = 'Not Found';
+                              setTimeout(() => { if(btn) btn.innerText = 'Hindi'; }, 2000);
+                            }
+                          } catch(err) {
+                            if(btn) btn.innerText = 'Error';
+                            setTimeout(() => { if(btn) btn.innerText = 'Hindi'; }, 2000);
+                          }
                         }}
+                        id="btn-hindi-auto"
                         style={{
                           background: '#222',
                           color: '#fff',
-                          border: '1px solid #ff007f',
+                          border: '1px solid #444',
                           padding: '4px 12px',
                           borderRadius: '20px',
                           fontSize: '12px',
                           fontWeight: 'bold',
-                          cursor: 'pointer',
-                          boxShadow: '0 0 5px rgba(255, 0, 127, 0.3)'
+                          cursor: 'pointer'
                         }}
                       >
-                        Hindi 🔍
+                        Hindi
                       </button>
                     )}
                   </div>

@@ -501,24 +501,44 @@ export default function Detail() {
                       );
                     })}
                     
-                    {/* Fallback Search Hindi Button */}
+                    {/* Hindi Playback Button */}
                     {!audioTracks.some(t => t.language === 'Hindi') && (
-                      <Link
-                        to={`/?q=${encodeURIComponent((movie?.title || '').replace(/\[.*\]/g, '').trim() + ' Hindi')}`}
+                      <button
+                        onClick={async () => {
+                          const base = (movie?.title || '').replace(/\[.*\]/g, '').trim();
+                          const btn = document.getElementById('btn-hindi-auto-detail');
+                          if(btn) btn.innerText = 'Loading...';
+                          
+                          try {
+                            const res = await api.external.netmirror.search(base + ' Hindi');
+                            const tracks = res?.results || [];
+                            const hindiTrack = tracks.find(r => r.title.toLowerCase().includes('hindi') || r.title.toLowerCase().includes('hin'));
+                            
+                            if (hindiTrack) {
+                              navigate(`/detail/${hindiTrack.id}?source=netmirror&type=${mediaType}&tab=${params.get('tab') || ''}&lang_pref=user`);
+                            } else {
+                              if(btn) btn.innerText = 'Not Found';
+                              setTimeout(() => { if(btn) btn.innerText = 'Hindi'; }, 2000);
+                            }
+                          } catch(err) {
+                            if(btn) btn.innerText = 'Error';
+                            setTimeout(() => { if(btn) btn.innerText = 'Hindi'; }, 2000);
+                          }
+                        }}
+                        id="btn-hindi-auto-detail"
                         style={{
                           background: '#222',
                           color: '#fff',
-                          textDecoration: 'none',
-                          border: '1px solid #ff007f',
+                          border: '1px solid #444',
                           padding: '4px 12px',
                           borderRadius: '20px',
                           fontSize: '12px',
                           fontWeight: 'bold',
-                          boxShadow: '0 0 5px rgba(255, 0, 127, 0.3)'
+                          cursor: 'pointer'
                         }}
                       >
-                        Hindi 🔍
-                      </Link>
+                        Hindi
+                      </button>
                     )}
                   </div>
                 </div>
