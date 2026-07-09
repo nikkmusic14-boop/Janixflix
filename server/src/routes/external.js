@@ -487,7 +487,6 @@ router.get('/hicine/movie-source', async (req, res) => {
             linksStr = item.links;
           }
         }
-      }
     }
 
     // Check if it's a TV Season containing episodes
