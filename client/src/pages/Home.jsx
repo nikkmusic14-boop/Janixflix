@@ -34,7 +34,7 @@ export default function Home() {
   const [homeIndianWebSeries, setHomeIndianWebSeries] = useState([]);
   const [homeHollywoodTV, setHomeHollywoodTV] = useState([]);
   const [homeKorean, setHomeKorean] = useState([]);
-  const [homeJapanese, setHomeJapanese] = useState([]);
+  const [homeAnime, setHomeAnime] = useState([]);
 
   // Search result states
   const [searchLoading, setSearchLoading] = useState(false);
@@ -108,7 +108,7 @@ export default function Home() {
             indianWebSeriesRes,
             hollywoodTVRes,
             koreanRes,
-            japaneseRes
+            animeRes
           ] = await Promise.all([
             api.external.netmirror.list({ type: '1', cn: 'India', page: 0 }).catch(() => ({ results: [] })),
             api.external.netmirror.search('South Indian', 0).catch(() => ({ results: [] })),
@@ -117,7 +117,7 @@ export default function Home() {
             api.external.netmirror.list({ type: '2', cn: 'India', page: 0 }).catch(() => ({ results: [] })),
             api.external.netmirror.list({ type: '2', cn: 'US', page: 0 }).catch(() => ({ results: [] })),
             api.external.netmirror.list({ cn: 'Korea', page: 0 }).catch(() => ({ results: [] })),
-            api.external.netmirror.list({ cn: 'Japan', page: 0 }).catch(() => ({ results: [] }))
+            api.external.netmirror.search('Anime', 0).catch(() => ({ results: [] }))
           ]);
           if (cancelled) return;
           setHomeBollywood(deDuplicateMovies(bwoodRes.results || [])
@@ -131,13 +131,8 @@ export default function Home() {
           setHomeHollywoodTV(deDuplicateMovies(hollywoodTVRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
           setHomeKorean(deDuplicateMovies(koreanRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
           
-          let jpnMovies = deDuplicateMovies(japaneseRes.results || []).map(m => ({ ...m, source: 'netmirror' }));
-          jpnMovies = jpnMovies.filter(m => {
-            const titleLower = m.title.toLowerCase();
-            const cnLower = (m.cn || '').toLowerCase();
-            return !(cnLower.includes('korea') || cnLower === 'kr' || titleLower.includes('korean') || titleLower.includes('korea'));
-          });
-          setHomeJapanese(jpnMovies);
+          let animeMovies = deDuplicateMovies(animeRes.results || []).map(m => ({ ...m, source: 'netmirror' }));
+          setHomeAnime(animeMovies);
 
           setMovies([]);
           setLoading(false);
@@ -166,7 +161,7 @@ export default function Home() {
           while (tempAllMovies.length < targetCount && attempts < 5) {
             let newItems = [];
             
-            if (activeServer === 'server1' || activeTab === 'japanese') {
+            if (activeServer === 'server1' || activeTab === 'anime') {
               const params = { page: apiPagePointer };
               
               if (activeTab === 'bollywood' || activeTab === 'southindian') {
@@ -181,6 +176,10 @@ export default function Home() {
                 const data = await api.external.netmirror.search('Punjabi', apiPagePointer);
                 if (cancelled) return;
                 newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
+              } else if (activeTab === 'anime') {
+                const data = await api.external.netmirror.search('Anime', apiPagePointer);
+                if (cancelled) return;
+                newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
               } else {
                 if (activeTab === 'hollywood') {
                   params.type = '1';
@@ -191,21 +190,12 @@ export default function Home() {
                 } else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') {
                   params.type = '2';
                   params.cn = 'US';
-                } else if (activeTab === 'japanese') {
-                  params.cn = 'Japan';
                 } else if (activeTab === 'korean') {
                   params.cn = 'Korea';
                 }
                 const data = await api.external.netmirror.list(params);
                 if (cancelled) return;
                 newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
-                if (activeTab === 'japanese') {
-                  newItems = newItems.filter(m => {
-                    const titleLower = m.title.toLowerCase();
-                    const cnLower = (m.cn || '').toLowerCase();
-                    return !(cnLower.includes('korea') || cnLower === 'kr' || titleLower.includes('korean') || titleLower.includes('korea'));
-                  });
-                }
               }
             } else {
               let categoryKey = activeTab;
@@ -457,14 +447,14 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Row 9: 🇯🇵 Japanese Movies, Series & Anime */}
-              {homeJapanese.length > 0 && (
+              {/* Row 9: ⛩️ Anime */}
+              {homeAnime.length > 0 && (
                 <div>
                   <h3 style={{ borderLeft: '4px solid #ff9f43', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
-                    🇯🇵 Japanese Movies, Series & Anime
+                    ⛩️ Anime
                   </h3>
                   <div className="home-row">
-                    {homeJapanese.map((m) => (
+                    {homeAnime.map((m) => (
                       <MovieCard key={m.id} movie={{ ...m, source: 'netmirror' }} />
                     ))}
                   </div>

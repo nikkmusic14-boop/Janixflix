@@ -117,10 +117,10 @@ export default function Navbar() {
           <span className="hide-emoji-mobile">🇰🇷</span> Korean
         </Link>
         <Link 
-          to="/?tab=japanese" 
-          className={`nav-link ${(activeTab === 'japanese' && !hasQuery) ? 'active' : ''}`}
+          to="/?tab=anime" 
+          className={`nav-link ${(activeTab === 'anime' && !hasQuery) ? 'active' : ''}`}
         >
-          <span className="hide-emoji-mobile">🇯🇵</span> <span className="hide-mobile">Japanese & </span>Anime
+          <span className="hide-emoji-mobile">⛩️</span> Anime
         </Link>
       </nav>
 
