@@ -2,6 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, Link, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api.js';
 import { getCleanBase, cleanHicineTitle } from '../utils.js';
+import ArtplayerComponent from '../components/ArtplayerComponent.jsx';
 
 const matchTitle = (a, b, movieYear) => {
   const cleanA = getCleanBase(a);
@@ -948,15 +949,27 @@ export default function Watch() {
                 style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
               />
             ) : source === 'local' ? (
-              <video
-                ref={videoRef}
-                controls
-                autoPlay
-                playsInline
-                preload="auto"
-                poster={api.thumbnailUrl(id)}
-                src={movie?.videoFile?.startsWith('http') ? movie.videoFile : api.streamUrl(id)}
-                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
+              <ArtplayerComponent
+                option={{
+                  url: movie?.videoFile?.startsWith('http') ? movie.videoFile : api.streamUrl(id),
+                  poster: api.thumbnailUrl(id),
+                  autoplay: true,
+                  volume: 1,
+                  isLive: false,
+                  muted: false,
+                  theme: '#00f3ff',
+                  fullscreen: true,
+                  fullscreenWeb: true,
+                  setting: true,
+                  playbackRate: true,
+                  aspectRatio: true,
+                  miniProgressBar: true,
+                  playsInline: true
+                }}
+                getInstance={(art) => {
+                  videoRef.current = art.video;
+                }}
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', '--video-fit': videoFit }}
                 onPlay={(e) => {
                   handleAutoVolumeBoost();
                   setVideoBuffering(false);
@@ -976,9 +989,7 @@ export default function Watch() {
                 onLoadedMetadata={handleLoadedMetadata}
                 onSeeked={handleSeeked}
                 {...bufferingHandlers}
-              >
-                Your browser does not support HTML5 video player.
-              </video>
+              />
             ) : null}
 
             {source === 'netmirror' && (
@@ -1011,14 +1022,26 @@ export default function Watch() {
                     style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                   />
                 ) : (
-                  <video
-                    ref={videoRef}
-                    controls
-                    autoPlay
-                    playsInline
-                    preload="auto"
-                    src={(window.location.hostname.includes('onrender.com') || activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl)}
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
+                  <ArtplayerComponent
+                    option={{
+                      url: (window.location.hostname.includes('onrender.com') || activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl),
+                      autoplay: true,
+                      volume: 1,
+                      isLive: false,
+                      muted: false,
+                      theme: '#00f3ff',
+                      fullscreen: true,
+                      fullscreenWeb: true,
+                      setting: true,
+                      playbackRate: true,
+                      aspectRatio: true,
+                      miniProgressBar: true,
+                      playsInline: true
+                    }}
+                    getInstance={(art) => {
+                      videoRef.current = art.video;
+                    }}
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', '--video-fit': videoFit }}
                     onError={handleVideoError}
                     onPlay={(e) => {
                       handleAutoVolumeBoost();
@@ -1039,9 +1062,7 @@ export default function Watch() {
                     onLoadedMetadata={handleLoadedMetadata}
                     onSeeked={handleSeeked}
                     {...bufferingHandlers}
-                  >
-                    Your browser does not support HTML5 direct video playback.
-                  </video>
+                  />
                 )
               ) : (
                 <div className="empty-state" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
@@ -1081,14 +1102,26 @@ export default function Watch() {
                     style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                   />
                 ) : (
-                  <video
-                    ref={videoRef}
-                    controls
-                    autoPlay
-                    playsInline
-                    preload="auto"
-                    src={api.hicineProxyUrl(hicineVideoUrl)}
-                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
+                  <ArtplayerComponent
+                    option={{
+                      url: api.hicineProxyUrl(hicineVideoUrl),
+                      autoplay: true,
+                      volume: 1,
+                      isLive: false,
+                      muted: false,
+                      theme: '#00f3ff',
+                      fullscreen: true,
+                      fullscreenWeb: true,
+                      setting: true,
+                      playbackRate: true,
+                      aspectRatio: true,
+                      miniProgressBar: true,
+                      playsInline: true
+                    }}
+                    getInstance={(art) => {
+                      videoRef.current = art.video;
+                    }}
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', '--video-fit': videoFit }}
                     onPlay={(e) => {
                       handleAutoVolumeBoost();
                       setVideoBuffering(false);
@@ -1108,9 +1141,7 @@ export default function Watch() {
                     onLoadedMetadata={handleLoadedMetadata}
                     onSeeked={handleSeeked}
                     {...bufferingHandlers}
-                  >
-                    Your browser does not support HTML5 direct video playback.
-                  </video>
+                  />
                 )
               ) : (
                 <div className="empty-state" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
