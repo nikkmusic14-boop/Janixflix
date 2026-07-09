@@ -490,13 +490,13 @@ router.get('/hicine/movie-source', async (req, res) => {
     }
 
     // Check if it's a TV Season containing episodes
-    if (linksStr.includes('Episode ')) {
+    if (/ep(isode)?(\s|\.)?\d+/i.test(linksStr) || linksStr.toLowerCase().includes('episode')) {
       const episodes = [];
       const lines = linksStr.split(/\r?\n|\\n/);
       
       for (const line of lines) {
-        if (line.toLowerCase().includes('episode')) {
-          // Format: "Episode 1 : url1,,480p : url2,,720p : url3,,1080p"
+        if (/ep(isode)?(\s|\.)?\d+/i.test(line) || line.toLowerCase().includes('episode')) {
+          // Format could be "Episode 1 : url1,,..." or "Ep 1 : url1,,..."
           const parts = line.split(' : ');
           if (parts.length >= 2) {
             const epTitle = parts[0].trim();

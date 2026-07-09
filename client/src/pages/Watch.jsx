@@ -1400,80 +1400,118 @@ export default function Watch() {
                 </span>
               </div>
 
-              {/* Audio Switcher buttons if multiple tracks exist */}
-              {(audioTracks.length > 1 || !audioTracks.some(t => t.language === 'Hindi')) && (
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginTop: '4px' }}>
-                  <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>🔄 Switch Language:</span>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {audioTracks.map((track) => {
-                      const isActive = source === 'netmirror' && track.id.toString() === subjectid?.toString();
-                      return (
-                        <button
-                          key={track.id}
-                          onClick={() => {
-                            if (isActive) return;
-                            navigate(`/watch/${track.id}?source=netmirror&type=${mediaType}&subjectid=${track.id}&dp=${encodeURIComponent(track.dp || '')}&title=${encodeURIComponent(track.title)}&se=${activeSe}&ep=${activeEp}&lang_pref=user`);
-                          }}
-                          style={{
-                            background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #ff007f 100%)' : '#222',
-                            color: '#fff',
-                            border: isActive ? 'none' : '1px solid #444',
-                            padding: '4px 12px',
-                            borderRadius: '20px',
-                            fontSize: '12px',
-                            fontWeight: 'bold',
-                            cursor: isActive ? 'default' : 'pointer',
-                            boxShadow: isActive ? '0 0 10px rgba(0, 243, 255, 0.3)' : 'none'
-                          }}
-                        >
-                          {track.language}
-                        </button>
-                      );
-                    })}
-
-                    {/* Hindi Playback Button */}
-                    {!audioTracks.some(t => t.language === 'Hindi') && (
+              {/* Audio Switcher buttons */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginTop: '4px' }}>
+                <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>🔄 Switch Language:</span>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  {audioTracks.map((track) => {
+                    const isActive = source === 'netmirror' && track.id.toString() === subjectid?.toString();
+                    return (
                       <button
-                        onClick={async () => {
-                          const base = (movieTitle || '').replace(/\[.*?\]|\(.*?\)/g, '').trim();
-                          // Immediately show loading
-                          const btn = document.getElementById('btn-hindi-auto');
-                          if(btn) btn.innerText = 'Loading...';
-                          
-                          try {
-                            const res = await api.external.netmirror.search(base);
-                            const tracks = res?.results || [];
-                            const hindiTrack = tracks.find(r => r.title.toLowerCase().includes('hindi') || r.title.toLowerCase().includes('hin'));
-                            
-                            if (hindiTrack) {
-                              navigate(`/watch/${hindiTrack.id}?source=netmirror&type=${mediaType}&subjectid=${hindiTrack.id}&dp=${encodeURIComponent(hindiTrack.dp || '')}&title=${encodeURIComponent(hindiTrack.title)}&se=${activeSe}&ep=${activeEp}&lang_pref=user`);
-                            } else {
-                              if(btn) btn.innerText = 'Not Found';
-                              setTimeout(() => { if(btn) btn.innerText = 'Hindi'; }, 2000);
-                            }
-                          } catch(err) {
-                            if(btn) btn.innerText = 'Error';
-                            setTimeout(() => { if(btn) btn.innerText = 'Hindi'; }, 2000);
-                          }
+                        key={track.id}
+                        onClick={() => {
+                          if (isActive) return;
+                          navigate(`/watch/${track.id}?source=netmirror&type=${mediaType}&subjectid=${track.id}&dp=${encodeURIComponent(track.dp || '')}&title=${encodeURIComponent(track.title)}&se=${activeSe}&ep=${activeEp}&lang_pref=user`);
                         }}
-                        id="btn-hindi-auto"
                         style={{
-                          background: '#222',
+                          background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #ff007f 100%)' : '#222',
                           color: '#fff',
-                          border: '1px solid #444',
+                          border: isActive ? 'none' : '1px solid #444',
                           padding: '4px 12px',
                           borderRadius: '20px',
                           fontSize: '12px',
                           fontWeight: 'bold',
-                          cursor: 'pointer'
+                          cursor: isActive ? 'default' : 'pointer',
+                          boxShadow: isActive ? '0 0 10px rgba(0, 243, 255, 0.3)' : 'none'
                         }}
                       >
-                        Hindi
+                        {track.language}
                       </button>
-                    )}
-                  </div>
+                    );
+                  })}
+
+                  {/* Hindi Playback Button */}
+                  {!audioTracks.some(t => t.language === 'Hindi') && (
+                    <button
+                      onClick={async () => {
+                        const base = (movieTitle || '').replace(/\[.*?\]|\(.*?\)/g, '').trim();
+                        const btn = document.getElementById('btn-hindi-auto');
+                        if(btn) btn.innerText = 'Loading...';
+                        
+                        try {
+                          const res = await api.external.netmirror.search(base);
+                          const tracks = res?.results || [];
+                          const hindiTrack = tracks.find(r => r.title.toLowerCase().includes('hindi') || r.title.toLowerCase().includes('hin'));
+                          
+                          if (hindiTrack) {
+                            navigate(`/watch/${hindiTrack.id}?source=netmirror&type=${mediaType}&subjectid=${hindiTrack.id}&dp=${encodeURIComponent(hindiTrack.dp || '')}&title=${encodeURIComponent(hindiTrack.title)}&se=${activeSe}&ep=${activeEp}&lang_pref=user`);
+                          } else {
+                            if(btn) btn.innerText = 'Not Found';
+                            setTimeout(() => { if(btn) btn.innerText = 'Hindi'; }, 2000);
+                          }
+                        } catch(err) {
+                          if(btn) btn.innerText = 'Error';
+                          setTimeout(() => { if(btn) btn.innerText = 'Hindi'; }, 2000);
+                        }
+                      }}
+                      id="btn-hindi-auto"
+                      style={{
+                        background: '#222',
+                        color: '#fff',
+                        border: '1px solid #444',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Hindi
+                    </button>
+                  )}
+                  
+                  {/* English/Original Playback Button */}
+                  {!audioTracks.some(t => t.language === 'English' || t.language === 'Original') && (
+                    <button
+                      onClick={async () => {
+                        const base = (movieTitle || '').replace(/hindi|dubbed|\[.*?\]|\(.*?\)/gi, '').trim();
+                        const btn = document.getElementById('btn-eng-auto');
+                        if(btn) btn.innerText = 'Loading...';
+                        
+                        try {
+                          const res = await api.external.netmirror.search(base);
+                          const tracks = res?.results || [];
+                          // Find a track that is NOT explicitly labeled Hindi
+                          const engTrack = tracks.find(r => !r.title.toLowerCase().includes('hindi') && !r.title.toLowerCase().includes('hin-'));
+                          
+                          if (engTrack) {
+                            navigate(`/watch/${engTrack.id}?source=netmirror&type=${mediaType}&subjectid=${engTrack.id}&dp=${encodeURIComponent(engTrack.dp || '')}&title=${encodeURIComponent(engTrack.title)}&se=${activeSe}&ep=${activeEp}&lang_pref=user`);
+                          } else {
+                            if(btn) btn.innerText = 'Not Found';
+                            setTimeout(() => { if(btn) btn.innerText = 'Original / English'; }, 2000);
+                          }
+                        } catch(err) {
+                          if(btn) btn.innerText = 'Error';
+                          setTimeout(() => { if(btn) btn.innerText = 'Original / English'; }, 2000);
+                        }
+                      }}
+                      id="btn-eng-auto"
+                      style={{
+                        background: '#222',
+                        color: '#fff',
+                        border: '1px solid #444',
+                        padding: '4px 12px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      Original / English
+                    </button>
+                  )}
                 </div>
-              )}
+              </div>
             </div>
 
 
