@@ -170,9 +170,11 @@ export default function Navbar() {
               >
                 <span 
                   style={{ flex: 1 }}
-                  onClick={() => {
+                  onMouseDown={(e) => {
+                    e.preventDefault(); // Prevent input onBlur from firing immediately
                     setQuery(term);
                     addSearchHistory(term);
+                    setShowHistory(false);
                     navigate(`/?q=${encodeURIComponent(term)}`);
                   }}
                 >
@@ -180,7 +182,8 @@ export default function Navbar() {
                 </span>
                 <span 
                   style={{ fontSize: '12px', color: 'var(--text-dim)', padding: '0 4px' }}
-                  onClick={(e) => {
+                  onMouseDown={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     removeSearchHistory(term);
                   }}
