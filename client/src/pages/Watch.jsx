@@ -1050,13 +1050,19 @@ export default function Watch() {
                 ) : (
                   <ArtplayerComponent
                     option={{
-                      url: (window.location.hostname.includes('onrender.com') || activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl),
-                      type: activeNetmirrorUrl?.includes('.m3u8') ? 'm3u8' : 'auto',
-                      quality: netmirrorQualities && netmirrorQualities.length > 0 ? netmirrorQualities.map(q => ({
-                        html: q.quality,
-                        url: (window.location.hostname.includes('onrender.com') || q.url === netmirrorChromecastUrl) ? q.url : api.external.netmirror.getProxyUrl(q.url),
-                        default: q.url === activeNetmirrorUrl
-                      })) : [],
+                      url: (activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl),
+                      type: 'm3u8',
+                      quality: netmirrorQualities && netmirrorQualities.length > 0 ? netmirrorQualities.map(q => {
+                        let label = q.quality;
+                        if (label === '1080' || label === '1080p') label = '1080p (FHD)';
+                        else if (label === '720' || label === '720p') label = '720p (HD)';
+                        else if (label === '480' || label === '480p') label = '480p (SD)';
+                        return {
+                          html: label,
+                          url: (q.url === netmirrorChromecastUrl) ? q.url : api.external.netmirror.getProxyUrl(q.url),
+                          default: q.url === activeNetmirrorUrl
+                        };
+                      }) : [],
                       autoplay: true,
                       volume: 1,
                       isLive: false,

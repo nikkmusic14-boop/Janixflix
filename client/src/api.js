@@ -66,8 +66,7 @@ export const api = {
         return request(`/api/external/netmirror/video-sources${qs ? `?${qs}` : ''}`);
       },
       getProxyUrl: (url) => {
-        const ext = url.includes('.m3u8') ? '/stream.m3u8' : '/stream.mp4';
-        return `${API_URL}/api/external/netmirror/proxy-stream${ext}?url=${encodeURIComponent(url)}`;
+        return `${API_URL}/api/external/netmirror/proxy-stream/stream.m3u8?url=${encodeURIComponent(url)}`;
       }
     },
     hicine: {

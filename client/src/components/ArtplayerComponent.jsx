@@ -16,18 +16,19 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
         m3u8: function (video, url, artInstance) {
           if (Hls.isSupported()) {
             if (artInstance.hls) {
-              artInstance.hls.destroy();
-            }
-            const hls = new Hls();
-            hls.loadSource(url);
-            hls.attachMedia(video);
-            artInstance.hls = hls;
-            
-            if (!artInstance.hlsIsBound) {
-              artInstance.on('destroy', () => {
-                if (artInstance.hls) artInstance.hls.destroy();
-              });
-              artInstance.hlsIsBound = true;
+              artInstance.hls.loadSource(url);
+            } else {
+              const hls = new Hls();
+              hls.loadSource(url);
+              hls.attachMedia(video);
+              artInstance.hls = hls;
+              
+              if (!artInstance.hlsIsBound) {
+                artInstance.on('destroy', () => {
+                  if (artInstance.hls) artInstance.hls.destroy();
+                });
+                artInstance.hlsIsBound = true;
+              }
             }
           } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             video.src = url;
