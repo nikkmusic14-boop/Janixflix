@@ -7,10 +7,7 @@ const router = Router();
 // Netmirror Secret Key and Mirrors Configuration
 const NETMIRROR_SECRET = 'net###@@sss';
 const MIRRORS = [
-  'https://speed.watch22.shop/play/watchbox.php',
-  'https://play.watch22.shop/play/watchbox.php',
-  'https://play.watch21.shop/play/watchbox.php',
-  'https://playnew.watch21.shop/play/watchbox.php'
+  'https://netmirror.global/play/watchbox.php'
 ];
 
 // Helper to fetch with timeout
@@ -298,7 +295,7 @@ router.get(['/netmirror/proxy-stream', '/netmirror/proxy-stream/stream.m3u8', '/
 
 
     const headers = {
-      'Referer': 'https://speed.watch22.shop/',
+      'Referer': 'https://netmirror.global/',
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     };
 
