@@ -934,11 +934,6 @@ export default function Watch() {
                   allowFullScreen
                   style={{ width: '100%', height: '100%', border: 'none' }}
                 />
-                <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
-                  <a href={movie.videoFile} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px', background: 'rgba(0,0,0,0.6)' }}>
-                    ↗️ Open in Drive
-                  </a>
-                </div>
               </div>
             ) : source === 'local' ? (
               <video
@@ -1004,11 +999,6 @@ export default function Watch() {
                       allow="autoplay; fullscreen"
                       style={{ width: '100%', height: '100%', border: 'none' }}
                     />
-                    <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
-                      <a href={activeNetmirrorUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px', background: 'rgba(0,0,0,0.6)' }}>
-                        ↗️ Open in Drive
-                      </a>
-                    </div>
                   </div>
                 ) : (
                   <video
@@ -1081,11 +1071,6 @@ export default function Watch() {
                       allow="autoplay; fullscreen"
                       style={{ width: '100%', height: '100%', border: 'none' }}
                     />
-                    <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
-                      <a href={hicineVideoUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px', background: 'rgba(0,0,0,0.6)' }}>
-                        ↗️ Open in Drive
-                      </a>
-                    </div>
                   </div>
                 ) : (
                   <video
