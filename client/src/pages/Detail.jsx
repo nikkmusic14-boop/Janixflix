@@ -88,11 +88,11 @@ export default function Detail() {
             throw new Error('Details not found on Server 1.');
           }
         } 
-        else if (source === 'okjatt') {
+        else if (source === 'hicine') {
           const titleFromUrl = decodeURIComponent(href.split('/').pop().replace(/-download-\d+\.html$/, '').replace(/-complete\.html$/, '').replace(/-/g, ' '))
-            .replace(/okjatt\.bond\.com/gi, 'JaNixFlix')
-            .replace(/okjatt\.bond/gi, 'JaNixFlix')
-            .replace(/okjatt/gi, 'JaNixFlix')
+            .replace(/hicine\.bond\.com/gi, 'JaNixFlix')
+            .replace(/hicine\.bond/gi, 'JaNixFlix')
+            .replace(/hicine/gi, 'JaNixFlix')
             .replace(/ok-jatt/gi, 'JaNixFlix');
           const parsed = {
             id,
@@ -102,13 +102,13 @@ export default function Detail() {
             year: '',
             genre: 'Premium Stream',
             rating: '',
-            source: 'okjatt',
+            source: 'hicine',
             mediaType
           };
           setMovie(parsed);
 
           setServerFetching(true);
-          const resolved = await api.external.okjatt.getMediaSource(href);
+          const resolved = await api.external.hicine.getMediaSource(href);
           if (cancelled) return;
           setServer2Data(resolved);
           setServerFetching(false);
@@ -154,7 +154,7 @@ export default function Detail() {
 
     const performSearch = async (query) => {
       if (source === 'netmirror') {
-        return await api.external.okjatt.search(query) || [];
+        return await api.external.hicine.search(query) || [];
       } else {
         const res = await api.external.netmirror.search(query);
         return res?.results || [];
@@ -176,7 +176,7 @@ export default function Detail() {
         const match = results.find(item => matchTitle(item.title, movie.title, movieYear));
         if (match) {
           setOppositeLink(match);
-          if (source === 'okjatt') {
+          if (source === 'hicine') {
             const oType = match.media_type || 'movie';
             api.external.netmirror.getDetails(oType, match.id)
               .then(data => {
@@ -346,7 +346,7 @@ export default function Detail() {
     else if (targetServer === 'server2' && !server2Data && oppositeLink) {
       setServerFetching(true);
       try {
-        const resolved = await api.external.okjatt.getMediaSource(oppositeLink.path || oppositeLink.href);
+        const resolved = await api.external.hicine.getMediaSource(oppositeLink.path || oppositeLink.href);
         setServer2Data(resolved);
       } catch (err) {
         console.error(err);
@@ -356,11 +356,11 @@ export default function Detail() {
     }
   };
 
-  // Load OKJatt TV season page
-  const handleLoadOkjattSeason = async (seasonPath) => {
+  // Load Hicine TV season page
+  const handleLoadHicineSeason = async (seasonPath) => {
     setServerFetching(true);
     try {
-      const resolved = await api.external.okjatt.getMediaSource(seasonPath);
+      const resolved = await api.external.hicine.getMediaSource(seasonPath);
       setServer2Data(resolved);
     } catch (err) {
       console.error(err);
@@ -503,9 +503,9 @@ export default function Detail() {
               )}
 
               {/* Play Server 2 Button */}
-              {source === 'okjatt' ? (
+              {source === 'hicine' ? (
                 <Link 
-                  to={`/watch/${id}?source=okjatt&href=${encodeURIComponent(href)}&title=${encodeURIComponent(movie.title)}`} 
+                  to={`/watch/${id}?source=hicine&href=${encodeURIComponent(href)}&title=${encodeURIComponent(movie.title)}`} 
                   className="btn btn-primary"
                   style={{ background: '#00a000' }}
                 >
@@ -513,7 +513,7 @@ export default function Detail() {
                 </Link>
               ) : oppositeLink ? (
                 <Link 
-                  to={`/watch/${id}?source=okjatt&href=${encodeURIComponent(oppositeLink.path || oppositeLink.href)}&title=${encodeURIComponent(movie.title)}`} 
+                  to={`/watch/${id}?source=hicine&href=${encodeURIComponent(oppositeLink.path || oppositeLink.href)}&title=${encodeURIComponent(movie.title)}`} 
                   className="btn btn-primary"
                   style={{ background: '#00a000' }}
                 >
@@ -593,7 +593,7 @@ export default function Detail() {
                   </div>
                 )}
 
-                {/* Server 2 (OKJatt) seasons/episodes grid */}
+                {/* Server 2 (Hicine) seasons/episodes grid */}
                 {activeServerTab === 'server2' && server2Data && (
                   <div>
                     {server2Data.type === 'tv_series' && server2Data.seasons && (
@@ -603,7 +603,7 @@ export default function Detail() {
                           {server2Data.seasons.map((s, idx) => (
                             <button
                               key={idx}
-                              onClick={() => handleLoadOkjattSeason(s.path)}
+                              onClick={() => handleLoadHicineSeason(s.path)}
                               className="btn btn-secondary"
                               style={{ padding: '12px', justifyContent: 'flex-start' }}
                             >
@@ -621,7 +621,7 @@ export default function Detail() {
                           <button 
                             onClick={async () => {
                               setServerFetching(true);
-                              const resolved = await api.external.okjatt.getMediaSource(href || (oppositeLink ? oppositeLink.path : ''));
+                              const resolved = await api.external.hicine.getMediaSource(href || (oppositeLink ? oppositeLink.path : ''));
                               setServer2Data(resolved);
                               setServerFetching(false);
                             }} 
@@ -636,7 +636,7 @@ export default function Detail() {
                           {server2Data.episodes.map((ep, idx) => (
                             <Link
                               key={idx}
-                              to={`/watch/${id}?source=okjatt&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(ep.title)}`}
+                              to={`/watch/${id}?source=hicine&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(ep.title)}`}
                               className="btn btn-secondary"
                               style={{ padding: '10px 14px', justifyContent: 'flex-start', fontSize: '13px' }}
                             >

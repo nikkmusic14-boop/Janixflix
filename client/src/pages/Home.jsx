@@ -39,7 +39,7 @@ export default function Home() {
   // Search result states
   const [searchLoading, setSearchLoading] = useState(false);
   const [netmirrorResults, setNetmirrorResults] = useState([]);
-  const [okjattResults, setOkjattResults] = useState([]);
+  const [hicineResults, setHicineResults] = useState([]);
 
   // Reset page and active server when category changes in URL
   useEffect(() => {
@@ -75,10 +75,10 @@ export default function Home() {
       
       Promise.all([
         api.external.netmirror.search(q).then(res => res.results || []).catch(() => []),
-        api.external.okjatt.search(q).catch(() => [])
-      ]).then(([netmirror, okjatt]) => {
+        api.external.hicine.search(q).catch(() => [])
+      ]).then(([netmirror, hicine]) => {
         setNetmirrorResults(deDuplicateMovies(netmirror).map(m => ({ ...m, source: 'netmirror' })));
-        setOkjattResults(deDuplicateMovies(okjatt));
+        setHicineResults(deDuplicateMovies(hicine));
         setSearchLoading(false);
       }).catch(err => {
         setError(err.message);
@@ -215,7 +215,7 @@ export default function Home() {
               else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') categoryKey = 'indianwebseries';
               else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') categoryKey = 'hollywoodtvshows';
 
-              const data = await api.external.okjatt.list(categoryKey, apiPagePointer);
+              const data = await api.external.hicine.list(categoryKey, apiPagePointer);
               if (cancelled) return;
               newItems = data.results || [];
             }
@@ -272,9 +272,9 @@ export default function Home() {
           {/* Server 2 results */}
           <div style={{ marginBottom: 40 }}>
             <h3 style={{ borderLeft: '4px solid #00a000', paddingLeft: 10, marginBottom: 16 }}>Premium Streams (Server 2)</h3>
-            {okjattResults.length ? (
+            {hicineResults.length ? (
               <div className="row-grid">
-                {okjattResults.map((m) => <MovieCard key={m.id} movie={m} />)}
+                {hicineResults.map((m) => <MovieCard key={m.id} movie={m} />)}
               </div>
             ) : (
               <p style={{ color: 'var(--text-dim)', paddingLeft: 14 }}>No matches in premium streams.</p>
@@ -537,7 +537,7 @@ export default function Home() {
                         const m = movies[0];
                         const path = m.source === 'netmirror'
                           ? `/watch/${m.id}?source=netmirror&type=${m.media_type || 'movie'}&subjectid=${m.id}&dp=${encodeURIComponent(m.dp || '')}&title=${encodeURIComponent(m.title)}`
-                          : `/watch/${m.id}?source=okjatt&href=${encodeURIComponent(m.href || m.path)}&title=${encodeURIComponent(m.title)}`;
+                          : `/watch/${m.id}?source=hicine&href=${encodeURIComponent(m.href || m.path)}&title=${encodeURIComponent(m.title)}`;
                         navigate(path);
                       }}
                       style={{

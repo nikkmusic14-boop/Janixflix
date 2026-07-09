@@ -108,7 +108,7 @@ router.get('/netmirror/filter', async (req, res) => {
       }
       
       try {
-        response = await fetchWithTimeout(baseUrl.toString());
+        response = await fetchWithTimeout(baseUrl.toString(), { timeout: 15000 });
         if (response.ok) {
           const data = await response.json();
           return res.json(data);
@@ -138,7 +138,7 @@ router.get('/netmirror/search', async (req, res) => {
 
   for (const url of urls) {
     try {
-      const response = await fetchWithTimeout(url);
+      const response = await fetchWithTimeout(url, { timeout: 15000 });
       if (response.ok) {
         const data = await response.json();
         return res.json(data);
@@ -171,7 +171,7 @@ router.get('/netmirror/details/:mediaType/:id', async (req, res) => {
     let response;
     for (const url of urls) {
       try {
-        response = await fetchWithTimeout(url);
+        response = await fetchWithTimeout(url, { timeout: 15000 });
         if (response.ok) {
           const data = await response.json();
           return res.json(data);
@@ -338,80 +338,93 @@ router.get('/netmirror/proxy-stream', async (req, res) => {
 });
 
 // ────────────────────────────────────────────────────────────
-// 2. OKJATT PROXIES & SCRAPERS
+// 2. HICINE PROXIES & SCRAPERS
 // ────────────────────────────────────────────────────────────
 
-const OKJATT_BASE = 'https://okjatt.bond';
+const HICINE_BASE = 'https://api.hicine.info/api';
 
-const CATEGORY_URLS = {
-  bollywood: `${OKJATT_BASE}/movies/Hindi/New-{page}.html`,
-  southindian: `${OKJATT_BASE}/movies/south-indian-dubbed/New-{page}.html`,
-  punjabi: `${OKJATT_BASE}/movies/Punjabi/New-{page}.html`,
-  hollywood: `${OKJATT_BASE}/movies/Hollywood-Dubbed/New-{page}.html`,
-  webseries: `${OKJATT_BASE}/tv/Hindi-web-series/list-{page}.html`,
-  indianwebseries: `${OKJATT_BASE}/tv/Hindi-web-series/list-{page}.html`,
-  indiantvshows: `${OKJATT_BASE}/tv/Hindi-web-series/list-{page}.html`,
-  tvshows: `${OKJATT_BASE}/tv/Hollywood-dubbed-web-series/list-{page}.html`,
-  hollywoodtvshows: `${OKJATT_BASE}/tv/Hollywood-dubbed-web-series/list-{page}.html`,
-  bgrade: `${OKJATT_BASE}/movies/B-Grade-Hindi-Movie/New-{page}.html`
+const HICINE_CATEGORY_URLS = {
+  bollywood: `${HICINE_BASE}/movies`, // API doesn't have bollywood directly, fallback to movies
+  southindian: `${HICINE_BASE}/movies`,
+  punjabi: `${HICINE_BASE}/movies`,
+  hollywood: `${HICINE_BASE}/movies`,
+  webseries: `${HICINE_BASE}/webseries`,
+  indianwebseries: `${HICINE_BASE}/webseries`,
+  indiantvshows: `${HICINE_BASE}/webseries`,
+  tvshows: `${HICINE_BASE}/webseries`,
+  hollywoodtvshows: `${HICINE_BASE}/webseries`,
+  bgrade: `${HICINE_BASE}/movies`
 };
 
 // Category Listing Scraper
-router.get('/okjatt/category/:cat', async (req, res) => {
+router.get('/hicine/category/:cat', async (req, res) => {
   const { cat } = req.params;
-  const page = req.query.page !== undefined ? Number(req.query.page) : null;
   
-  const template = CATEGORY_URLS[cat];
-  if (!template) {
-    return res.status(404).json({ error: `Category "${cat}" not found` });
-  }
-
-  // Web series page indexing is 1-based, movies are 0-based
-  const defaultPage = (cat === 'webseries' || cat === 'tvshows' || cat === 'indianwebseries' || cat === 'indiantvshows' || cat === 'hollywoodtvshows') ? 1 : 0;
-  const actualPage = page !== null ? page : defaultPage;
-  const url = template.replace('{page}', actualPage);
+  let url = HICINE_CATEGORY_URLS[cat] || `${HICINE_BASE}/recent`;
 
   try {
-    const response = await fetchWithTimeout(url);
+    const response = await fetchWithTimeout(url, { timeout: 15000 });
     if (!response.ok) {
-      throw new Error(`OKJatt fetch failed with status ${response.status}`);
+      throw new Error(`Hicine fetch failed with status ${response.status}`);
     }
-    const html = await response.text();
-    const items = parseOKJattList(html);
+    const json = await response.json();
+    const dataList = json.data || json;
+    
+    const items = dataList.map(item => ({
+      id: item.url_slug || item._id,
+      href: item.links || `/api/${item.url_slug || item._id}`,
+      title: item.title,
+      quality: 'HD',
+      thumbnail: item.featured_image || item.poster,
+      source: 'hicine',
+      raw: item
+    }));
+
     res.json({
-      page: actualPage,
+      page: 1,
       category: cat,
       results: items
     });
   } catch (err) {
-    console.error('[OKJatt Category Error]:', err.message);
+    console.error('[Hicine Category Error]:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
 // Search Scraper
-router.get('/okjatt/search', async (req, res) => {
+router.get('/hicine/search', async (req, res) => {
   const { q } = req.query;
   if (!q) return res.status(400).json({ error: 'Search query is required' });
 
   try {
-    const url = `${OKJATT_BASE}/movies/src_data.php?q=${encodeURIComponent(q)}`;
-    const response = await fetchWithTimeout(url);
+    const url = `${HICINE_BASE}/search/${encodeURIComponent(q)}`;
+    const response = await fetchWithTimeout(url, { timeout: 15000 });
     if (!response.ok) {
-      throw new Error(`OKJatt search failed with status ${response.status}`);
+      throw new Error(`Hicine search failed with status ${response.status}`);
     }
-    const html = await response.text();
-    const items = parseOKJattSearch(html);
+    const json = await response.json();
+    const dataList = json.data || json;
+    
+    const items = dataList.map(item => ({
+      id: item.url_slug || item._id,
+      href: item.links || `/api/${item.url_slug || item._id}`,
+      title: item.title,
+      quality: 'HD',
+      thumbnail: item.featured_image || item.poster,
+      source: 'hicine',
+      raw: item
+    }));
+    
     res.json(items);
   } catch (err) {
-    console.error('[OKJatt Search Error]:', err.message);
+    console.error('[Hicine Search Error]:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Direct Media Link Scraper for OKJatt movies/episodes
-router.get('/okjatt/movie-source', async (req, res) => {
-  const { path: mediaPath } = req.query;
+// Direct Media Link Scraper for Hicine movies/episodes
+router.get('/hicine/movie-source', async (req, res) => {
+  let { path: mediaPath } = req.query;
 
   if (mediaPath && mediaPath.toLowerCase().includes('satluj')) {
     const localUrl = `${req.protocol}://${req.get('host')}/api/stream/satluj`;
@@ -421,131 +434,132 @@ router.get('/okjatt/movie-source', async (req, res) => {
   if (!mediaPath) return res.status(400).json({ error: 'Param "path" is required' });
 
   try {
-    let url = mediaPath.startsWith('http') ? mediaPath : `${OKJATT_BASE}${mediaPath}`;
-    
-    // Step 1: Check if the link goes to a TV series "all seasons" page or a direct episode/movie page.
-    // If it's a TV series main page, let's scrape it to find season list links
-    const response1 = await fetchWithTimeout(url);
-    const html1 = await response1.text();
+    let linksStr = mediaPath;
 
-    // Is it an episode or movie download page already?
-    if (html1.includes('supports HTML5 video') || html1.includes('<source')) {
-      const source = extractVideoSource(html1);
+    // If the path is a slug like /api/movie-slug, we need to fetch the item details
+    if (mediaPath.startsWith('/api/')) {
+      const slug = mediaPath.replace('/api/', '');
+      // Some titles might not match perfectly if we just replace hyphens, but it's our best bet.
+      const query = slug.replace(/-download-\d+\.html$/, '').replace(/-complete\.html$/, '').replace(/-/g, ' ');
       
-      const episodes = [];
-      const episodeLinks = [];
-      const epRegex = /href="([^"]*\/tv\/[^"]*-download-\d+\.html)"/g;
-      let epMatch;
-      while ((epMatch = epRegex.exec(html1)) !== null) {
-        episodeLinks.push(epMatch[1]);
-      }
-      const epRegex2 = /href='([^'\/]*\/tv\/[^']*-download-\d+\.html)'/g;
-      while ((epMatch = epRegex2.exec(html1)) !== null) {
-        episodeLinks.push(epMatch[1]);
-      }
-
-      const uniqueLinks = [...new Set(episodeLinks)];
-      if (uniqueLinks.length > 0) {
-        uniqueLinks.forEach(link => {
-          const parts = link.split('/');
-          const filename = parts[parts.length - 1];
-          const titleClean = filename
-            .replace(/-download-\d+\.html$/, '')
-            .replace(/-/g, ' ');
-          let id = '';
-          const idMatch = filename.match(/-download-(\d+)\.html$/);
-          if (idMatch) id = idMatch[1];
-          episodes.push({ title: sanitizeTitle(titleClean), path: link, id });
-        });
-      }
-
-      if (source) return res.json({ videoUrl: source, episodes: episodes.length > 0 ? episodes : undefined });
-    }
-
-    // Is it a movie detail page?
-    // E.g. search for /movies/download/...
-    const downloadPageMatch = html1.match(/href="([^"]*\/download\/[^"]+)"/) || html1.match(/href='([^']*\/download\/[^']+)'/);
-    if (downloadPageMatch) {
-      const downloadPageUrl = downloadPageMatch[1].startsWith('http') 
-        ? downloadPageMatch[1] 
-        : `${OKJATT_BASE}${downloadPageMatch[1]}`;
-      
-      const response2 = await fetchWithTimeout(downloadPageUrl);
-      const html2 = await response2.text();
-      const source = extractVideoSource(html2);
-      if (source) return res.json({ videoUrl: source });
-    }
-
-    // Is it a TV Show Series page?
-    // It might list episodes like /tv/Do-You-Wanna-Partner-...-download-15382.html
-    const episodeLinks = [];
-    const episodeRegex = /href="([^"]*\/tv\/[^"]*-download-\d+\.html)"/g;
-    let match;
-    while ((match = episodeRegex.exec(html1)) !== null) {
-      episodeLinks.push(match[1]);
-    }
-    const episodeRegex2 = /href='([^'\/]*\/tv\/[^']*-download-\d+\.html)'/g;
-    while ((match = episodeRegex2.exec(html1)) !== null) {
-      episodeLinks.push(match[1]);
-    }
-
-    if (episodeLinks.length > 0) {
-      // Return season structure so the frontend can choose which episode to play
-      const episodes = episodeLinks.map(link => {
-        const parts = link.split('/');
-        const filename = parts[parts.length - 1];
-        // Parse Title / Episode Number from URL e.g. Do-You-Wanna-Partner-2025-S1Ep1-Episode-1-Hindi-Bootstrap-download-15382.html
-        const titleClean = filename
-          .replace(/-download-\d+\.html$/, '')
-          .replace(/-/g, ' ');
+      const searchRes = await fetchWithTimeout(`${HICINE_BASE}/search/${encodeURIComponent(query)}`, { timeout: 15000 });
+      if (searchRes.ok) {
+        const json = await searchRes.json();
+        const dataList = json.data || json;
+        const item = dataList.find(i => i.url_slug === slug || i._id === slug) || dataList[0];
         
-        let id = '';
-        const idMatch = filename.match(/-download-(\d+)\.html$/);
-        if (idMatch) id = idMatch[1];
-
-        return { title: sanitizeTitle(titleClean), path: link, id };
-      });
-
-      return res.json({ type: 'tv_season', episodes });
+        if (item) {
+          // Check if it's a TV Series
+          if (item.season_1) {
+            const seasons = [];
+            for (let i = 1; i <= 20; i++) {
+              if (item[`season_${i}`]) {
+                seasons.push({ title: `Season ${i}`, path: item[`season_${i}`] });
+              }
+            }
+            if (item.season_zip) {
+              seasons.push({ title: 'Complete Zip', path: item.season_zip });
+            }
+            return res.json({ type: 'tv_series', seasons });
+          } else if (item.links) {
+            linksStr = item.links;
+          }
+        }
+      }
     }
 
-    // Is it a main Webseries Page listing Season complete links?
-    // E.g. /tv/Hindi-web-series/Do-You-Wanna-Partner-2025-Season-1-Hindi-L366-complete.html
-    const seasonLinks = [];
-    const seasonRegex = /href="([^"]*\/tv\/[^"]*-complete\.html)"/g;
-    while ((match = seasonRegex.exec(html1)) !== null) {
-      seasonLinks.push(match[1]);
-    }
-    const seasonRegex2 = /href='([^'\/]*\/tv\/[^']*-complete\.html)'/g;
-    while ((match = seasonRegex2.exec(html1)) !== null) {
-      seasonLinks.push(match[1]);
-    }
-
-    if (seasonLinks.length > 0) {
-      const seasons = seasonLinks.map(link => {
-        const parts = link.split('/');
-        const filename = parts[parts.length - 1];
-        const titleClean = filename
-          .replace(/-complete\.html$/, '')
-          .replace(/-/g, ' ');
-        return { title: sanitizeTitle(titleClean), path: link };
-      });
-      return res.json({ type: 'tv_series', seasons });
+    // Check if it's a TV Season containing episodes
+    if (linksStr.includes('Episode ')) {
+      const episodes = [];
+      const lines = linksStr.split(/\r?\n|\\n/);
+      
+      for (const line of lines) {
+        if (line.toLowerCase().includes('episode')) {
+          // Format: "Episode 1 : url1,,480p : url2,,720p : url3,,1080p"
+          const parts = line.split(' : ');
+          if (parts.length >= 2) {
+            const epTitle = parts[0].trim();
+            const remaining = line.substring(epTitle.length + 3);
+            const formattedLinks = remaining.split(' : ').map(part => part.replace(',,', ', ')).join('\\n');
+            episodes.push({ title: epTitle, path: formattedLinks });
+          }
+        }
+      }
+      if (episodes.length > 0) {
+        return res.json({ type: 'tv_season', episodes });
+      }
     }
 
-    // Fallback: check if we can find any direct checkyourlinks/cdn links on this page
-    const directUrl = extractVideoSource(html1);
-    if (directUrl) return res.json({ videoUrl: directUrl });
+    // Parse the links string for a direct video
+    // Format: "https://worker.../?vcloud=..., Link2, Link3..., 480p\nhttps://worker..., 720p"
+    const lines = linksStr.split(/\r?\n|\\n/);
+    let bestUrl = null;
+    
+    for (const line of lines) {
+       const parts = line.split(',');
+       if (parts.length > 0) {
+          const urlCandidate = parts[0].trim();
+          if (urlCandidate.startsWith('http')) {
+             bestUrl = urlCandidate;
+             if (line.includes('720p') || line.includes('1080p')) {
+                bestUrl = urlCandidate;
+                break;
+             }
+          }
+       }
+    }
+    
+    if (bestUrl) {
+      // Convert the Hicine worker URL into a direct raw video URL to bypass ads and html player
+      if (bestUrl.includes('?vcloud=')) {
+        try {
+          const urlObj = new URL(bestUrl);
+          const vcloudParam = urlObj.searchParams.get('vcloud');
+          const origin = urlObj.origin;
+          
+          const linksRes = await fetch(`${origin}/api/links?vcloud=${encodeURIComponent(vcloudParam)}`);
+          if (linksRes.ok) {
+            const data = await linksRes.json();
+            if (data && data.tokens) {
+              const servers = ['fsl', 'fsl2', 'server1', 'pixel', 'gofile']; // Preference order
+              let selectedServer = null;
+              for (const s of servers) {
+                if (data.tokens[s]) {
+                  selectedServer = s;
+                  break;
+                }
+              }
+              if (!selectedServer && Object.keys(data.tokens).length > 0) {
+                selectedServer = Object.keys(data.tokens)[0];
+              }
+              
+              if (selectedServer) {
+                const { ts, sig } = data.tokens[selectedServer];
+                const goUrl = `${origin}/go?type=${selectedServer}&vcloud=${encodeURIComponent(vcloudParam)}&ts=${ts}&sig=${sig}`;
+                
+                const goRes = await fetch(goUrl, { redirect: 'manual' });
+                if (goRes.status >= 300 && goRes.status < 400 && goRes.headers.get('location')) {
+                  bestUrl = goRes.headers.get('location');
+                }
+              }
+            }
+          }
+        } catch (e) {
+           console.error('[Hicine Raw Link Extract Error]:', e.message);
+        }
+      }
+      return res.json({ videoUrl: bestUrl });
+    }
 
-    res.status(404).json({ error: 'Could not resolve a playable video source or episodes from this OKJatt page.' });
+    res.status(404).json({ error: 'Could not resolve a playable video source from Hicine.' });
   } catch (err) {
-    console.error('[OKJatt Resolve Error]:', err.message);
+    console.error('[Hicine Resolve Error]:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Proxy endpoint to stream OKJatt videos (bypasses HTTP-only connection refused and mixed content blocks)
-router.get('/okjatt/proxy-stream', async (req, res) => {
+// Proxy endpoint to stream Hicine videos (bypasses HTTP-only connection refused and CORS blocks)
+router.get('/hicine/proxy-stream', async (req, res) => {
   let { url } = req.query;
   if (!url) return res.status(400).json({ error: 'Param "url" is required' });
 
@@ -555,14 +569,10 @@ router.get('/okjatt/proxy-stream', async (req, res) => {
   });
 
   try {
-    // Replace expired/dead linktosho.store domain with active checkyourlinks.shop domain
-    if (url.includes('linktosho.store')) {
-      url = url.replace('linktosho.store', 'checkyourlinks.shop');
-    }
-
     const headers = {
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-      'Referer': 'https://okjatt.bond/'
+      'Referer': 'https://www.hicine.info/',
+      'Origin': 'https://www.hicine.info'
     };
 
     if (req.headers.range) {
@@ -581,7 +591,7 @@ router.get('/okjatt/proxy-stream', async (req, res) => {
     if (response.body) {
       const stream = Readable.fromWeb(response.body);
       stream.on('error', (err) => {
-        console.error('[OKJatt Proxy Stream pipe error]:', err.message);
+        console.error('[Hicine Proxy Stream pipe error]:', err.message);
       });
       stream.pipe(res);
     } else {
@@ -589,147 +599,12 @@ router.get('/okjatt/proxy-stream', async (req, res) => {
     }
   } catch (err) {
     if (err.name === 'AbortError') {
-      console.log('[OKJatt Proxy Stream]: Upstream request aborted because client disconnected.');
+      console.log('[Hicine Proxy Stream]: Upstream request aborted because client disconnected.');
       return;
     }
-    console.error('[OKJatt Proxy Stream Error]:', err.message);
+    console.error('[Hicine Proxy Stream Error]:', err.message);
     res.status(500).json({ error: err.message });
   }
 });
-
-// ────────────────────────────────────────────────────────────
-// PARSING & SCRAPING HELPERS
-// ────────────────────────────────────────────────────────────
-
-function sanitizeTitle(title) {
-  if (!title) return '';
-  let cleaned = title
-    // Replace "OkJatt [number].html" or "JaNixFlix [number].html" with "JaNixFlix"
-    .replace(/\s*(okjatt\.bond\.com|okjatt\.bond|okjatt|ok-jatt|JaNixFlix)\s+\d+\.html$/gi, ' JaNixFlix')
-    // Standard replacements if any raw names remain
-    .replace(/okjatt\.bond\.com/gi, 'JaNixFlix')
-    .replace(/okjatt\.bond/gi, 'JaNixFlix')
-    .replace(/okjatt/gi, 'JaNixFlix')
-    .replace(/ok-jatt/gi, 'JaNixFlix')
-    // Remove raw IDs or .html at the end
-    .replace(/\s+--\s*\d+\.html$/gi, '')
-    .replace(/\s+-\s*\d+\.html$/gi, '')
-    .replace(/\s+\d+\.html$/gi, '')
-    .replace(/\.html$/gi, '');
-  return cleaned.trim();
-}
-
-function parseOKJattList(html) {
-  const items = [];
-  const blocks = html.split('class="ml-item"');
-  
-  for (let i = 1; i < blocks.length; i++) {
-    const block = blocks[i];
-    
-    // Extract href
-    const hrefMatch = block.match(/href="([^"]+)"/) || block.match(/href='([^']+)'/);
-    if (!hrefMatch) continue;
-    const href = hrefMatch[1];
-    
-    // Extract title
-    const titleMatch = block.match(/title="([^"]+)"/) || block.match(/oldtitle="([^"]+)"/);
-    const title = titleMatch ? titleMatch[1] : '';
-    
-    // Extract quality
-    const qualMatch = block.match(/class="mli-quality">([^<]+)</);
-    const quality = qualMatch ? qualMatch[1].trim() : '';
-    
-    // Extract image thumbnail
-    const imgMatch = block.match(/data-original="([^"]+)"/) || block.match(/src="([^"]+)"/);
-    let thumbnail = imgMatch ? imgMatch[1] : '';
-    if (thumbnail && thumbnail.startsWith('/')) {
-      thumbnail = `${OKJATT_BASE}${thumbnail}`;
-    }
-    
-    // Extract display title
-    const dTitleMatch = block.match(/<h2><b>([^<]+)<\/b><\/h2>/) || block.match(/<h2>([^<]+)<\/h2>/);
-    const displayTitle = dTitleMatch ? dTitleMatch[1].trim() : title;
-    
-    // Extract numeric ID
-    let id = '';
-    const idMatch = href.match(/--(\d+)\.html$/) || href.match(/-download-(\d+)\.html$/);
-    if (idMatch) {
-      id = idMatch[1];
-    } else {
-      id = href; // fallback to complete URL path
-    }
-
-    items.push({
-      id,
-      href,
-      title: sanitizeTitle(displayTitle || title),
-      quality,
-      thumbnail,
-      source: 'okjatt'
-    });
-  }
-  return items;
-}
-
-function parseOKJattSearch(html) {
-  const items = [];
-  const liBlocks = html.split('</li>');
-  
-  for (const block of liBlocks) {
-    const hrefMatch = block.match(/href='([^']+)'/) || block.match(/href="([^"]+)"/);
-    if (!hrefMatch) continue;
-    const href = hrefMatch[1];
-    
-    const imgMatch = block.match(/src='([^']+)'/) || block.match(/src="([^"]+)"/);
-    let thumbnail = imgMatch ? imgMatch[1] : '';
-    if (thumbnail && thumbnail.startsWith('/')) {
-      thumbnail = `${OKJATT_BASE}${thumbnail}`;
-    }
-    
-    // Get text inside <a> tag without <img>
-    const cleanBlock = block.replace(/<img[^>]*>/, '');
-    const titleMatch = cleanBlock.match(/>([^<]+)<\/a>/);
-    const title = titleMatch ? titleMatch[1].trim() : '';
-    
-    let id = '';
-    const idMatch = href.match(/--(\d+)\.html$/) || href.match(/-download-(\d+)\.html$/);
-    if (idMatch) {
-      id = idMatch[1];
-    } else {
-      id = href;
-    }
-    
-    items.push({
-      id,
-      href,
-      title: sanitizeTitle(title),
-      thumbnail,
-      source: 'okjatt'
-    });
-  }
-  return items;
-}
-
-function extractVideoSource(html) {
-  const OKJATT_BASE = 'https://okjatt.bond';
-
-  // Try video tag source
-  const sourceMatch = html.match(/<source[^>]*src="([^"]+)"/) || 
-                      html.match(/<source[^>]*src='([^']+)'/);
-  if (sourceMatch) return sourceMatch[1];
-
-  // Try direct checkyourlinks link or linktosho link
-  const linkMatch = html.match(/href="([^"]*checkyourlinks\.shop\?id=[^"]+)"/) ||
-                    html.match(/href='([^'*checkyourlinks\.shop\?id=[^']+)'/) ||
-                    html.match(/href="([^"]*linktosho\.store\/[^"]+)"/) ||
-                    html.match(/href='([^'\/]*linktosho\.store\/[^']+)'/);
-  if (linkMatch) return linkMatch[1];
-  
-  // Try direct CDN checkyourlinks MP4 file link
-  const fileMatch = html.match(/href="([^"]*checkyourlinks\.shop\/[^"]+\.mp4[^"]*)"/);
-  if (fileMatch) return fileMatch[1];
-
-  return null;
-}
 
 export default router;

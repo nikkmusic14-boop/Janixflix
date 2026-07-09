@@ -7,7 +7,7 @@ export default function MovieCard({ movie }) {
     if (movie.source === 'netmirror') {
       return movie.backdrop_path || movie.thumbnail || movie.poster_path || movie.image || '';
     }
-    if (movie.source === 'okjatt') {
+    if (movie.source === 'hicine') {
       return movie.thumbnail || movie.poster_path || movie.backdrop_path || movie.image || '';
     }
     return movie.poster_path || movie.backdrop_path || movie.thumbnail || api.thumbnailUrl(movie.id);
@@ -26,13 +26,13 @@ export default function MovieCard({ movie }) {
     return <span className="badge" style={{ background: bg }}>{label}</span>;
   };
 
-  // For Netmirror/OKJatt, we also need to know the media type (movie vs tv) on detail page
+  // For Netmirror/Hicine, we also need to know the media type (movie vs tv) on detail page
   const mediaTypeParam = movie.media_type ? `&type=${movie.media_type}` : '';
-  const okjattHrefParam = movie.href ? `&href=${encodeURIComponent(movie.href)}` : '';
+  const hicineHrefParam = movie.href ? `&href=${encodeURIComponent(movie.href)}` : '';
   const thumbParam = movie.thumbnail ? `&thumb=${encodeURIComponent(movie.thumbnail)}` : '';
 
   return (
-    <Link className="card" to={`/movie/${movie.id}?source=${movie.source || 'local'}${mediaTypeParam}${okjattHrefParam}${thumbParam}`}>
+    <Link className="card" to={`/movie/${movie.id}?source=${movie.source || 'local'}${mediaTypeParam}${hicineHrefParam}${thumbParam}`}>
       <div className="poster">
         <img
           src={getThumbUrl()}

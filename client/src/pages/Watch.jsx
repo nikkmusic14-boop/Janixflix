@@ -33,9 +33,9 @@ export default function Watch() {
   const subjectid = params.get('subjectid') || '';
   const dp = params.get('dp') || '';
   const title = (params.get('title') || '')
-    .replace(/okjatt\.bond\.com/gi, 'JaNixFlix')
-    .replace(/okjatt\.bond/gi, 'JaNixFlix')
-    .replace(/okjatt/gi, 'JaNixFlix')
+    .replace(/hicine\.bond\.com/gi, 'JaNixFlix')
+    .replace(/hicine\.bond/gi, 'JaNixFlix')
+    .replace(/hicine/gi, 'JaNixFlix')
     .replace(/ok-jatt/gi, 'JaNixFlix');
   const href = params.get('href') || '';
   const activeSe = Number(params.get('se') || 0);
@@ -57,10 +57,10 @@ export default function Watch() {
   const [seasons, setSeasons] = useState([]); // TV seasons list for sidebar
   const [activeSeasonTab, setActiveSeasonTab] = useState(1);
 
-  // Server 2 (OKJatt) states
-  const [okjattVideoUrl, setOkjattVideoUrl] = useState('');
-  const [okjattLoading, setOkjattLoading] = useState(false);
-  const [okjattEpisodes, setOkjattEpisodes] = useState([]); // TV episodes list for sidebar
+  // Server 2 (Hicine) states
+  const [hicineVideoUrl, setHicineVideoUrl] = useState('');
+  const [hicineLoading, setHicineLoading] = useState(false);
+  const [hicineEpisodes, setHicineEpisodes] = useState([]); // TV episodes list for sidebar
 
   // Universal Quality Selection
   const [selectedQuality, setSelectedQuality] = useState('1080p');
@@ -97,19 +97,19 @@ export default function Watch() {
           navigate(`/watch/${id}?source=netmirror&type=tv&se=${activeSe + 1}&ep=1&subjectid=${subjectid}&dp=${encodeURIComponent(dp)}&title=${encodeURIComponent(movie?.title || title)}`, { replace: true });
         }
       }
-    } else if (source === 'okjatt') {
-      const currentIndex = okjattEpisodes.findIndex(ep => ep.path === href);
+    } else if (source === 'hicine') {
+      const currentIndex = hicineEpisodes.findIndex(ep => ep.path === href);
       if (currentIndex !== -1) {
-        // Okjatt episodes could be sorted either way. Let's try currentIndex - 1 and currentIndex + 1.
+        // Hicine episodes could be sorted either way. Let's try currentIndex - 1 and currentIndex + 1.
         // Usually, later episodes are at the bottom (currentIndex + 1), but sometimes top (currentIndex - 1).
         // We will default to currentIndex + 1 for next.
-        if (currentIndex < okjattEpisodes.length - 1) {
-          const next = okjattEpisodes[currentIndex + 1];
-          navigate(`/watch/${id}?source=okjatt&href=${encodeURIComponent(next.path)}&title=${encodeURIComponent(next.title)}`, { replace: true });
+        if (currentIndex < hicineEpisodes.length - 1) {
+          const next = hicineEpisodes[currentIndex + 1];
+          navigate(`/watch/${id}?source=hicine&href=${encodeURIComponent(next.path)}&title=${encodeURIComponent(next.title)}`, { replace: true });
         }
       }
     }
-  }, [source, mediaType, seasons, activeSe, activeEp, okjattEpisodes, href, id, subjectid, dp, movie, title, navigate]);
+  }, [source, mediaType, seasons, activeSe, activeEp, hicineEpisodes, href, id, subjectid, dp, movie, title, navigate]);
 
   const handlePrevEp = useCallback(() => {
     if (source === 'netmirror' && mediaType === 'tv') {
@@ -122,25 +122,25 @@ export default function Watch() {
           navigate(`/watch/${id}?source=netmirror&type=tv&se=${activeSe - 1}&ep=${prevTotalEp}&subjectid=${subjectid}&dp=${encodeURIComponent(dp)}&title=${encodeURIComponent(movie?.title || title)}`, { replace: true });
         }
       }
-    } else if (source === 'okjatt') {
-      const currentIndex = okjattEpisodes.findIndex(ep => ep.path === href);
+    } else if (source === 'hicine') {
+      const currentIndex = hicineEpisodes.findIndex(ep => ep.path === href);
       if (currentIndex !== -1 && currentIndex > 0) {
-        const prev = okjattEpisodes[currentIndex - 1];
-        navigate(`/watch/${id}?source=okjatt&href=${encodeURIComponent(prev.path)}&title=${encodeURIComponent(prev.title)}`, { replace: true });
+        const prev = hicineEpisodes[currentIndex - 1];
+        navigate(`/watch/${id}?source=hicine&href=${encodeURIComponent(prev.path)}&title=${encodeURIComponent(prev.title)}`, { replace: true });
       }
     }
-  }, [source, mediaType, seasons, activeSe, activeEp, okjattEpisodes, href, id, subjectid, dp, movie, title, navigate]);
+  }, [source, mediaType, seasons, activeSe, activeEp, hicineEpisodes, href, id, subjectid, dp, movie, title, navigate]);
 
   const triggerServer2Fallback = useCallback(async () => {
     try {
       const baseTitle = getCleanBase(movie?.title || title);
       if (baseTitle) {
-        let results = await api.external.okjatt.search(baseTitle);
+        let results = await api.external.hicine.search(baseTitle);
         if (results && results.length === 0) {
           const words = baseTitle.split(' ');
           if (words.length > 2) {
             const shortQuery = words.slice(0, 2).join(' ');
-            results = await api.external.okjatt.search(shortQuery);
+            results = await api.external.hicine.search(shortQuery);
           }
         }
         
@@ -148,7 +148,7 @@ export default function Watch() {
         const match = results && results.find(item => matchTitle(item.title, movie?.title || title, movieYear));
         if (match) {
           console.log('[Fallback Found Server 2 Match]:', match.title);
-          const data = await api.external.okjatt.getMediaSource(match.path || match.href);
+          const data = await api.external.hicine.getMediaSource(match.path || match.href);
           if (data && data.videoUrl) {
             let targetHref = match.path || match.href;
             if (mediaType === 'tv' && data.episodes && data.episodes.length > 0) {
@@ -161,7 +161,7 @@ export default function Watch() {
               }
             }
             
-            navigate(`/watch/${id}?source=okjatt&href=${encodeURIComponent(targetHref)}&title=${encodeURIComponent(match.title)}`, { replace: true });
+            navigate(`/watch/${id}?source=hicine&href=${encodeURIComponent(targetHref)}&title=${encodeURIComponent(match.title)}`, { replace: true });
             return true;
           }
         }
@@ -445,7 +445,7 @@ export default function Watch() {
       sourceNodeRef.current = null;
       setBoostActive(false);
     }
-  }, [activeNetmirrorUrl, okjattVideoUrl]);
+  }, [activeNetmirrorUrl, hicineVideoUrl]);
 
   // Clean up AudioContext on unmount
   useEffect(() => {
@@ -456,9 +456,9 @@ export default function Watch() {
     };
   }, []);
 
-  // Adjust screen fit when source changes (Default to 'fill' for Server 2 / okjatt to make it full screen)
+  // Adjust screen fit when source changes (Default to 'fill' for Server 2 / hicine to make it full screen)
   useEffect(() => {
-    if (source === 'okjatt') {
+    if (source === 'hicine') {
       setVideoFit('fill');
     } else {
       setVideoFit('contain');
@@ -509,8 +509,8 @@ export default function Watch() {
             }
           }
         } 
-        else if (source === 'okjatt') {
-          // OKJatt simple metadata
+        else if (source === 'hicine') {
+          // Hicine simple metadata
           setMovie({ title: title || 'Premium Stream' });
         } 
         else {
@@ -611,19 +611,19 @@ export default function Watch() {
     }
   }, [subjectid, activeSe, activeEp, dp, movie, title, mirrorIndex, source]);
 
-  // 3. Resolve OKJatt streaming source link & episodes list
+  // 3. Resolve Hicine streaming source link & episodes list
   useEffect(() => {
-    if (source === 'okjatt' && href) {
-      setOkjattLoading(true);
-      setOkjattVideoUrl('');
-      setOkjattEpisodes([]);
+    if (source === 'hicine' && href) {
+      setHicineLoading(true);
+      setHicineVideoUrl('');
+      setHicineEpisodes([]);
       setError('');
-      api.external.okjatt.getMediaSource(href)
+      api.external.hicine.getMediaSource(href)
         .then(data => {
           if (data && data.videoUrl) {
-            setOkjattVideoUrl(data.videoUrl);
+            setHicineVideoUrl(data.videoUrl);
             if (data.episodes) {
-              setOkjattEpisodes(data.episodes);
+              setHicineEpisodes(data.episodes);
             }
           } else {
             throw new Error('Failed to resolve direct streaming media link.');
@@ -634,7 +634,7 @@ export default function Watch() {
           setError(err.message);
         })
         .finally(() => {
-          setOkjattLoading(false);
+          setHicineLoading(false);
         });
     }
   }, [href, source]);
@@ -667,8 +667,8 @@ export default function Watch() {
     const mYearMatch = movieYearVal.toString().match(/\b(19|20)\d{2}\b/)?.[0] || null;
 
     if (source === 'netmirror') {
-      // Search OKJatt (Server 2) for this title
-      api.external.okjatt.search(searchTitle)
+      // Search Hicine (Server 2) for this title
+      api.external.hicine.search(searchTitle)
         .then(res => {
           if (res && res.length > 0) {
             const match = res.find(item => matchTitle(item.title, movieTitle, mYearMatch));
@@ -680,7 +680,7 @@ export default function Watch() {
         .catch(err => console.log("Opposite search failed:", err))
         .finally(() => setOppositeSearching(false));
     } 
-    else if (source === 'okjatt') {
+    else if (source === 'hicine') {
       // Search Netmirror (Server 1) for this title
       api.external.netmirror.search(searchTitle)
         .then(res => {
@@ -706,7 +706,7 @@ export default function Watch() {
         const res = await api.external.netmirror.search(query);
         return res?.results || [];
       } else {
-        return await api.external.okjatt.search(query) || [];
+        return await api.external.hicine.search(query) || [];
       }
     };
 
@@ -795,7 +795,7 @@ export default function Watch() {
   // Handle switching to Server 2 (HD)
   const handleSwitchToServer2 = () => {
     if (!oppositeLink) return;
-    navigate(`/watch/${id}?source=okjatt&href=${encodeURIComponent(oppositeLink.path || oppositeLink.href)}&title=${encodeURIComponent(oppositeLink.title || movieTitle)}`);
+    navigate(`/watch/${id}?source=hicine&href=${encodeURIComponent(oppositeLink.path || oppositeLink.href)}&title=${encodeURIComponent(oppositeLink.title || movieTitle)}`);
   };
 
   // Navigate between Netmirror episodes inside player screen
@@ -844,7 +844,7 @@ export default function Watch() {
   const currentLang = getCurrentAudioLanguage();
 
   if (loading) return <div className="loading" style={{ paddingTop: '100px' }}>Loading streaming content…</div>;
-  if (error && !okjattLoading) {
+  if (error && !hicineLoading) {
     return (
       <div className="empty-state" style={{ paddingTop: '120px', maxWidth: '600px', margin: '0 auto', padding: '0 24px' }}>
         <h2 style={{ color: 'var(--red)', textShadow: '0 0 10px rgba(255,0,85,0.2)' }}>Playback Error</h2>
@@ -899,7 +899,7 @@ export default function Watch() {
     );
   }
 
-  const hasSidebar = (source === 'netmirror' && mediaType === 'tv' && seasons.length > 0) || (source === 'okjatt' && okjattEpisodes.length > 0);
+  const hasSidebar = (source === 'netmirror' && mediaType === 'tv' && seasons.length > 0) || (source === 'hicine' && hicineEpisodes.length > 0);
 
   return (
     <div className="player-wrap" style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingTop: '90px' }}>
@@ -911,16 +911,16 @@ export default function Watch() {
           ← Back to Catalog
         </button>
         
-        {/* Source info tags - completely hidden Netmirror/OKJatt brand names */}
+        {/* Source info tags - completely hidden Netmirror/Hicine brand names */}
         <span style={{ 
-          background: source === 'netmirror' ? '#0070f3' : source === 'okjatt' ? '#00a000' : 'var(--red)',
+          background: source === 'netmirror' ? '#0070f3' : source === 'hicine' ? '#00a000' : 'var(--red)',
           fontSize: '11px',
           fontWeight: 'bold',
           textTransform: 'uppercase',
           padding: '4px 10px',
           borderRadius: '4px'
         }}>
-          {source === 'netmirror' ? 'Server 1 (FHD)' : source === 'okjatt' ? 'Server 2 (HD)' : 'Local library'}
+          {source === 'netmirror' ? 'Server 1 (FHD)' : source === 'hicine' ? 'Server 2 (HD)' : 'Local library'}
         </span>
       </div>
 
@@ -1032,8 +1032,8 @@ export default function Watch() {
               )
             )}
 
-            {source === 'okjatt' && (
-              okjattLoading ? (
+            {source === 'hicine' && (
+              hicineLoading ? (
                 <div className="loading" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000' }}>
                   <div style={{ 
                     display: 'flex', 
@@ -1050,14 +1050,14 @@ export default function Watch() {
                     <span style={{ color: '#ff0055', textShadow: '0 0 15px rgba(255, 0, 85, 0.6), 0 0 30px rgba(255, 0, 85, 0.2)' }}>FLIX</span>
                   </div>
                 </div>
-              ) : okjattVideoUrl ? (
+              ) : hicineVideoUrl ? (
                 <video
                   ref={videoRef}
                   controls
                   autoPlay
                   playsInline
                   preload="auto"
-                  src={api.okjattProxyUrl(okjattVideoUrl)}
+                  src={api.hicineProxyUrl(hicineVideoUrl)}
                   style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
                   onPlay={(e) => {
                     handleAutoVolumeBoost();
@@ -1220,8 +1220,8 @@ export default function Watch() {
               <span style={{ fontSize: '14px', color: 'var(--text-dim)', fontWeight: 'bold' }}>📡 Switch Play Server:</span>
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
-                  onClick={source === 'okjatt' ? handleSwitchToServer1 : undefined}
-                  disabled={source === 'netmirror' || (source === 'okjatt' && !oppositeLink && !oppositeSearching) || oppositeSearching}
+                  onClick={source === 'hicine' ? handleSwitchToServer1 : undefined}
+                  disabled={source === 'netmirror' || (source === 'hicine' && !oppositeLink && !oppositeSearching) || oppositeSearching}
                   style={{
                     background: source === 'netmirror' ? '#0070f3' : '#333',
                     color: '#fff',
@@ -1230,25 +1230,25 @@ export default function Watch() {
                     borderRadius: '4px',
                     fontSize: '13px',
                     fontWeight: 'bold',
-                    cursor: source === 'netmirror' ? 'default' : (source === 'okjatt' && !oppositeLink) ? 'not-allowed' : 'pointer',
-                    opacity: source === 'netmirror' ? 1 : (source === 'okjatt' && !oppositeLink) ? 0.4 : 1
+                    cursor: source === 'netmirror' ? 'default' : (source === 'hicine' && !oppositeLink) ? 'not-allowed' : 'pointer',
+                    opacity: source === 'netmirror' ? 1 : (source === 'hicine' && !oppositeLink) ? 0.4 : 1
                   }}
                 >
-                  Stream Server 1 (FHD) {oppositeSearching ? ' (Searching...)' : (source === 'okjatt' && !oppositeLink) ? ' (Unavailable)' : ''}
+                  Stream Server 1 (FHD) {oppositeSearching ? ' (Searching...)' : (source === 'hicine' && !oppositeLink) ? ' (Unavailable)' : ''}
                 </button>
                 <button
                   onClick={source === 'netmirror' ? handleSwitchToServer2 : undefined}
-                  disabled={source === 'okjatt' || (source === 'netmirror' && !oppositeLink && !oppositeSearching) || oppositeSearching}
+                  disabled={source === 'hicine' || (source === 'netmirror' && !oppositeLink && !oppositeSearching) || oppositeSearching}
                   style={{
-                    background: source === 'okjatt' ? '#00a000' : '#333',
+                    background: source === 'hicine' ? '#00a000' : '#333',
                     color: '#fff',
                     border: 'none',
                     padding: '8px 16px',
                     borderRadius: '4px',
                     fontSize: '13px',
                     fontWeight: 'bold',
-                    cursor: source === 'okjatt' ? 'default' : (source === 'netmirror' && !oppositeLink) ? 'not-allowed' : 'pointer',
-                    opacity: source === 'okjatt' ? 1 : (source === 'netmirror' && !oppositeLink) ? 0.4 : 1
+                    cursor: source === 'hicine' ? 'default' : (source === 'netmirror' && !oppositeLink) ? 'not-allowed' : 'pointer',
+                    opacity: source === 'hicine' ? 1 : (source === 'netmirror' && !oppositeLink) ? 0.4 : 1
                   }}
                 >
                   Stream Server 2 (HD) {oppositeSearching ? ' (Searching...)' : (source === 'netmirror' && !oppositeLink) ? ' (Unavailable)' : ''}
@@ -1257,7 +1257,7 @@ export default function Watch() {
             </div>
 
             {/* Universal Quality Selector */}
-            {(!netmirrorLoading && !okjattLoading) && (
+            {(!netmirrorLoading && !hicineLoading) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '12px', marginTop: '4px' }}>
                 <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>🎬 Video Quality:</span>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -1289,7 +1289,7 @@ export default function Watch() {
             )}
 
             {/* Screen Mode / Auto Play Selector */}
-            {(!netmirrorLoading && !okjattLoading) && (
+            {(!netmirrorLoading && !hicineLoading) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '12px', marginTop: '4px' }}>
                 <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>📺 Screen Mode:</span>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -1368,7 +1368,7 @@ export default function Watch() {
                             if (source === 'netmirror') {
                               navigate(`/watch/${track.id}?source=netmirror&type=${mediaType}&subjectid=${track.id}&dp=${encodeURIComponent(track.dp || '')}&title=${encodeURIComponent(track.title)}&se=${activeSe}&ep=${activeEp}&lang_pref=user`);
                             } else {
-                              navigate(`/watch/${track.id}?source=okjatt&href=${encodeURIComponent(track.href)}&title=${encodeURIComponent(track.title)}`);
+                              navigate(`/watch/${track.id}?source=hicine&href=${encodeURIComponent(track.href)}&title=${encodeURIComponent(track.title)}`);
                             }
                           }}
                           style={{
@@ -1476,16 +1476,16 @@ export default function Watch() {
               </>
             )}
 
-            {/* Server 2 (OKJatt) Scraped Episode List */}
-            {source === 'okjatt' && okjattEpisodes.length > 0 && (
+            {/* Server 2 (Hicine) Scraped Episode List */}
+            {source === 'hicine' && hicineEpisodes.length > 0 && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                {okjattEpisodes.map((ep, idx) => {
+                {hicineEpisodes.map((ep, idx) => {
                   const isActive = href === ep.path;
                   return (
                     <button
                       key={idx}
                       onClick={() => {
-                        navigate(`/watch/${id}?source=okjatt&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(ep.title)}`);
+                        navigate(`/watch/${id}?source=hicine&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(ep.title)}`);
                       }}
                       style={{
                         background: isActive ? 'rgba(0,160,0,0.15)' : 'rgba(255,255,255,0.02)',

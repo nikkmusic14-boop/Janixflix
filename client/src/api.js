@@ -41,9 +41,9 @@ export const api = {
   // Media URLs
   streamUrl: (id) => `${API_URL}/api/stream/${id}`,
   thumbnailUrl: (id) => `${API_URL}/api/stream/thumbnail/${id}`,
-  okjattProxyUrl: (url) => `${API_URL}/api/external/okjatt/proxy-stream?url=${encodeURIComponent(url)}`,
+  hicineProxyUrl: (url) => `${API_URL}/api/external/hicine/proxy-stream?url=${encodeURIComponent(url)}`,
 
-  // External APIs (Netmirror & OKJatt proxy/scrapers)
+  // External APIs (Netmirror & Hicine proxy/scrapers)
   external: {
     netmirror: {
       list: (params = {}) => {
@@ -62,13 +62,13 @@ export const api = {
       },
       getProxyUrl: (url) => `${API_URL}/api/external/netmirror/proxy-stream?url=${encodeURIComponent(url)}`
     },
-    okjatt: {
+    hicine: {
       list: (category, page) => {
         const qs = page !== undefined ? `?page=${page}` : '';
-        return request(`/api/external/okjatt/category/${category}${qs}`);
+        return request(`/api/external/hicine/category/${category}${qs}`);
       },
-      search: (q) => request(`/api/external/okjatt/search?q=${encodeURIComponent(q)}`),
-      getMediaSource: (path) => request(`/api/external/okjatt/movie-source?path=${encodeURIComponent(path)}`)
+      search: (q) => request(`/api/external/hicine/search?q=${encodeURIComponent(q)}`),
+      getMediaSource: (path) => request(`/api/external/hicine/movie-source?path=${encodeURIComponent(path)}`)
     }
   }
 };
