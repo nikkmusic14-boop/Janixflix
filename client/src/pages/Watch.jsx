@@ -543,16 +543,6 @@ export default function Watch() {
       setActiveNetmirrorUrl('');
       setError('');
 
-      if (String(subjectid) === '122059') {
-        const driveLink = "https://drive.google.com/file/d/1fopIoNNpdvC_J49Y8cXquDT7f1-S4lEt/view?usp=drive_link";
-        setActiveNetmirrorUrl(driveLink);
-        setNetmirrorChromecastUrl(driveLink);
-        setNetmirrorQualities([{ quality: '1080p', url: driveLink }]);
-        setSelectedQuality('1080p');
-        setNetmirrorLoading(false);
-        return;
-      }
-
       api.external.netmirror.getVideoSources({
         id: subjectid,
         se: activeSe,
@@ -940,7 +930,14 @@ export default function Watch() {
         {/* The video screen container */}
         <div style={{ flex: '1 1 700px' }}>
           <div className="player" style={{ position: 'relative', overflow: 'hidden', width: '100%', aspectRatio: '16/9', background: '#000' }}>
-            {source === 'local' && (
+            {source === 'local' && movie?.videoFile?.includes('drive.google.com') ? (
+              <iframe
+                title="Google Drive Video Player"
+                src={movie.videoFile.replace('/view', '/preview').replace('?usp=drive_link', '')}
+                allowFullScreen
+                style={{ width: '100%', height: '100%', border: 'none' }}
+              />
+            ) : source === 'local' ? (
               <video
                 ref={videoRef}
                 controls
@@ -948,7 +945,7 @@ export default function Watch() {
                 playsInline
                 preload="auto"
                 poster={api.thumbnailUrl(id)}
-                src={api.streamUrl(id)}
+                src={movie?.videoFile?.startsWith('http') ? movie.videoFile : api.streamUrl(id)}
                 style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
                 onPlay={(e) => {
                   handleAutoVolumeBoost();
@@ -972,7 +969,7 @@ export default function Watch() {
               >
                 Your browser does not support HTML5 video player.
               </video>
-            )}
+            ) : null}
 
             {source === 'netmirror' && (
               netmirrorLoading ? (
