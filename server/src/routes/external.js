@@ -285,7 +285,7 @@ router.get('/netmirror/video-sources', async (req, res) => {
 });
 
 // Proxy endpoint to stream external videos with referrer and range support
-router.get(['/netmirror/proxy-stream', '/netmirror/proxy-stream/stream.m3u8', '/netmirror/proxy-stream/stream.mp4'], async (req, res) => {
+router.get(['/netmirror/proxy-stream', '/netmirror/proxy-stream/stream.m3u8', '/netmirror/proxy-stream/stream.mp4', '/netmirror/proxy-stream/stream.ts'], async (req, res) => {
   let { url } = req.query;
   if (!url) return res.status(400).json({ error: 'Param "url" is required' });
 
@@ -313,19 +313,45 @@ router.get(['/netmirror/proxy-stream', '/netmirror/proxy-stream/stream.m3u8', '/
     res.status(response.status);
 
     response.headers.forEach((val, key) => {
-      if (['content-type', 'content-length', 'content-range', 'accept-ranges'].includes(key)) {
+      // Do not copy content-length for M3U8 as we might rewrite it
+      if (['content-type', 'content-range', 'accept-ranges'].includes(key)) {
+        res.setHeader(key, val);
+      } else if (key === 'content-length' && !url.includes('.m3u8') && !url.includes('.mp4')) {
         res.setHeader(key, val);
       }
     });
 
-    if (response.body) {
-      const stream = Readable.fromWeb(response.body);
-      stream.on('error', (err) => {
-        console.error('[Netmirror Proxy Stream pipe error]:', err.message);
-      });
-      stream.pipe(res);
+    // If it's an m3u8 playlist, rewrite the paths to proxy the .ts files
+    if ((url.includes('.m3u8') || url.includes('.mp4')) && !url.includes('.ts')) {
+       const bodyText = await response.text();
+       if (bodyText.startsWith('#EXTM3U')) {
+           const baseUrl = new URL('.', url).href;
+           const rewritten = bodyText.split('\n').map(line => {
+               if (line.trim() && !line.startsWith('#')) {
+                   // Ensure it's absolute
+                   let tsUrl = line.startsWith('http') ? line : baseUrl + line;
+                   // Return proxy URL for this TS segment
+                   return `/api/external/netmirror/proxy-stream/stream.ts?url=${encodeURIComponent(tsUrl)}`;
+               }
+               return line;
+           }).join('\n');
+           res.setHeader('Content-Type', 'application/vnd.apple.mpegurl');
+           res.setHeader('Content-Length', Buffer.byteLength(rewritten));
+           return res.send(rewritten);
+       } else {
+           // Not a valid m3u8, send as is
+           return res.send(bodyText);
+       }
     } else {
-      res.end();
+      if (response.body) {
+        const stream = Readable.fromWeb(response.body);
+        stream.on('error', (err) => {
+          console.error('[Netmirror Proxy Stream pipe error]:', err.message);
+        });
+        stream.pipe(res);
+      } else {
+        res.end();
+      }
     }
   } catch (err) {
     if (err.name === 'AbortError') {
@@ -336,6 +362,7 @@ router.get(['/netmirror/proxy-stream', '/netmirror/proxy-stream/stream.m3u8', '/
     res.status(500).json({ error: err.message });
   }
 });
+
 
 // ────────────────────────────────────────────────────────────
 // 2. HICINE PROXIES & SCRAPERS
