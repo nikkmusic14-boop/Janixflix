@@ -925,9 +925,9 @@ export default function Watch() {
       }}>
         {/* The video screen container */}
         <div style={{ flex: '1 1 700px', maxWidth: '100%', minWidth: 0 }}>
-          <div className="player" style={{ position: 'relative', overflow: 'hidden', width: '100%', aspectRatio: '16/9', background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div className="player" style={{ position: 'relative', overflow: 'hidden', width: '100%', aspectRatio: '16/9', background: '#000' }}>
             {source === 'local' && movie?.videoFile?.includes('drive.google.com') ? (
-              <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
                 <iframe
                   title="Google Drive Video Player"
                   src={movie.videoFile.replace('/view', '/preview').replace('?usp=drive_link', '')}
@@ -949,7 +949,7 @@ export default function Watch() {
                 preload="auto"
                 poster={api.thumbnailUrl(id)}
                 src={movie?.videoFile?.startsWith('http') ? movie.videoFile : api.streamUrl(id)}
-                style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
+                style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
                 onPlay={(e) => {
                   handleAutoVolumeBoost();
                   setVideoBuffering(false);
@@ -976,7 +976,7 @@ export default function Watch() {
 
             {source === 'netmirror' && (
               netmirrorLoading ? (
-                <div className="loading" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000' }}>
+                <div className="loading" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000' }}>
                   <div style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
@@ -994,7 +994,7 @@ export default function Watch() {
                 </div>
               ) : activeNetmirrorUrl ? (
                 activeNetmirrorUrl.includes('drive.google.com') ? (
-                  <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
                     <iframe
                       title="Google Drive Video Player"
                       src={activeNetmirrorUrl.replace('/view', '/preview').replace('?usp=drive_link', '')}
@@ -1018,7 +1018,7 @@ export default function Watch() {
                     playsInline
                     preload="auto"
                     src={(window.location.hostname.includes('onrender.com') || activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl)}
-                    style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
                     onError={handleVideoError}
                     onPlay={(e) => {
                       handleAutoVolumeBoost();
@@ -1044,7 +1044,7 @@ export default function Watch() {
                   </video>
                 )
               ) : (
-                <div className="empty-state" style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <div className="empty-state" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                   <h3>Video stream failed to load</h3>
                   <p>Please try switching sever next to watch movie</p>
                 </div>
@@ -1053,7 +1053,7 @@ export default function Watch() {
 
             {source === 'hicine' && (
               hicineLoading ? (
-                <div className="loading" style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000' }}>
+                <div className="loading" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#000' }}>
                   <div style={{ 
                     display: 'flex', 
                     alignItems: 'center', 
@@ -1071,7 +1071,7 @@ export default function Watch() {
                 </div>
               ) : hicineVideoUrl ? (
                 hicineVideoUrl.includes('drive.google.com') ? (
-                  <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                  <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
                     <iframe
                       title="Google Drive Video Player"
                       src={hicineVideoUrl.replace('/view', '/preview').replace('?usp=drive_link', '')}
@@ -1095,7 +1095,7 @@ export default function Watch() {
                     playsInline
                     preload="auto"
                     src={api.hicineProxyUrl(hicineVideoUrl)}
-                    style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
+                    style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
                     onPlay={(e) => {
                       handleAutoVolumeBoost();
                       setVideoBuffering(false);
@@ -1120,7 +1120,7 @@ export default function Watch() {
                   </video>
                 )
               ) : (
-                <div className="empty-state" style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <div className="empty-state" style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
                   <h3>Video stream failed to load</h3>
                   <p>Please try switching sever next to watch movie</p>
                 </div>
