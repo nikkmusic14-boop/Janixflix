@@ -1258,24 +1258,24 @@ export default function Watch() {
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
                   onClick={source === 'hicine' ? handleSwitchToServer1 : undefined}
-                  disabled={source === 'netmirror' || (source === 'hicine' && !oppositeLink && !oppositeSearching) || oppositeSearching}
+                  disabled={source === 'netmirror' || source === 'local' || (source === 'hicine' && !oppositeLink && !oppositeSearching) || oppositeSearching}
                   style={{
-                    background: source === 'netmirror' ? '#0070f3' : '#333',
+                    background: (source === 'netmirror' || source === 'local') ? '#0070f3' : '#333',
                     color: '#fff',
                     border: 'none',
                     padding: '8px 16px',
                     borderRadius: '4px',
                     fontSize: '13px',
                     fontWeight: 'bold',
-                    cursor: source === 'netmirror' ? 'default' : (source === 'hicine' && !oppositeLink) ? 'not-allowed' : 'pointer',
-                    opacity: source === 'netmirror' ? 1 : (source === 'hicine' && !oppositeLink) ? 0.4 : 1
+                    cursor: (source === 'netmirror' || source === 'local') ? 'default' : (source === 'hicine' && !oppositeLink) ? 'not-allowed' : 'pointer',
+                    opacity: (source === 'netmirror' || source === 'local') ? 1 : (source === 'hicine' && !oppositeLink) ? 0.4 : 1
                   }}
                 >
                   Stream Server 1 (FHD) {oppositeSearching ? ' (Searching...)' : (source === 'hicine' && !oppositeLink) ? ' (Unavailable)' : ''}
                 </button>
                 <button
-                  onClick={source === 'netmirror' ? handleSwitchToServer2 : undefined}
-                  disabled={source === 'hicine' || (source === 'netmirror' && !oppositeLink && !oppositeSearching) || oppositeSearching}
+                  onClick={(source === 'netmirror' || source === 'local') ? handleSwitchToServer2 : undefined}
+                  disabled={source === 'hicine' || ((source === 'netmirror' || source === 'local') && !oppositeLink && !oppositeSearching) || oppositeSearching}
                   style={{
                     background: source === 'hicine' ? '#00a000' : '#333',
                     color: '#fff',
@@ -1284,11 +1284,11 @@ export default function Watch() {
                     borderRadius: '4px',
                     fontSize: '13px',
                     fontWeight: 'bold',
-                    cursor: source === 'hicine' ? 'default' : (source === 'netmirror' && !oppositeLink) ? 'not-allowed' : 'pointer',
-                    opacity: source === 'hicine' ? 1 : (source === 'netmirror' && !oppositeLink) ? 0.4 : 1
+                    cursor: source === 'hicine' ? 'default' : ((source === 'netmirror' || source === 'local') && !oppositeLink) ? 'not-allowed' : 'pointer',
+                    opacity: source === 'hicine' ? 1 : ((source === 'netmirror' || source === 'local') && !oppositeLink) ? 0.4 : 1
                   }}
                 >
-                  Stream Server 2 (HD) {oppositeSearching ? ' (Searching...)' : (source === 'netmirror' && !oppositeLink) ? ' (Unavailable)' : ''}
+                  Stream Server 2 (HD) {oppositeSearching ? ' (Searching...)' : ((source === 'netmirror' || source === 'local') && !oppositeLink) ? ' (Unavailable)' : ''}
                 </button>
               </div>
             </div>

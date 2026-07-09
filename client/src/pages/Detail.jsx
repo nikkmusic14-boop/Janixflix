@@ -546,7 +546,15 @@ export default function Detail() {
           {!isTv && (
             <div className="hero-buttons" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               {/* Play Server 1 Button */}
-              {source === 'netmirror' ? (
+              {source === 'local' ? (
+                <Link 
+                  to={`/watch/${movie.id}?source=local`} 
+                  className="btn btn-primary"
+                  style={{ background: '#0070f3' }}
+                >
+                  ⚡ Play Stream Server 1 (FHD)
+                </Link>
+              ) : source === 'netmirror' ? (
                 <Link 
                   to={`/watch/${movie.id}?source=netmirror&type=movie&subjectid=${movie.id}&dp=${encodeURIComponent(movie.dp || '')}&title=${encodeURIComponent(movie.title)}&tab=${params.get('tab') || ''}`} 
                   className="btn btn-primary"
@@ -590,12 +598,6 @@ export default function Detail() {
                 <button className="btn btn-primary" style={{ background: '#00a000', opacity: 0.5, cursor: 'default' }} disabled>
                   🔥 Server 2 (Searching...)
                 </button>
-              )}
-
-              {source === 'local' && (
-                <Link to={`/watch/${movie.id}`} className="btn btn-primary">
-                  ▶ Play Uploaded File
-                </Link>
               )}
             </div>
           )}
