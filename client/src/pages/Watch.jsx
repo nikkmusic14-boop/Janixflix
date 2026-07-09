@@ -990,7 +990,10 @@ export default function Watch() {
                   <iframe
                     title="Google Drive Video Player"
                     src={activeNetmirrorUrl.replace('/view', '/preview').replace('?usp=drive_link', '')}
-                    allowFullScreen
+                    allowFullScreen={true}
+                    webkitallowfullscreen="true"
+                    mozallowfullscreen="true"
+                    allow="autoplay; fullscreen"
                     style={{ width: '100%', height: '100%', border: 'none' }}
                   />
                 ) : (
@@ -1057,7 +1060,10 @@ export default function Watch() {
                   <iframe
                     title="Google Drive Video Player"
                     src={hicineVideoUrl.replace('/view', '/preview').replace('?usp=drive_link', '')}
-                    allowFullScreen
+                    allowFullScreen={true}
+                    webkitallowfullscreen="true"
+                    mozallowfullscreen="true"
+                    allow="autoplay; fullscreen"
                     style={{ width: '100%', height: '100%', border: 'none' }}
                   />
                 ) : (
