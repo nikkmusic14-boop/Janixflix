@@ -138,7 +138,7 @@ router.get('/netmirror/search', async (req, res) => {
 
   for (const url of urls) {
     try {
-      const response = await fetchWithTimeout(url, { timeout: 15000 });
+      const response = await fetchWithTimeout(url, { timeout: 5000 });
       if (response.ok) {
         const data = await response.json();
         return res.json(data);

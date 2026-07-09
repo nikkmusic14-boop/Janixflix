@@ -1409,13 +1409,13 @@ export default function Watch() {
                     {!audioTracks.some(t => t.language === 'Hindi') && (
                       <button
                         onClick={async () => {
-                          const base = (movieTitle || '').replace(/\[.*\]/g, '').trim();
+                          const base = (movieTitle || '').replace(/\[.*?\]|\(.*?\)/g, '').trim();
                           // Immediately show loading
                           const btn = document.getElementById('btn-hindi-auto');
                           if(btn) btn.innerText = 'Loading...';
                           
                           try {
-                            const res = await api.external.netmirror.search(base + ' Hindi');
+                            const res = await api.external.netmirror.search(base);
                             const tracks = res?.results || [];
                             const hindiTrack = tracks.find(r => r.title.toLowerCase().includes('hindi') || r.title.toLowerCase().includes('hin'));
                             
