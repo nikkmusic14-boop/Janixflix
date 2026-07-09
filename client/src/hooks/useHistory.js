@@ -17,7 +17,12 @@ export function useHistory() {
 
       const storedViews = JSON.parse(localStorage.getItem(VIEW_HISTORY_KEY));
       if (Array.isArray(storedViews)) {
-        setViewHistory(storedViews);
+        // Filter out broken hicine history items that don't have an href
+        const validViews = storedViews.filter(m => !(m.source === 'hicine' && !m.href));
+        setViewHistory(validViews);
+        if (validViews.length !== storedViews.length) {
+          localStorage.setItem(VIEW_HISTORY_KEY, JSON.stringify(validViews));
+        }
       }
     } catch (e) {
       console.warn("Failed to load history from local storage", e);
@@ -65,6 +70,7 @@ export function useHistory() {
         media_type: movie.media_type,
         source: movie.source || 'netmirror',
         type: movie.type, // might be 'tv' or 'movie' from component context
+        href: movie.href,
         timestamp: Date.now()
       };
 
