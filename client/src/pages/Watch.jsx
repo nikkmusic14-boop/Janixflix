@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { useParams, Link, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api.js';
 import { getCleanBase, cleanHicineTitle } from '../utils.js';
 
@@ -53,14 +53,13 @@ export default function Watch() {
   const [netmirrorLoading, setNetmirrorLoading] = useState(false);
   const [audioTracks, setAudioTracks] = useState([]);
   const [mirrors, setMirrors] = useState([]);
-  const [mirrorIndex, setMirrorIndex] = useState(0);
   const [seasons, setSeasons] = useState([]); // TV seasons list for sidebar
   const [activeSeasonTab, setActiveSeasonTab] = useState(1);
 
   // Server 2 (Hicine) states
   const [hicineVideoUrl, setHicineVideoUrl] = useState('');
   const [hicineLoading, setHicineLoading] = useState(false);
-  const [hicineEpisodes, setHicineEpisodes] = useState([]); // TV episodes list for sidebar
+  const [hicineEpisodes, setHicineEpisodes] = useState(location.state?.hicineEpisodes || []); // TV episodes list for sidebar
 
   // Universal Quality Selection
   const [selectedQuality, setSelectedQuality] = useState('1080p');
@@ -606,7 +605,6 @@ export default function Watch() {
     if (source === 'hicine' && href) {
       setHicineLoading(true);
       setHicineVideoUrl('');
-      setHicineEpisodes([]);
       setError('');
       api.external.hicine.getMediaSource(href)
         .then(data => {
@@ -923,6 +921,119 @@ export default function Watch() {
         gap: '24px',
         alignItems: 'flex-start'
       }}>
+        {/* TV Series Episode Sidebar (Unified sidebar for Server 1 & Server 2) - Moved to Left */}
+        {hasSidebar && (
+          <div className="episode-sidebar" style={{
+            flex: '1 1 280px',
+            background: 'var(--bg-elev)',
+            borderRadius: '6px',
+            padding: '16px',
+            maxHeight: '520px',
+            overflowY: 'auto',
+            border: '1px solid #222'
+          }}>
+            <h3 style={{ fontSize: '16px', marginBottom: '14px', color: '#fff' }}>Episode Guide</h3>
+            
+            {/* Server 1 (Netmirror) Season Tabs & Episodes */}
+            {source === 'netmirror' && (
+              <>
+                <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', marginBottom: '16px', paddingBottom: '6px' }}>
+                  {seasons.map((season, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => setActiveSeasonTab(season.se)}
+                      style={{
+                        background: activeSeasonTab === season.se ? '#0070f3' : '#333',
+                        color: '#fff',
+                        border: 'none',
+                        padding: '6px 12px',
+                        borderRadius: '20px',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        boxShadow: activeSeasonTab === season.se ? '0 0 10px rgba(0, 112, 243, 0.4)' : 'none'
+                      }}
+                    >
+                      {season.title || `Season ${season.se}`}
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(60px, 1fr))', gap: '8px' }}>
+                  {(() => {
+                    const activeSeasonObj = seasons.find(s => s.se === activeSeasonTab);
+                    if (!activeSeasonObj) return null;
+                    const eps = Array.from({ length: activeSeasonObj.ep_count }, (_, i) => i + 1);
+                    return eps.map(ep => {
+                      const isActive = parseInt(activeSe) === parseInt(activeSeasonTab) && parseInt(activeEp) === ep;
+                      return (
+                        <button
+                          key={ep}
+                          onClick={() => {
+                            if (!isActive) {
+                              navigate(`/watch/${id}?source=netmirror&type=tv&se=${activeSeasonTab}&ep=${ep}&subjectid=${subjectid}&dp=${encodeURIComponent(dp || '')}&title=${encodeURIComponent(title)}`);
+                            }
+                          }}
+                          style={{
+                            background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #0070f3 100%)' : '#222',
+                            color: '#fff',
+                            border: isActive ? 'none' : '1px solid #444',
+                            padding: '10px 0',
+                            borderRadius: '4px',
+                            fontSize: '13px',
+                            fontWeight: 'bold',
+                            cursor: isActive ? 'default' : 'pointer',
+                            textAlign: 'center',
+                            boxShadow: isActive ? '0 0 10px rgba(0, 243, 255, 0.3)' : 'none',
+                            transition: 'all 0.2s'
+                          }}
+                        >
+                          Ep {ep}
+                        </button>
+                      );
+                    });
+                  })()}
+                </div>
+              </>
+            )}
+
+            {/* Server 2 (Hicine) Episodes List */}
+            {source === 'hicine' && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {hicineEpisodes.map((ep, idx) => {
+                  const isActive = href === ep.path;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        if (!isActive) {
+                          navigate(`/watch/${id}?source=hicine&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(ep.title)}`, { state: { hicineEpisodes } });
+                        }
+                      }}
+                      style={{
+                        background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #0070f3 100%)' : '#222',
+                        color: '#fff',
+                        border: isActive ? 'none' : '1px solid #444',
+                        padding: '12px 14px',
+                        borderRadius: '6px',
+                        fontSize: '13px',
+                        fontWeight: 'bold',
+                        cursor: isActive ? 'default' : 'pointer',
+                        textAlign: 'left',
+                        boxShadow: isActive ? '0 0 10px rgba(0, 243, 255, 0.3)' : 'none',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      ▶ {ep.title}
+                    </button>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        )}
+
         {/* The video screen container */}
         <div style={{ flex: '1 1 700px', maxWidth: '100%', minWidth: 0 }}>
           <div className="player" style={{ position: 'relative', overflow: 'hidden', width: '100%', aspectRatio: '16/9', background: '#000' }}>

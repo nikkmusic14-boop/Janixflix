@@ -682,6 +682,7 @@ export default function Detail() {
                                       <Link
                                         key={idx}
                                         to={`/watch/${id}?source=hicine&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(cleanHicineTitle(ep.title))}`}
+                                        state={{ hicineEpisodes: episodes }}
                                         className="btn btn-secondary"
                                         style={{ padding: '8px 12px', justifyContent: 'center', fontSize: '13px' }}
                                       >
@@ -720,6 +721,7 @@ export default function Detail() {
                             <Link
                               key={idx}
                               to={`/watch/${id}?source=hicine&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(cleanHicineTitle(ep.title))}`}
+                              state={{ hicineEpisodes: server2Data.episodes }}
                               className="btn btn-secondary"
                               style={{ padding: '10px 14px', justifyContent: 'flex-start', fontSize: '13px' }}
                             >
