@@ -43,7 +43,7 @@ export default function Home() {
 
   // Reset page and active server when category changes in URL
   useEffect(() => {
-    const defaultServer = activeTab === 'southindian' ? 'server2' : 'server1';
+    const defaultServer = (activeTab === 'southindian' || activeTab === 'anime') ? 'server2' : 'server1';
     const isSeries = activeTab === 'indianwebseries' || activeTab === 'indiantvshows' || activeTab === 'hollywoodtvshows' || activeTab === 'webseries' || activeTab === 'tvshows';
     const startPage = (defaultServer === 'server2' && isSeries) ? 1 : 0;
     setActiveServer(defaultServer);
@@ -196,10 +196,6 @@ export default function Home() {
                            !t.includes('kaun kitney paani mein') &&
                            !t.includes('leanne morgan');
                   });
-              } else if (activeTab === 'latent') {
-                const data = await api.external.netmirror.search("India's Got Latent", apiPagePointer);
-                if (cancelled) return;
-                newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
               } else {
                 if (activeTab === 'hollywood') {
                   params.type = '1';
@@ -223,16 +219,7 @@ export default function Home() {
               else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') categoryKey = 'indianwebseries';
               else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') categoryKey = 'hollywoodtvshows';
 
-              if (activeTab === 'latent') {
-                if (apiPagePointer === 0 || apiPagePointer === 1) {
-                  const data = await api.external.hicine.search("India's Got Latent");
-                  if (cancelled) return;
-                  newItems = Array.isArray(data) ? data : [];
-                } else {
-                  newItems = [];
-                }
-              } else {
-                const data = await api.external.hicine.list(categoryKey, apiPagePointer);
+              const data = await api.external.hicine.list(categoryKey, apiPagePointer);
                 if (cancelled) return;
                 newItems = data.results || [];
                 
@@ -246,7 +233,6 @@ export default function Home() {
                   });
                 }
               }
-            }
 
             if (newItems.length === 0) {
               break;
@@ -345,12 +331,14 @@ export default function Home() {
           justifyContent: 'center',
           gap: '12px' 
         }}>
-          <button
-            onClick={() => handleServerChange('server1')}
-            style={serverButtonStyle(activeServer === 'server1', '#0070f3')}
-          >
-            ⚡ Stream Server 1 (FHD)
-          </button>
+          {activeTab !== 'anime' && (
+            <button
+              onClick={() => handleServerChange('server1')}
+              style={serverButtonStyle(activeServer === 'server1', '#0070f3')}
+            >
+              ⚡ Stream Server 1 (FHD)
+            </button>
+          )}
           <button
             onClick={() => handleServerChange('server2')}
             style={serverButtonStyle(activeServer === 'server2', '#00a000')}
