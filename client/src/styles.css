@@ -1045,4 +1045,8 @@ img {
 
   
 /* Force Artplayer fullscreen button on mobile portrait */  
-@media screen and (max-width: 768px) { .art-control-fullscreenWeb { display: none !important; } }
+@media screen and (max-width: 768px) {
+  .art-control-fullscreenWeb { display: none !important; }
+  .art-control-time { font-size: 11px !important; margin: 0 4px !important; }
+  .art-control-quality { font-size: 11px !important; padding: 0 4px !important; }
+}
