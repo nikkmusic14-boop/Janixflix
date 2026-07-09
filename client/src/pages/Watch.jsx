@@ -1367,7 +1367,7 @@ export default function Watch() {
               </div>
 
               {/* Audio Switcher buttons if multiple tracks exist */}
-              {audioTracks.length > 1 && (
+              {(audioTracks.length > 1 || (!audioTracks.some(t => t.language === 'Hindi') && source === 'netmirror')) && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginTop: '4px' }}>
                   <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>🔄 Switch Language:</span>
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -1402,6 +1402,27 @@ export default function Watch() {
                         </button>
                       );
                     })}
+
+                    {/* Fallback Search Hindi Button */}
+                    {!audioTracks.some(t => t.language === 'Hindi') && (
+                      <button
+                        onClick={() => {
+                          navigate(`/?q=${encodeURIComponent((movieTitle || '').replace(/\[.*\]/g, '').trim() + ' Hindi')}`);
+                        }}
+                        style={{
+                          background: '#222',
+                          color: '#fff',
+                          border: '1px dashed #ff007f',
+                          padding: '4px 12px',
+                          borderRadius: '20px',
+                          fontSize: '12px',
+                          fontWeight: 'bold',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        🔍 Search Hindi
+                      </button>
+                    )}
                   </div>
                 </div>
               )}

@@ -456,7 +456,7 @@ export default function Detail() {
               </div>
 
               {/* Audio Switcher buttons if multiple tracks exist */}
-              {audioTracks.length > 1 && (
+              {(audioTracks.length > 1 || (!audioTracks.some(t => t.language === 'Hindi') && source === 'netmirror')) && (
                 <div style={{ 
                   display: 'flex', 
                   alignItems: 'center', 
@@ -493,6 +493,25 @@ export default function Detail() {
                         </Link>
                       );
                     })}
+                    
+                    {/* Fallback Search Hindi Button */}
+                    {!audioTracks.some(t => t.language === 'Hindi') && (
+                      <Link
+                        to={`/?q=${encodeURIComponent((movie?.title || '').replace(/\[.*\]/g, '').trim() + ' Hindi')}`}
+                        style={{
+                          background: '#222',
+                          color: '#fff',
+                          textDecoration: 'none',
+                          border: '1px dashed #ff007f',
+                          padding: '4px 12px',
+                          borderRadius: '20px',
+                          fontSize: '12px',
+                          fontWeight: 'bold'
+                        }}
+                      >
+                        🔍 Search Hindi
+                      </Link>
+                    )}
                   </div>
                 </div>
               )}
