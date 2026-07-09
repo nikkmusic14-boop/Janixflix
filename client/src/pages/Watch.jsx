@@ -941,12 +941,12 @@ export default function Watch() {
         <div style={{ flex: '1 1 700px', maxWidth: '100%', minWidth: 0 }}>
           <div className="player" style={{ position: 'relative', overflow: 'hidden', width: '100%', aspectRatio: '16/9', background: '#000' }}>
             {source === 'local' && movie?.videoFile?.includes('drive.google.com') ? (
-              <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+              <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}>
                 <iframe
                   title="Google Drive Video Player"
                   src={movie.videoFile.replace('/view', '/preview').replace('?usp=drive_link', '')}
                   allowFullScreen
-                  style={{ width: '100%', height: '100%', border: 'none' }}
+                  style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                 />
               </div>
             ) : source === 'local' ? (
@@ -1003,7 +1003,7 @@ export default function Watch() {
                 </div>
               ) : activeNetmirrorUrl ? (
                 activeNetmirrorUrl.includes('drive.google.com') ? (
-                  <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+                  <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}>
                     <iframe
                       title="Google Drive Video Player"
                       src={activeNetmirrorUrl.replace('/view', '/preview').replace('?usp=drive_link', '')}
@@ -1011,7 +1011,7 @@ export default function Watch() {
                       webkitallowfullscreen="true"
                       mozallowfullscreen="true"
                       allow="autoplay; fullscreen"
-                      style={{ width: '100%', height: '100%', border: 'none' }}
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                     />
                   </div>
                 ) : (
@@ -1075,7 +1075,7 @@ export default function Watch() {
                 </div>
               ) : hicineVideoUrl ? (
                 hicineVideoUrl.includes('drive.google.com') ? (
-                  <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%' }}>
+                  <div style={{ position: 'relative', width: '100%', paddingTop: '56.25%' }}>
                     <iframe
                       title="Google Drive Video Player"
                       src={hicineVideoUrl.replace('/view', '/preview').replace('?usp=drive_link', '')}
@@ -1083,7 +1083,7 @@ export default function Watch() {
                       webkitallowfullscreen="true"
                       mozallowfullscreen="true"
                       allow="autoplay; fullscreen"
-                      style={{ width: '100%', height: '100%', border: 'none' }}
+                      style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', border: 'none' }}
                     />
                   </div>
                 ) : (
