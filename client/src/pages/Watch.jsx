@@ -380,9 +380,15 @@ export default function Watch() {
     const cleanTitle = getCleanBase(movieTitle);
     if (!cleanTitle) return;
     
-    const key = mediaType === 'tv' 
-      ? `janixflix_progress_tv_${cleanTitle}_s${activeSe}_e${activeEp}`
-      : `janixflix_progress_movie_${cleanTitle}`;
+    let key;
+    if (source === 'hicine' && href) {
+      const safeHref = href.replace(/[^a-zA-Z0-9]/g, '_');
+      key = `janixflix_progress_hicine_${safeHref}`;
+    } else {
+      key = mediaType === 'tv' 
+        ? `janixflix_progress_tv_${cleanTitle}_s${activeSe}_e${activeEp}`
+        : `janixflix_progress_movie_${cleanTitle}`;
+    }
       
     if (video.currentTime > video.duration * 0.96) {
       localStorage.removeItem(key);
@@ -398,9 +404,15 @@ export default function Watch() {
     const cleanTitle = getCleanBase(movieTitle);
     if (!cleanTitle) return;
     
-    const key = mediaType === 'tv' 
-      ? `janixflix_progress_tv_${cleanTitle}_s${activeSe}_e${activeEp}`
-      : `janixflix_progress_movie_${cleanTitle}`;
+    let key;
+    if (source === 'hicine' && href) {
+      const safeHref = href.replace(/[^a-zA-Z0-9]/g, '_');
+      key = `janixflix_progress_hicine_${safeHref}`;
+    } else {
+      key = mediaType === 'tv' 
+        ? `janixflix_progress_tv_${cleanTitle}_s${activeSe}_e${activeEp}`
+        : `janixflix_progress_movie_${cleanTitle}`;
+    }
       
     const savedTime = localStorage.getItem(key);
     let didSeek = false;
