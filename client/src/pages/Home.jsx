@@ -223,22 +223,7 @@ export default function Home() {
               else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') categoryKey = 'indianwebseries';
               else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') categoryKey = 'hollywoodtvshows';
 
-              if (activeTab === 'anime') {
-                if (apiPagePointer === 0 || apiPagePointer === 1) {
-                  const data = await api.external.hicine.search('Anime');
-                  if (cancelled) return;
-                  newItems = Array.isArray(data) ? data : [];
-                  newItems = newItems.filter(m => {
-                    const t = m.title.toLowerCase();
-                    return !t.includes('anime supremacy') && 
-                           !t.includes('chô jigen kakumei anime') &&
-                           !t.includes('kaun kitney paani mein') &&
-                           !t.includes('leanne morgan');
-                  });
-                } else {
-                  newItems = [];
-                }
-              } else if (activeTab === 'latent') {
+              if (activeTab === 'latent') {
                 if (apiPagePointer === 0 || apiPagePointer === 1) {
                   const data = await api.external.hicine.search("India's Got Latent");
                   if (cancelled) return;
@@ -250,6 +235,16 @@ export default function Home() {
                 const data = await api.external.hicine.list(categoryKey, apiPagePointer);
                 if (cancelled) return;
                 newItems = data.results || [];
+                
+                if (activeTab === 'anime') {
+                  newItems = newItems.filter(m => {
+                    const t = m.title.toLowerCase();
+                    return !t.includes('anime supremacy') && 
+                           !t.includes('chô jigen kakumei anime') &&
+                           !t.includes('kaun kitney paani mein') &&
+                           !t.includes('leanne morgan');
+                  });
+                }
               }
             }
 

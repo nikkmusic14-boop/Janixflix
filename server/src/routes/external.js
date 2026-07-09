@@ -353,7 +353,8 @@ const HICINE_CATEGORY_URLS = {
   indiantvshows: `${HICINE_BASE}/webseries`,
   tvshows: `${HICINE_BASE}/webseries`,
   hollywoodtvshows: `${HICINE_BASE}/webseries`,
-  bgrade: `${HICINE_BASE}/movies`
+  bgrade: `${HICINE_BASE}/movies`,
+  anime: `${HICINE_BASE}/anime`
 };
 
 // Category Listing Scraper
