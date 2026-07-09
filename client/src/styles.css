@@ -434,7 +434,6 @@ img {
   background: #000;
   border-radius: 8px;
   overflow: hidden;
-  aspect-ratio: 16/9;
   border: 1px solid rgba(0, 243, 255, 0.25);
   box-shadow: 0 10px 40px rgba(0, 0, 0, 0.9), 0 0 25px rgba(0, 243, 255, 0.1);
 }
