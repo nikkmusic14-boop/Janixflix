@@ -131,7 +131,12 @@ export default function Home() {
           setHomeHollywoodTV(deDuplicateMovies(hollywoodTVRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
           setHomeKorean(deDuplicateMovies(koreanRes.results || []).map(m => ({ ...m, source: 'netmirror' })));
           
-          let animeMovies = deDuplicateMovies(animeRes.results || []).map(m => ({ ...m, source: 'netmirror' }));
+          let animeMovies = deDuplicateMovies(animeRes.results || [])
+            .map(m => ({ ...m, source: 'netmirror' }))
+            .filter(m => {
+              const t = m.title.toLowerCase();
+              return !t.includes('anime supremacy') && !t.includes('chô jigen kakumei anime');
+            });
           setHomeAnime(animeMovies);
 
           setMovies([]);
@@ -161,7 +166,7 @@ export default function Home() {
           while (tempAllMovies.length < targetCount && attempts < 5) {
             let newItems = [];
             
-            if (activeServer === 'server1' || activeTab === 'anime') {
+            if (activeServer === 'server1') {
               const params = { page: apiPagePointer };
               
               if (activeTab === 'bollywood' || activeTab === 'southindian') {
@@ -179,7 +184,12 @@ export default function Home() {
               } else if (activeTab === 'anime') {
                 const data = await api.external.netmirror.search('Anime', apiPagePointer);
                 if (cancelled) return;
-                newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
+                newItems = (data.results || [])
+                  .map(m => ({ ...m, source: 'netmirror' }))
+                  .filter(m => {
+                    const t = m.title.toLowerCase();
+                    return !t.includes('anime supremacy') && !t.includes('chô jigen kakumei anime');
+                  });
               } else {
                 if (activeTab === 'hollywood') {
                   params.type = '1';
@@ -203,9 +213,23 @@ export default function Home() {
               else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') categoryKey = 'indianwebseries';
               else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') categoryKey = 'hollywoodtvshows';
 
-              const data = await api.external.hicine.list(categoryKey, apiPagePointer);
-              if (cancelled) return;
-              newItems = data.results || [];
+              if (activeTab === 'anime') {
+                if (apiPagePointer === 0 || apiPagePointer === 1) {
+                  const data = await api.external.hicine.search('Anime');
+                  if (cancelled) return;
+                  newItems = Array.isArray(data) ? data : [];
+                  newItems = newItems.filter(m => {
+                    const t = m.title.toLowerCase();
+                    return !t.includes('anime supremacy') && !t.includes('chô jigen kakumei anime');
+                  });
+                } else {
+                  newItems = [];
+                }
+              } else {
+                const data = await api.external.hicine.list(categoryKey, apiPagePointer);
+                if (cancelled) return;
+                newItems = data.results || [];
+              }
             }
 
             if (newItems.length === 0) {
