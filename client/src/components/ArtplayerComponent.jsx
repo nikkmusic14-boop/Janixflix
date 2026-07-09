@@ -37,14 +37,6 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
         },
       },
       plugins: [
-        (artInstance) => {
-          const originalSwitchUrl = artInstance.switchUrl.bind(artInstance);
-          artInstance.switchUrl = (url, name) => {
-            artInstance.type = url.includes('.m3u8') ? 'm3u8' : 'auto';
-            return originalSwitchUrl(url, name);
-          };
-          return { name: 'overrideSwitchUrl' };
-        },
         (art) => {
           art.on('fullscreen', (state) => {
             if (state && window.screen && window.screen.orientation && window.screen.orientation.lock) {

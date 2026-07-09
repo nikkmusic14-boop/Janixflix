@@ -65,7 +65,10 @@ export const api = {
         const qs = new URLSearchParams(params).toString();
         return request(`/api/external/netmirror/video-sources${qs ? `?${qs}` : ''}`);
       },
-      getProxyUrl: (url) => `${API_URL}/api/external/netmirror/proxy-stream?url=${encodeURIComponent(url)}`
+      getProxyUrl: (url) => {
+        const ext = url.includes('.m3u8') ? '/stream.m3u8' : '/stream.mp4';
+        return `${API_URL}/api/external/netmirror/proxy-stream${ext}?url=${encodeURIComponent(url)}`;
+      }
     },
     hicine: {
       list: (category, page) => {

@@ -285,7 +285,7 @@ router.get('/netmirror/video-sources', async (req, res) => {
 });
 
 // Proxy endpoint to stream external videos with referrer and range support
-router.get('/netmirror/proxy-stream', async (req, res) => {
+router.get(['/netmirror/proxy-stream', '/netmirror/proxy-stream/stream.m3u8', '/netmirror/proxy-stream/stream.mp4'], async (req, res) => {
   let { url } = req.query;
   if (!url) return res.status(400).json({ error: 'Param "url" is required' });
 
@@ -580,7 +580,7 @@ router.get('/hicine/movie-source', async (req, res) => {
 });
 
 // Proxy endpoint to stream Hicine videos (bypasses HTTP-only connection refused and CORS blocks)
-router.get('/hicine/proxy-stream', async (req, res) => {
+router.get(['/hicine/proxy-stream', '/hicine/proxy-stream/stream.m3u8', '/hicine/proxy-stream/stream.mp4'], async (req, res) => {
   let { url } = req.query;
   if (!url) return res.status(400).json({ error: 'Param "url" is required' });
 
