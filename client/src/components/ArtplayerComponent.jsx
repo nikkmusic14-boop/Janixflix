@@ -95,8 +95,14 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
           click: function () {
             if (this.fullscreen) {
               this.fullscreen = false;
+              if (window.screen && window.screen.orientation && window.screen.orientation.unlock) {
+                window.screen.orientation.unlock();
+              }
             } else {
               this.fullscreen = true;
+              if (window.screen && window.screen.orientation && window.screen.orientation.lock) {
+                window.screen.orientation.lock('landscape').catch(e => console.log(e));
+              }
             }
           },
         }
