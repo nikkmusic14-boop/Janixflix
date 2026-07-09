@@ -325,11 +325,26 @@ router.get(['/netmirror/proxy-stream', '/netmirror/proxy-stream/stream.m3u8', '/
     if ((url.includes('.m3u8') || url.includes('.mp4')) && !url.includes('.ts')) {
        const bodyText = await response.text();
        if (bodyText.startsWith('#EXTM3U')) {
-           const baseUrl = new URL('.', url).href;
+           const parsedUrl = new URL(url);
            const rewritten = bodyText.split('\n').map(line => {
                if (line.trim() && !line.startsWith('#')) {
-                   // Ensure it's absolute
-                   let tsUrl = line.startsWith('http') ? line : baseUrl + line;
+                   // Ensure it's absolute, resolving against the original url
+                   let tsUrl = line.startsWith('http') ? line : new URL(line, parsedUrl.href).href;
+                   
+                   // Append the query parameters from the M3U8 URL (like ?sign=...&t=...) to the TS chunk
+                   // because Hakunaymatata requires them to authorize the TS chunk download!
+                   try {
+                       const tsUrlObj = new URL(tsUrl);
+                       for (const [key, val] of parsedUrl.searchParams.entries()) {
+                           if (!tsUrlObj.searchParams.has(key)) {
+                               tsUrlObj.searchParams.append(key, val);
+                           }
+                       }
+                       tsUrl = tsUrlObj.href;
+                   } catch (e) {
+                       console.error('Failed to append query params to TS url:', e);
+                   }
+                   
                    // Return proxy URL for this TS segment
                    return `/api/external/netmirror/proxy-stream/stream.ts?url=${encodeURIComponent(tsUrl)}`;
                }
