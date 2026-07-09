@@ -419,7 +419,9 @@ export default function Watch() {
     
     if (savedTime) {
       const timeVal = parseFloat(savedTime);
-      if (!isNaN(timeVal) && timeVal > 0 && timeVal < video.duration) {
+      if (!isNaN(timeVal) && timeVal > 0) {
+        // Only seek if we have a valid saved time
+        // We removed timeVal < video.duration because duration might be NaN on initial load for some streams
         video.currentTime = timeVal;
         didSeek = true;
         console.log(`Resuming playback at ${timeVal}s`);

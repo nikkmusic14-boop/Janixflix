@@ -163,10 +163,13 @@ export default function Detail() {
     if (movie && movie.title) {
       addViewHistory({
         ...movie,
+        source: source || movie.source,
+        href: href || movie.href || movie.path,
+        media_type: mediaType || movie.media_type,
         poster_path: movie.thumbnail || movie.poster_path
       });
     }
-  }, [movie]);
+  }, [movie, source, href, mediaType]);
 
   // 2. Background search for the alternate server match
   useEffect(() => {
