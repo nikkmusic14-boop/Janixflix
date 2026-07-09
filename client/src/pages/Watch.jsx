@@ -1074,7 +1074,7 @@ export default function Watch() {
                 ) : (
                   <ArtplayerComponent
                     option={{
-                      url: (activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl),
+                      url: activeNetmirrorUrl,
                       type: 'm3u8',
                       quality: netmirrorQualities && netmirrorQualities.length > 0 ? netmirrorQualities.map(q => {
                         let label = q.quality;
@@ -1083,7 +1083,7 @@ export default function Watch() {
                         else if (label === '480' || label === '480p') label = '480p (SD)';
                         return {
                           html: label,
-                          url: (q.url === netmirrorChromecastUrl) ? q.url : api.external.netmirror.getProxyUrl(q.url),
+                          url: q.url,
                           default: q.url === activeNetmirrorUrl
                         };
                       }) : [],
