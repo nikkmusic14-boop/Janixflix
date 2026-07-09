@@ -221,12 +221,12 @@ router.get('/netmirror/video-sources', async (req, res) => {
     (id && id.toLowerCase().includes('satluj')) ||
     (id === '122059')
   ) {
-    const localUrl = `${req.protocol}://${req.get('host')}/api/stream/satluj`;
+    const driveUrl = 'https://drive.google.com/file/d/1fopIoNNpdvC_J49Y8cXquDT7f1-S4lEt/view?usp=drive_link';
     return res.json({
       qualities: [
-        { quality: '2160p ZEE5 WEB-DL', url: localUrl }
+        { quality: '2160p ZEE5 WEB-DL (Google Drive)', url: driveUrl }
       ],
-      chromecastUrl: localUrl,
+      chromecastUrl: driveUrl,
       mirrors: []
     });
   }
@@ -427,8 +427,8 @@ router.get('/hicine/movie-source', async (req, res) => {
   let { path: mediaPath } = req.query;
 
   if (mediaPath && mediaPath.toLowerCase().includes('satluj')) {
-    const localUrl = `${req.protocol}://${req.get('host')}/api/stream/satluj`;
-    return res.json({ videoUrl: localUrl });
+    const driveUrl = 'https://drive.google.com/file/d/1fopIoNNpdvC_J49Y8cXquDT7f1-S4lEt/view?usp=drive_link';
+    return res.json({ videoUrl: driveUrl });
   }
 
   if (!mediaPath) return res.status(400).json({ error: 'Param "path" is required' });

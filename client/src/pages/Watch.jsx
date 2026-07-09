@@ -990,37 +990,46 @@ export default function Watch() {
                   </div>
                 </div>
               ) : activeNetmirrorUrl ? (
-                <video
-                  ref={videoRef}
-                  controls
-                  autoPlay
-                  playsInline
-                  preload="auto"
-                  src={(window.location.hostname.includes('onrender.com') || activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl)}
-                  style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
-                  onError={handleVideoError}
-                  onPlay={(e) => {
-                    handleAutoVolumeBoost();
-                    setVideoBuffering(false);
-                    setIsPaused(false);
-                  }}
-                  onPause={() => {
-                    setVideoBuffering(false);
-                    setIsPaused(true);
-                  }}
-                  onEnded={() => {
-                    setIsPaused(true);
-                    if (autoPlayNext) {
-                      handleNextEp();
-                    }
-                  }}
-                  onTimeUpdate={handleTimeUpdate}
-                  onLoadedMetadata={handleLoadedMetadata}
-                  onSeeked={handleSeeked}
-                  {...bufferingHandlers}
-                >
-                  Your browser does not support HTML5 direct video playback.
-                </video>
+                activeNetmirrorUrl.includes('drive.google.com') ? (
+                  <iframe
+                    title="Google Drive Video Player"
+                    src={activeNetmirrorUrl.replace('/view', '/preview').replace('?usp=drive_link', '')}
+                    allowFullScreen
+                    style={{ width: '100%', height: '100%', border: 'none' }}
+                  />
+                ) : (
+                  <video
+                    ref={videoRef}
+                    controls
+                    autoPlay
+                    playsInline
+                    preload="auto"
+                    src={(window.location.hostname.includes('onrender.com') || activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl)}
+                    style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
+                    onError={handleVideoError}
+                    onPlay={(e) => {
+                      handleAutoVolumeBoost();
+                      setVideoBuffering(false);
+                      setIsPaused(false);
+                    }}
+                    onPause={() => {
+                      setVideoBuffering(false);
+                      setIsPaused(true);
+                    }}
+                    onEnded={() => {
+                      setIsPaused(true);
+                      if (autoPlayNext) {
+                        handleNextEp();
+                      }
+                    }}
+                    onTimeUpdate={handleTimeUpdate}
+                    onLoadedMetadata={handleLoadedMetadata}
+                    onSeeked={handleSeeked}
+                    {...bufferingHandlers}
+                  >
+                    Your browser does not support HTML5 direct video playback.
+                  </video>
+                )
               ) : (
                 <div className="empty-state" style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <h3>Video stream failed to load</h3>
@@ -1048,36 +1057,45 @@ export default function Watch() {
                   </div>
                 </div>
               ) : hicineVideoUrl ? (
-                <video
-                  ref={videoRef}
-                  controls
-                  autoPlay
-                  playsInline
-                  preload="auto"
-                  src={api.hicineProxyUrl(hicineVideoUrl)}
-                  style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
-                  onPlay={(e) => {
-                    handleAutoVolumeBoost();
-                    setVideoBuffering(false);
-                    setIsPaused(false);
-                  }}
-                  onPause={() => {
-                    setVideoBuffering(false);
-                    setIsPaused(true);
-                  }}
-                  onEnded={() => {
-                    setIsPaused(true);
-                    if (autoPlayNext) {
-                      handleNextEp();
-                    }
-                  }}
-                  onTimeUpdate={handleTimeUpdate}
-                  onLoadedMetadata={handleLoadedMetadata}
-                  onSeeked={handleSeeked}
-                  {...bufferingHandlers}
-                >
-                  Your browser does not support HTML5 direct video playback.
-                </video>
+                hicineVideoUrl.includes('drive.google.com') ? (
+                  <iframe
+                    title="Google Drive Video Player"
+                    src={hicineVideoUrl.replace('/view', '/preview').replace('?usp=drive_link', '')}
+                    allowFullScreen
+                    style={{ width: '100%', height: '100%', border: 'none' }}
+                  />
+                ) : (
+                  <video
+                    ref={videoRef}
+                    controls
+                    autoPlay
+                    playsInline
+                    preload="auto"
+                    src={api.hicineProxyUrl(hicineVideoUrl)}
+                    style={{ width: '100%', height: '100%', objectFit: videoFit, '--video-fit': videoFit }}
+                    onPlay={(e) => {
+                      handleAutoVolumeBoost();
+                      setVideoBuffering(false);
+                      setIsPaused(false);
+                    }}
+                    onPause={() => {
+                      setVideoBuffering(false);
+                      setIsPaused(true);
+                    }}
+                    onEnded={() => {
+                      setIsPaused(true);
+                      if (autoPlayNext) {
+                        handleNextEp();
+                      }
+                    }}
+                    onTimeUpdate={handleTimeUpdate}
+                    onLoadedMetadata={handleLoadedMetadata}
+                    onSeeked={handleSeeked}
+                    {...bufferingHandlers}
+                  >
+                    Your browser does not support HTML5 direct video playback.
+                  </video>
+                )
               ) : (
                 <div className="empty-state" style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                   <h3>Video stream failed to load</h3>
