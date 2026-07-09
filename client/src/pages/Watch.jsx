@@ -1075,7 +1075,7 @@ export default function Watch() {
                   <ArtplayerComponent
                     option={{
                       url: api.external.netmirror.getProxyUrl(activeNetmirrorUrl),
-                      type: activeNetmirrorUrl?.includes('.m3u8') ? 'm3u8' : 'auto',
+                      type: api.external.netmirror.getProxyUrl(activeNetmirrorUrl).includes('.m3u8') ? 'm3u8' : 'auto',
                       quality: netmirrorQualities && netmirrorQualities.length > 0 ? netmirrorQualities.map(q => {
                         let label = q.quality;
                         if (label === '1080' || label === '1080p') label = '1080p (FHD)';
@@ -1168,7 +1168,7 @@ export default function Watch() {
                   <ArtplayerComponent
                     option={{
                       url: api.hicineProxyUrl(hicineVideoUrl),
-                      type: hicineVideoUrl?.includes('.m3u8') ? 'm3u8' : 'auto',
+                      type: api.hicineProxyUrl(hicineVideoUrl).includes('.m3u8') ? 'm3u8' : 'auto',
                       quality: hicineQualities && hicineQualities.length > 0 ? hicineQualities.map(q => {
                         let label = q.quality;
                         if (label === '1080' || label === '1080p') label = '1080p (FHD)';
