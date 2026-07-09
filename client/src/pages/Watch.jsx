@@ -61,6 +61,7 @@ export default function Watch() {
 
   // Server 2 (Hicine) states
   const [hicineVideoUrl, setHicineVideoUrl] = useState('');
+  const [hicineQualities, setHicineQualities] = useState([]);
   const [hicineLoading, setHicineLoading] = useState(false);
   const [hicineEpisodes, setHicineEpisodes] = useState(location.state?.hicineEpisodes || []); // TV episodes list for sidebar
 
@@ -191,13 +192,15 @@ export default function Watch() {
     onStalled: () => setVideoBuffering(true),
   };
 
+  const artInstanceRef = useRef(null);
+
   const handleQualityChange = (qLabel) => {
     setSelectedQuality(qLabel);
     
-    const video = videoRef.current;
-    if (video) {
+    const art = artInstanceRef.current;
+    if (art && art.video) {
       // Save current progress immediately before quality change
-      const time = video.currentTime;
+      const time = art.video.currentTime;
       const cleanTitle = getCleanBase(movieTitle);
       if (cleanTitle) {
         const key = mediaType === 'tv' 
@@ -218,14 +221,12 @@ export default function Watch() {
       });
       
       const targetUrl = match ? match.url : netmirrorQualities[0].url;
+      const proxyUrl = api.external.netmirror.getProxyUrl(targetUrl);
       setActiveNetmirrorUrl(targetUrl);
       
-      // Force video element reload in next tick after React updates the src
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.load();
-        }
-      }, 50);
+      if (artInstanceRef.current && artInstanceRef.current.switchUrl) {
+        artInstanceRef.current.switchUrl(proxyUrl);
+      }
     } else if (source === 'hicine' && hicineQualities.length > 0) {
       const numeric = qLabel.replace('p', '');
       const match = hicineQualities.find(q => {
@@ -237,21 +238,20 @@ export default function Watch() {
       });
       
       const targetUrl = match ? match.url : hicineQualities[0].url;
+      const proxyUrl = api.hicineProxyUrl(targetUrl);
       setHicineVideoUrl(targetUrl);
       
-      setTimeout(() => {
-        if (videoRef.current) {
-          videoRef.current.load();
-        }
-      }, 50);
+      if (artInstanceRef.current && artInstanceRef.current.switchUrl) {
+        artInstanceRef.current.switchUrl(proxyUrl);
+      }
     } else {
-      if (video) {
-        const time = video.currentTime;
-        const paused = video.paused;
-        video.load();
-        video.currentTime = time;
+      if (art && art.video) {
+        const time = art.video.currentTime;
+        const paused = art.video.paused;
+        art.video.load();
+        art.video.currentTime = time;
         if (!paused) {
-          video.play().catch(() => {});
+          art.video.play().catch(e => console.error("Playback interrupted:", e));
         }
       }
     }
@@ -1103,9 +1103,9 @@ export default function Watch() {
                     }}
                     getInstance={(art) => {
                       videoRef.current = art.video;
+                      artInstanceRef.current = art;
                     }}
                     style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', '--video-fit': videoFit }}
-                    onError={handleVideoError}
                     onPlay={(e) => {
                       handleAutoVolumeBoost();
                       setVideoBuffering(false);
@@ -1196,6 +1196,7 @@ export default function Watch() {
                     }}
                     getInstance={(art) => {
                       videoRef.current = art.video;
+                      artInstanceRef.current = art;
                     }}
                     style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', '--video-fit': videoFit }}
                     onPlay={(e) => {

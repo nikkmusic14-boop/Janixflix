@@ -295,10 +295,7 @@ router.get(['/netmirror/proxy-stream', '/netmirror/proxy-stream/stream.m3u8', '/
   });
 
   try {
-    // Replace blocked hostname with the mobile stream proxy hostname
-    if (url.includes('bcdnxw.hakunaymatata.com')) {
-      url = url.replace('bcdnxw.hakunaymatata.com', 'bcdn.watch22.shop');
-    }
+
 
     const headers = {
       'Referer': 'https://speed.watch22.shop/',
