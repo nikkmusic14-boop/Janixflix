@@ -122,6 +122,13 @@ export default function Navbar() {
         >
           <span className="hide-emoji-mobile">⛩️</span> Anime
         </Link>
+        <Link 
+          to="/?tab=latent" 
+          className={`nav-link ${(activeTab === 'latent' && !hasQuery) ? 'active' : ''}`}
+          style={{ color: '#ff9f43', fontWeight: 'bold' }}
+        >
+          <span className="hide-emoji-mobile">🎤</span> Latent
+        </Link>
       </nav>
 
       {/* Right-aligned Search Input & Social Links */}

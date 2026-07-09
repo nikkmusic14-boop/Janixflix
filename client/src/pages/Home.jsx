@@ -196,6 +196,10 @@ export default function Home() {
                            !t.includes('kaun kitney paani mein') &&
                            !t.includes('leanne morgan');
                   });
+              } else if (activeTab === 'latent') {
+                const data = await api.external.netmirror.search("India's Got Latent", apiPagePointer);
+                if (cancelled) return;
+                newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
               } else {
                 if (activeTab === 'hollywood') {
                   params.type = '1';
@@ -231,6 +235,14 @@ export default function Home() {
                            !t.includes('kaun kitney paani mein') &&
                            !t.includes('leanne morgan');
                   });
+                } else {
+                  newItems = [];
+                }
+              } else if (activeTab === 'latent') {
+                if (apiPagePointer === 0 || apiPagePointer === 1) {
+                  const data = await api.external.hicine.search("India's Got Latent");
+                  if (cancelled) return;
+                  newItems = Array.isArray(data) ? data : [];
                 } else {
                   newItems = [];
                 }
