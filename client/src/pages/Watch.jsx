@@ -54,6 +54,7 @@ export default function Watch() {
   const [netmirrorLoading, setNetmirrorLoading] = useState(false);
   const [audioTracks, setAudioTracks] = useState([]);
   const [mirrors, setMirrors] = useState([]);
+  const [mirrorIndex, setMirrorIndex] = useState(0);
   const [seasons, setSeasons] = useState([]); // TV seasons list for sidebar
   const [activeSeasonTab, setActiveSeasonTab] = useState(1);
 
