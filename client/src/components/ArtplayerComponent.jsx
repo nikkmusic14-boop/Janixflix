@@ -21,6 +21,30 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
             }
           });
           return { name: 'autoRotate' };
+        },
+        (art) => {
+          let touchTime = 0;
+          const handleTap = (e) => {
+            const now = Date.now();
+            if (now - touchTime < 300) {
+              // Double tap detected
+              const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+              const rect = art.template.$video.getBoundingClientRect();
+              const x = clientX - rect.left;
+              if (x > rect.width / 2) {
+                art.forward = 10;
+                art.notice.show = '⏩ 10s';
+              } else {
+                art.backward = 10;
+                art.notice.show = '⏪ 10s';
+              }
+              if (e.cancelable) e.preventDefault();
+            }
+            touchTime = now;
+          };
+          art.on('video:touchstart', handleTap);
+          art.on('video:click', handleTap);
+          return { name: 'doubleTapSeek' };
         }
       ]
     });
