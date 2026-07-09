@@ -26,6 +26,7 @@ export default function Watch() {
   const { id } = useParams();
   const [params] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   // Query parameters
   const source = params.get('source') || 'local';
