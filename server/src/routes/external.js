@@ -330,7 +330,25 @@ router.get(['/netmirror/proxy-stream', '/netmirror/proxy-stream/stream.m3u8', '/
        if (bodyText.startsWith('#EXTM3U')) {
            const parsedUrl = new URL(url);
            const rewritten = bodyText.split('\n').map(line => {
-               if (line.trim() && !line.startsWith('#')) {
+               if (line.startsWith('#')) {
+                   // Rewrite URI="..." inside tags like #EXT-X-MEDIA or #EXT-X-MAP
+                   if (line.includes('URI="')) {
+                       return line.replace(/URI="([^"]+)"/g, (match, p1) => {
+                           let uriUrl = p1.startsWith('http') ? p1 : new URL(p1, parsedUrl.href).href;
+                           try {
+                               const uriUrlObj = new URL(uriUrl);
+                               for (const [key, val] of parsedUrl.searchParams.entries()) {
+                                   if (!uriUrlObj.searchParams.has(key)) {
+                                       uriUrlObj.searchParams.append(key, val);
+                                   }
+                               }
+                               uriUrl = uriUrlObj.href;
+                           } catch (e) {}
+                           return `URI="/api/external/netmirror/proxy-stream/stream.ts?url=${encodeURIComponent(uriUrl)}"`;
+                       });
+                   }
+                   return line;
+               } else if (line.trim()) {
                    // Ensure it's absolute, resolving against the original url
                    let tsUrl = line.startsWith('http') ? line : new URL(line, parsedUrl.href).href;
                    
@@ -678,7 +696,24 @@ router.get(['/hicine/proxy-stream', '/hicine/proxy-stream/stream.m3u8', '/hicine
        if (bodyText.startsWith('#EXTM3U')) {
            const parsedUrl = new URL(url);
            const rewritten = bodyText.split('\n').map(line => {
-               if (line.trim() && !line.startsWith('#')) {
+               if (line.startsWith('#')) {
+                   if (line.includes('URI="')) {
+                       return line.replace(/URI="([^"]+)"/g, (match, p1) => {
+                           let uriUrl = p1.startsWith('http') ? p1 : new URL(p1, parsedUrl.href).href;
+                           try {
+                               const uriUrlObj = new URL(uriUrl);
+                               for (const [key, val] of parsedUrl.searchParams.entries()) {
+                                   if (!uriUrlObj.searchParams.has(key)) {
+                                       uriUrlObj.searchParams.append(key, val);
+                                   }
+                               }
+                               uriUrl = uriUrlObj.href;
+                           } catch (e) {}
+                           return `URI="/api/external/hicine/proxy-stream/stream.ts?url=${encodeURIComponent(uriUrl)}"`;
+                       });
+                   }
+                   return line;
+               } else if (line.trim()) {
                    let tsUrl = line.startsWith('http') ? line : new URL(line, parsedUrl.href).href;
                    try {
                        const tsUrlObj = new URL(tsUrl);
