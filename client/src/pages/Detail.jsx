@@ -498,12 +498,12 @@ export default function Detail() {
                     {!audioTracks.some(t => t.language === 'Hindi') && (
                       <button
                         onClick={async () => {
-                          const base = (movie?.title || '').replace(/\[.*\]/g, '').trim();
+                          const base = (movie?.title || '').replace(/\[.*?\]|\(.*?\)/g, '').trim();
                           const btn = document.getElementById('btn-hindi-auto-detail');
                           if(btn) btn.innerText = 'Loading...';
                           
                           try {
-                            const res = await api.external.netmirror.search(base + ' Hindi');
+                            const res = await api.external.netmirror.search(base);
                             const tracks = res?.results || [];
                             const hindiTrack = tracks.find(r => r.title.toLowerCase().includes('hindi') || r.title.toLowerCase().includes('hin'));
                             
