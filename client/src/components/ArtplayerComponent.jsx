@@ -24,26 +24,34 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
         },
         (art) => {
           let touchTime = 0;
+          let isDoubleTapping = false;
+
           const handleTap = (e) => {
             const now = Date.now();
             if (now - touchTime < 300) {
-              // Double tap detected
+              isDoubleTapping = true;
               const clientX = e.touches ? e.touches[0].clientX : e.clientX;
               const rect = art.template.$video.getBoundingClientRect();
               const x = clientX - rect.left;
+              
               if (x > rect.width / 2) {
-                art.forward = 10;
-                art.notice.show = '⏩ 10s';
+                art.currentTime = Math.min(art.currentTime + 10, art.duration);
+                art.notice.show = '⏩ +10s';
               } else {
-                art.backward = 10;
-                art.notice.show = '⏪ 10s';
+                art.currentTime = Math.max(art.currentTime - 10, 0);
+                art.notice.show = '⏪ -10s';
               }
               if (e.cancelable) e.preventDefault();
+              
+              // Reset
+              setTimeout(() => { isDoubleTapping = false; }, 300);
             }
             touchTime = now;
           };
+
           art.on('video:touchstart', handleTap);
           art.on('video:click', handleTap);
+          
           return { name: 'doubleTapSeek' };
         }
       ]
