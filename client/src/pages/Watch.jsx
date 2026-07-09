@@ -661,15 +661,21 @@ export default function Watch() {
   }, [subjectid, activeSe, activeEp, dp, movie, title, mirrorIndex, source]);
 
   // 3. Resolve Hicine streaming source link & episodes list
+  const [hicineQualities, setHicineQualities] = useState([]);
+
   useEffect(() => {
     if (source === 'hicine' && href) {
       setHicineLoading(true);
       setHicineVideoUrl('');
+      setHicineQualities([]);
       setError('');
       api.external.hicine.getMediaSource(href)
         .then(data => {
           if (data && data.videoUrl) {
             setHicineVideoUrl(data.videoUrl);
+            if (data.qualities && data.qualities.length > 0) {
+              setHicineQualities(data.qualities);
+            }
             if (data.episodes) {
               setHicineEpisodes(data.episodes);
             }
