@@ -135,7 +135,10 @@ export default function Home() {
             .map(m => ({ ...m, source: 'netmirror' }))
             .filter(m => {
               const t = m.title.toLowerCase();
-              return !t.includes('anime supremacy') && !t.includes('chô jigen kakumei anime');
+              return !t.includes('anime supremacy') && 
+                     !t.includes('chô jigen kakumei anime') &&
+                     !t.includes('kaun kitney paani mein') &&
+                     !t.includes('leanne morgan');
             });
           setHomeAnime(animeMovies);
 
@@ -188,7 +191,10 @@ export default function Home() {
                   .map(m => ({ ...m, source: 'netmirror' }))
                   .filter(m => {
                     const t = m.title.toLowerCase();
-                    return !t.includes('anime supremacy') && !t.includes('chô jigen kakumei anime');
+                    return !t.includes('anime supremacy') && 
+                           !t.includes('chô jigen kakumei anime') &&
+                           !t.includes('kaun kitney paani mein') &&
+                           !t.includes('leanne morgan');
                   });
               } else {
                 if (activeTab === 'hollywood') {
@@ -220,7 +226,10 @@ export default function Home() {
                   newItems = Array.isArray(data) ? data : [];
                   newItems = newItems.filter(m => {
                     const t = m.title.toLowerCase();
-                    return !t.includes('anime supremacy') && !t.includes('chô jigen kakumei anime');
+                    return !t.includes('anime supremacy') && 
+                           !t.includes('chô jigen kakumei anime') &&
+                           !t.includes('kaun kitney paani mein') &&
+                           !t.includes('leanne morgan');
                   });
                 } else {
                   newItems = [];
