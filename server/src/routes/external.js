@@ -218,7 +218,7 @@ router.get('/netmirror/video-sources', async (req, res) => {
     (id && id.toLowerCase().includes('satluj')) ||
     (id === '122059')
   ) {
-    const driveUrl = 'https://drive.google.com/file/d/1fopIoNNpdvC_J49Y8cXquDT7f1-S4lEt/preview';
+    const driveUrl = 'https://drive.google.com/file/d/1fopIoNNpdvC_J49Y8cXquDT7f1-S4lEt/view?usp=drive_link';
     return res.json({
       qualities: [
         { quality: '2160p ZEE5 WEB-DL (Google Drive)', url: driveUrl }
