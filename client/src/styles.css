@@ -1045,4 +1045,4 @@ img {
 
   
 /* Force Artplayer fullscreen button on mobile portrait */  
-@media screen and (max-width: 768px) { .art-control-fullscreen { display: flex !important; visibility: visible !important; } .art-control-fullscreenWeb { display: flex !important; visibility: visible !important; } } 
+@media screen and (max-width: 768px) { .art-control-fullscreenWeb { display: none !important; } }
