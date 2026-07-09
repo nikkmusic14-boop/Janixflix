@@ -41,7 +41,12 @@ export const api = {
   // Media URLs
   streamUrl: (id) => `${API_URL}/api/stream/${id}`,
   thumbnailUrl: (id) => `${API_URL}/api/stream/thumbnail/${id}`,
-  hicineProxyUrl: (url) => `${API_URL}/api/external/hicine/proxy-stream?url=${encodeURIComponent(url)}`,
+  hicineProxyUrl: (url) => {
+    if (url && url.includes('.r2.dev')) {
+      return url; // r2.dev URLs fail with 403 if proxied with Hicine Referer
+    }
+    return `${API_URL}/api/external/hicine/proxy-stream?url=${encodeURIComponent(url)}`;
+  },
 
   // External APIs (Netmirror & Hicine proxy/scrapers)
   external: {

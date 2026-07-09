@@ -443,13 +443,34 @@ router.get('/hicine/movie-source', async (req, res) => {
       // Some titles might not match perfectly if we just replace hyphens, but it's our best bet.
       const query = slug.replace(/-download-\d+\.html$/, '').replace(/-complete\.html$/, '').replace(/-/g, ' ');
       
-      const searchRes = await fetchWithTimeout(`${HICINE_BASE}/search/${encodeURIComponent(query)}`, { timeout: 15000 });
-      if (searchRes.ok) {
-        const json = await searchRes.json();
-        const dataList = json.data || json;
-        const item = dataList.find(i => i.url_slug === slug || i._id === slug) || dataList[0];
+      let item = null;
+      
+      // Try direct endpoints first
+      const endpoints = ['anime', 'webseries', 'movies'];
+      for (const ep of endpoints) {
+        try {
+          const res = await fetchWithTimeout(`${HICINE_BASE}/${ep}/${slug}`, { timeout: 5000 });
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data._id) {
+              item = data;
+              break;
+            }
+          }
+        } catch(e) {}
+      }
+
+      // Fallback to search
+      if (!item) {
+        const searchRes = await fetchWithTimeout(`${HICINE_BASE}/search/${encodeURIComponent(query)}`, { timeout: 15000 });
+        if (searchRes.ok) {
+          const json = await searchRes.json();
+          const dataList = json.data || json;
+          item = dataList.find(i => i.url_slug === slug || i._id === slug) || dataList[0];
+        }
+      }
         
-        if (item) {
+      if (item) {
           // Check if it's a TV Series
           if (item.season_1) {
             const seasons = [];
