@@ -13,21 +13,38 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
       fullscreen: true,
       autoOrientation: true,
       customType: {
-        m3u8: function (video, url) {
+        m3u8: function (video, url, artInstance) {
           if (Hls.isSupported()) {
+            if (artInstance.hls) {
+              artInstance.hls.destroy();
+            }
             const hls = new Hls();
             hls.loadSource(url);
             hls.attachMedia(video);
-            art.hls = hls;
-            art.on('destroy', () => hls.destroy());
+            artInstance.hls = hls;
+            
+            if (!artInstance.hlsIsBound) {
+              artInstance.on('destroy', () => {
+                if (artInstance.hls) artInstance.hls.destroy();
+              });
+              artInstance.hlsIsBound = true;
+            }
           } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
             video.src = url;
           } else {
-            art.notice.show = 'Unsupported video format: m3u8';
+            artInstance.notice.show = 'Unsupported video format: m3u8';
           }
         },
       },
       plugins: [
+        (artInstance) => {
+          const originalSwitchUrl = artInstance.switchUrl.bind(artInstance);
+          artInstance.switchUrl = (url, name) => {
+            artInstance.type = url.includes('.m3u8') ? 'm3u8' : 'auto';
+            return originalSwitchUrl(url, name);
+          };
+          return { name: 'overrideSwitchUrl' };
+        },
         (art) => {
           art.on('fullscreen', (state) => {
             if (state && window.screen && window.screen.orientation && window.screen.orientation.lock) {
