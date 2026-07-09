@@ -1050,6 +1050,11 @@ export default function Watch() {
                   <ArtplayerComponent
                     option={{
                       url: (window.location.hostname.includes('onrender.com') || activeNetmirrorUrl === netmirrorChromecastUrl) ? activeNetmirrorUrl : api.external.netmirror.getProxyUrl(activeNetmirrorUrl),
+                      quality: netmirrorQualities && netmirrorQualities.length > 0 ? netmirrorQualities.map(q => ({
+                        html: q.quality,
+                        url: (window.location.hostname.includes('onrender.com') || q.url === netmirrorChromecastUrl) ? q.url : api.external.netmirror.getProxyUrl(q.url),
+                        default: q.url === activeNetmirrorUrl
+                      })) : [],
                       autoplay: true,
                       volume: 1,
                       isLive: false,
