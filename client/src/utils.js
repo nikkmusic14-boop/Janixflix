@@ -59,3 +59,28 @@ export const deDuplicateMovies = (list) => {
   }
   return result;
 };
+
+export const cleanHicineTitle = (title) => {
+  if (!title) return '';
+  if (!title.includes(',')) return title.trim();
+
+  let parts = title.split(',').map(s => s.trim());
+  
+  const hasGarbage = parts.some(p => /^Link\d+$/i.test(p) || /^\d+(\.\d+)?[A-Za-z]+$/.test(p) || (p.length > 10 && !p.includes(' ')));
+  
+  if (hasGarbage) {
+    parts = parts.filter(p => {
+      if (/^Link\d+$/i.test(p)) return false;
+      if (/^\d+(\.\d+)?[MGT]B$/i.test(p)) return false;
+      if (/^[a-z0-9]{10,}$/i.test(p) && !p.includes(' ')) return false;
+      return true;
+    });
+    if (parts.length === 0) {
+      return title.split(',').map(s => s.trim()).reduce((a, b) => a.length > b.length ? a : b);
+    }
+    return parts.join(', ').trim() || title.trim();
+  }
+
+  return title.trim();
+};
+

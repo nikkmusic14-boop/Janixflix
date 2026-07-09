@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback } from 'react';
 import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
-import { getCleanBase } from '../utils.js';
+import { getCleanBase, cleanHicineTitle } from '../utils.js';
 
 const matchTitle = (a, b, movieYear) => {
   const cleanA = getCleanBase(a);
@@ -1537,7 +1537,7 @@ export default function Watch() {
                     <button
                       key={idx}
                       onClick={() => {
-                        navigate(`/watch/${id}?source=hicine&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(ep.title)}`);
+                        navigate(`/watch/${id}?source=hicine&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(cleanHicineTitle(ep.title))}`);
                       }}
                       style={{
                         background: isActive ? 'rgba(0,160,0,0.15)' : 'rgba(255,255,255,0.02)',
@@ -1561,7 +1561,7 @@ export default function Watch() {
                         overflow: 'hidden',
                         textOverflow: 'ellipsis'
                       }}>
-                        🎬 {ep.title}
+                        🎬 {cleanHicineTitle(ep.title)}
                       </span>
                       {isActive && <span style={{ fontSize: '10px', background: '#00a000', color: '#fff', padding: '1px 5px', borderRadius: '3px', flexShrink: 0 }}>Playing</span>}
                     </button>

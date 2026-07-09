@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../api.js';
 import { useHistory } from '../hooks/useHistory';
-import { getCleanBase } from '../utils.js';
+import { getCleanBase, cleanHicineTitle } from '../utils.js';
 
 const matchTitle = (a, b, movieYear) => {
   const cleanA = getCleanBase(a);
@@ -671,7 +671,7 @@ export default function Detail() {
                             return (
                               <div key={sIdx}>
                                 <h4 style={{ color: '#fff', marginBottom: '12px' }}>
-                                  {season.title} ({episodes.length} Episodes)
+                                  {cleanHicineTitle(season.title)} ({episodes.length} Episodes)
                                 </h4>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '8px' }}>
                                   {episodes.map((ep, idx) => {
@@ -681,7 +681,7 @@ export default function Detail() {
                                     return (
                                       <Link
                                         key={idx}
-                                        to={`/watch/${id}?source=hicine&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(ep.title)}`}
+                                        to={`/watch/${id}?source=hicine&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(cleanHicineTitle(ep.title))}`}
                                         className="btn btn-secondary"
                                         style={{ padding: '8px 12px', justifyContent: 'center', fontSize: '13px' }}
                                       >
@@ -719,11 +719,11 @@ export default function Detail() {
                           {server2Data.episodes.map((ep, idx) => (
                             <Link
                               key={idx}
-                              to={`/watch/${id}?source=hicine&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(ep.title)}`}
+                              to={`/watch/${id}?source=hicine&href=${encodeURIComponent(ep.path)}&title=${encodeURIComponent(cleanHicineTitle(ep.title))}`}
                               className="btn btn-secondary"
                               style={{ padding: '10px 14px', justifyContent: 'flex-start', fontSize: '13px' }}
                             >
-                              🎬 {ep.title}
+                              🎬 {cleanHicineTitle(ep.title)}
                             </Link>
                           ))}
                         </div>
