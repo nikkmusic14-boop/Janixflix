@@ -1075,12 +1075,13 @@ export default function Watch() {
                   <ArtplayerComponent
                     option={{
                       url: api.external.netmirror.getProxyUrl(activeNetmirrorUrl),
-                      type: 'auto',
+                      type: activeNetmirrorUrl?.includes('.m3u8') ? 'm3u8' : 'auto',
                       quality: netmirrorQualities && netmirrorQualities.length > 0 ? netmirrorQualities.map(q => {
                         let label = q.quality;
                         if (label === '1080' || label === '1080p') label = '1080p (FHD)';
                         else if (label === '720' || label === '720p') label = '720p (HD)';
                         else if (label === '480' || label === '480p') label = '480p (SD)';
+                        else if (label === '360' || label === '360p') label = '360p (SD)';
                         return {
                           html: label,
                           url: api.external.netmirror.getProxyUrl(q.url),
