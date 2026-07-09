@@ -45,7 +45,8 @@ export const api = {
     if (url && url.includes('.r2.dev')) {
       return url; // r2.dev URLs fail with 403 if proxied with Hicine Referer
     }
-    return `${API_URL}/api/external/hicine/proxy-stream?url=${encodeURIComponent(url)}`;
+    const ext = url.includes('.m3u8') ? '/stream.m3u8' : '/stream.mp4';
+    return `${API_URL}/api/external/hicine/proxy-stream${ext}?url=${encodeURIComponent(url)}`;
   },
 
   // External APIs (Netmirror & Hicine proxy/scrapers)

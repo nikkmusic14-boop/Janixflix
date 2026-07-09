@@ -226,6 +226,24 @@ export default function Watch() {
           videoRef.current.load();
         }
       }, 50);
+    } else if (source === 'hicine' && hicineQualities.length > 0) {
+      const numeric = qLabel.replace('p', '');
+      const match = hicineQualities.find(q => {
+        const label = q.quality.toLowerCase();
+        if (qLabel === '1080p') {
+          return label.includes('1080') || label.includes('fhd') || label.includes('full hd');
+        }
+        return label.includes(numeric);
+      });
+      
+      const targetUrl = match ? match.url : hicineQualities[0].url;
+      setHicineVideoUrl(targetUrl);
+      
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.load();
+        }
+      }, 50);
     } else {
       if (video) {
         const time = video.currentTime;
@@ -1144,6 +1162,18 @@ export default function Watch() {
                     option={{
                       url: api.hicineProxyUrl(hicineVideoUrl),
                       type: hicineVideoUrl?.includes('.m3u8') ? 'm3u8' : 'auto',
+                      quality: hicineQualities && hicineQualities.length > 0 ? hicineQualities.map(q => {
+                        let label = q.quality;
+                        if (label === '1080' || label === '1080p') label = '1080p (FHD)';
+                        else if (label === '720' || label === '720p') label = '720p (HD)';
+                        else if (label === '480' || label === '480p') label = '480p (SD)';
+                        else if (label === '360' || label === '360p') label = '360p (SD)';
+                        return {
+                          html: label,
+                          url: api.hicineProxyUrl(q.url),
+                          default: q.url === hicineVideoUrl
+                        };
+                      }) : [],
                       autoplay: true,
                       volume: 1,
                       isLive: false,

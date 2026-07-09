@@ -514,62 +514,76 @@ router.get('/hicine/movie-source', async (req, res) => {
     // Parse the links string for a direct video
     // Format: "https://worker.../?vcloud=..., Link2, Link3..., 480p\nhttps://worker..., 720p"
     const lines = linksStr.split(/\r?\n|\\n/);
-    let bestUrl = null;
+    let urlCandidates = [];
     
     for (const line of lines) {
        const parts = line.split(',');
        if (parts.length > 0) {
           const urlCandidate = parts[0].trim();
           if (urlCandidate.startsWith('http')) {
-             bestUrl = urlCandidate;
-             if (line.includes('720p') || line.includes('1080p')) {
-                bestUrl = urlCandidate;
-                break;
+             let quality = '480p';
+             if (line.includes('1080p') || line.includes('1080')) quality = '1080p';
+             else if (line.includes('720p') || line.includes('720')) quality = '720p';
+             else if (line.includes('480p') || line.includes('480')) quality = '480p';
+             else if (line.includes('360p') || line.includes('360')) quality = '360p';
+             
+             // Avoid duplicates
+             if (!urlCandidates.some(c => c.quality === quality)) {
+               urlCandidates.push({ quality, url: urlCandidate });
              }
           }
        }
     }
     
-    if (bestUrl) {
-      // Convert the Hicine worker URL into a direct raw video URL to bypass ads and html player
-      if (bestUrl.includes('?vcloud=')) {
-        try {
-          const urlObj = new URL(bestUrl);
-          const vcloudParam = urlObj.searchParams.get('vcloud');
-          const origin = urlObj.origin;
-          
-          const linksRes = await fetch(`${origin}/api/links?vcloud=${encodeURIComponent(vcloudParam)}`);
-          if (linksRes.ok) {
-            const data = await linksRes.json();
-            if (data && data.tokens) {
-              const servers = ['fsl', 'fsl2', 'server1', 'pixel', 'gofile']; // Preference order
-              let selectedServer = null;
-              for (const s of servers) {
-                if (data.tokens[s]) {
-                  selectedServer = s;
-                  break;
+    if (urlCandidates.length > 0) {
+      const resolvedQualities = await Promise.all(urlCandidates.map(async (item) => {
+        let resolvedUrl = item.url;
+        if (resolvedUrl.includes('?vcloud=')) {
+          try {
+            const urlObj = new URL(resolvedUrl);
+            const vcloudParam = urlObj.searchParams.get('vcloud');
+            const origin = urlObj.origin;
+            
+            const linksRes = await fetch(`${origin}/api/links?vcloud=${encodeURIComponent(vcloudParam)}`);
+            if (linksRes.ok) {
+              const data = await linksRes.json();
+              if (data && data.tokens) {
+                const servers = ['fsl', 'fsl2', 'server1', 'pixel', 'gofile']; // Preference order
+                let selectedServer = null;
+                for (const s of servers) {
+                  if (data.tokens[s]) {
+                    selectedServer = s;
+                    break;
+                  }
                 }
-              }
-              if (!selectedServer && Object.keys(data.tokens).length > 0) {
-                selectedServer = Object.keys(data.tokens)[0];
-              }
-              
-              if (selectedServer) {
-                const { ts, sig } = data.tokens[selectedServer];
-                const goUrl = `${origin}/go?type=${selectedServer}&vcloud=${encodeURIComponent(vcloudParam)}&ts=${ts}&sig=${sig}`;
+                if (!selectedServer && Object.keys(data.tokens).length > 0) {
+                  selectedServer = Object.keys(data.tokens)[0];
+                }
                 
-                const goRes = await fetch(goUrl, { redirect: 'manual' });
-                if (goRes.status >= 300 && goRes.status < 400 && goRes.headers.get('location')) {
-                  bestUrl = goRes.headers.get('location');
+                if (selectedServer) {
+                  const { ts, sig } = data.tokens[selectedServer];
+                  const goUrl = `${origin}/go?type=${selectedServer}&vcloud=${encodeURIComponent(vcloudParam)}&ts=${ts}&sig=${sig}`;
+                  
+                  const goRes = await fetch(goUrl, { redirect: 'manual' });
+                  if (goRes.status >= 300 && goRes.status < 400 && goRes.headers.get('location')) {
+                    resolvedUrl = goRes.headers.get('location');
+                  }
                 }
               }
             }
+          } catch (e) {
+             console.error('[Hicine Raw Link Extract Error]:', e.message);
           }
-        } catch (e) {
-           console.error('[Hicine Raw Link Extract Error]:', e.message);
         }
-      }
-      return res.json({ videoUrl: bestUrl });
+        return { quality: item.quality, url: resolvedUrl };
+      }));
+      
+      // Sort qualities high to low
+      const qOrder = { '1080p': 4, '720p': 3, '480p': 2, '360p': 1 };
+      resolvedQualities.sort((a, b) => (qOrder[b.quality] || 0) - (qOrder[a.quality] || 0));
+
+      const bestUrl = resolvedQualities[0].url;
+      return res.json({ videoUrl: bestUrl, qualities: resolvedQualities });
     }
 
     res.status(404).json({ error: 'Could not resolve a playable video source from Hicine.' });
