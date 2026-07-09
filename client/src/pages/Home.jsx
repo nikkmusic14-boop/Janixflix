@@ -208,10 +208,8 @@ export default function Home() {
                 }
               }
             } else {
-              let categoryKey = 'bollywood';
-              if (activeTab === 'southindian') categoryKey = 'southindian';
-              else if (activeTab === 'punjabi') categoryKey = 'punjabi';
-              else if (activeTab === 'hollywood') categoryKey = 'hollywood';
+              let categoryKey = activeTab;
+              if (activeTab === 'home' || !activeTab) categoryKey = 'bollywood';
               else if (activeTab === 'webseries' || activeTab === 'indianwebseries' || activeTab === 'indiantvshows') categoryKey = 'indianwebseries';
               else if (activeTab === 'tvshows' || activeTab === 'hollywoodtvshows') categoryKey = 'hollywoodtvshows';
 
@@ -309,8 +307,8 @@ export default function Home() {
 
   return (
     <div style={{ paddingTop: '100px' }}>
-      {/* Sub-tabs for Server Selection (Hidden for Japanese/South Indian/Korean categories) */}
-      {!loading && !error && activeTab !== 'japanese' && activeTab !== 'southindian' && activeTab !== 'korean' && (
+      {/* Sub-tabs for Server Selection */}
+      {!loading && !error && activeTab !== 'home' && (
         <div className="filters-bar" style={{ 
           padding: '16px 48px 0', 
           display: 'flex', 
