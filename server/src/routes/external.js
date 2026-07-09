@@ -148,7 +148,7 @@ router.get('/netmirror/search', async (req, res) => {
     }
   }
 
-  res.status(500).json({ error: 'Failed to search Netmirror endpoints' });
+  return res.json({ results: [] });
 });
 
 // Movie/TV Details

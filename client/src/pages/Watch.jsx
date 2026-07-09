@@ -927,12 +927,19 @@ export default function Watch() {
         <div style={{ flex: '1 1 700px', maxWidth: '100%', minWidth: 0 }}>
           <div className="player" style={{ position: 'relative', overflow: 'hidden', width: '100%', aspectRatio: '16/9', background: '#000' }}>
             {source === 'local' && movie?.videoFile?.includes('drive.google.com') ? (
-              <iframe
-                title="Google Drive Video Player"
-                src={movie.videoFile.replace('/view', '/preview').replace('?usp=drive_link', '')}
-                allowFullScreen
-                style={{ width: '100%', height: '100%', border: 'none' }}
-              />
+              <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                <iframe
+                  title="Google Drive Video Player"
+                  src={movie.videoFile.replace('/view', '/preview').replace('?usp=drive_link', '')}
+                  allowFullScreen
+                  style={{ width: '100%', height: '100%', border: 'none' }}
+                />
+                <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
+                  <a href={movie.videoFile} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px', background: 'rgba(0,0,0,0.6)' }}>
+                    ↗️ Open in Drive
+                  </a>
+                </div>
+              </div>
             ) : source === 'local' ? (
               <video
                 ref={videoRef}
@@ -987,15 +994,22 @@ export default function Watch() {
                 </div>
               ) : activeNetmirrorUrl ? (
                 activeNetmirrorUrl.includes('drive.google.com') ? (
-                  <iframe
-                    title="Google Drive Video Player"
-                    src={activeNetmirrorUrl.replace('/view', '/preview').replace('?usp=drive_link', '')}
-                    allowFullScreen={true}
-                    webkitallowfullscreen="true"
-                    mozallowfullscreen="true"
-                    allow="autoplay; fullscreen"
-                    style={{ width: '100%', height: '100%', border: 'none' }}
-                  />
+                  <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                    <iframe
+                      title="Google Drive Video Player"
+                      src={activeNetmirrorUrl.replace('/view', '/preview').replace('?usp=drive_link', '')}
+                      allowFullScreen={true}
+                      webkitallowfullscreen="true"
+                      mozallowfullscreen="true"
+                      allow="autoplay; fullscreen"
+                      style={{ width: '100%', height: '100%', border: 'none' }}
+                    />
+                    <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
+                      <a href={activeNetmirrorUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px', background: 'rgba(0,0,0,0.6)' }}>
+                        ↗️ Open in Drive
+                      </a>
+                    </div>
+                  </div>
                 ) : (
                   <video
                     ref={videoRef}
@@ -1057,15 +1071,22 @@ export default function Watch() {
                 </div>
               ) : hicineVideoUrl ? (
                 hicineVideoUrl.includes('drive.google.com') ? (
-                  <iframe
-                    title="Google Drive Video Player"
-                    src={hicineVideoUrl.replace('/view', '/preview').replace('?usp=drive_link', '')}
-                    allowFullScreen={true}
-                    webkitallowfullscreen="true"
-                    mozallowfullscreen="true"
-                    allow="autoplay; fullscreen"
-                    style={{ width: '100%', height: '100%', border: 'none' }}
-                  />
+                  <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                    <iframe
+                      title="Google Drive Video Player"
+                      src={hicineVideoUrl.replace('/view', '/preview').replace('?usp=drive_link', '')}
+                      allowFullScreen={true}
+                      webkitallowfullscreen="true"
+                      mozallowfullscreen="true"
+                      allow="autoplay; fullscreen"
+                      style={{ width: '100%', height: '100%', border: 'none' }}
+                    />
+                    <div style={{ position: 'absolute', top: '10px', right: '10px', zIndex: 10 }}>
+                      <a href={hicineVideoUrl} target="_blank" rel="noopener noreferrer" className="btn btn-secondary" style={{ padding: '6px 12px', fontSize: '12px', background: 'rgba(0,0,0,0.6)' }}>
+                        ↗️ Open in Drive
+                      </a>
+                    </div>
+                  </div>
                 ) : (
                   <video
                     ref={videoRef}
