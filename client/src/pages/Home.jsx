@@ -5,6 +5,42 @@ import MovieCard from '../components/MovieCard.jsx';
 import { deDuplicateMovies } from '../utils.js';
 import { useHistory } from '../hooks/useHistory';
 
+const REGEX = {
+  punjabi: /punjabi|jatt|singh|carry on jatta|chhal mera|sardaar|gippy|diljit|ammy|kambdi|shadaa|qismat|honsla rakh|chal mera putt/i,
+  south: /hindi dubbed|south|allu arjun|ram charan|ntr|prabhas|yash|vijay|ajith|mahesh babu|dhanush|surya|karthi|ravi teja|pawan kalyan|kgf|pushpa|rrr|baahubali|salaar|leo/i,
+  hollywood: /avengers|batman|spider-man|superman|iron man|deadpool|x-men|marvel|dc|fast and furious|mission impossible|john wick|matrix|jurassic|star wars|harry potter|transformers/i,
+  southFalsePositives: /south park|southpaw|south of|journey to the south|south pacific|south central|south bound|southbound|south side|southside|south pole|south korea|south african|south park/i
+};
+
+const isCleanPunjabi = (m) => {
+  const t = m.title ? m.title.toLowerCase() : '';
+  if (/(hindi dubbed|south|hollywood)/.test(t)) return false;
+  return true;
+};
+
+const isCleanSouthIndian = (m) => {
+  const t = m.title ? m.title.toLowerCase() : '';
+  if (REGEX.southFalsePositives.test(t)) return false;
+  if (REGEX.punjabi.test(t)) return false;
+  if (REGEX.hollywood.test(t)) return false;
+  return true;
+};
+
+const isCleanBollywood = (m) => {
+  const t = m.title ? m.title.toLowerCase() : '';
+  if (/(hindi dubbed|south|allu arjun|ram charan|ntr|prabhas|yash|vijay|ajith|mahesh babu|dhanush|kgf|pushpa|rrr|baahubali|salaar|leo)/.test(t)) return false;
+  if (REGEX.punjabi.test(t)) return false;
+  if (REGEX.hollywood.test(t)) return false;
+  return true;
+};
+
+const isCleanHollywood = (m) => {
+  const t = m.title ? m.title.toLowerCase() : '';
+  if (/(hindi dubbed|bollywood|punjabi|south indian|telugu|tamil|malayalam)/.test(t)) return false;
+  if (REGEX.southFalsePositives.test(t)) return false;
+  return true;
+};
+
 export default function Home() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -123,10 +159,10 @@ export default function Home() {
           
           const getRes = (res) => (res && res.status === 'fulfilled' && res.value && res.value.results) ? res.value.results : (res && res.status === 'fulfilled' && Array.isArray(res.value)) ? res.value : [];
 
-          setHomeBollywood(deDuplicateMovies(getRes(bollyRes)).map(m => ({ ...m, source: 'netmirror' })).filter(m => !m.title.toLowerCase().includes('punjabi')).slice(0, 10));
-          setHomePunjabi(deDuplicateMovies(getRes(punjabiRes)).map(m => ({ ...m, source: 'hicine' })).slice(0, 10));
-          setHomeHollywood(deDuplicateMovies(getRes(hollyRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
-          setHomeSouth(deDuplicateMovies(getRes(southRes)).map(m => ({ ...m, source: 'hicine' })).slice(0, 10));
+          setHomeBollywood(deDuplicateMovies(getRes(bollyRes)).map(m => ({ ...m, source: 'netmirror' })).filter(isCleanBollywood).slice(0, 10));
+          setHomePunjabi(deDuplicateMovies(getRes(punjabiRes)).map(m => ({ ...m, source: 'hicine' })).filter(isCleanPunjabi).slice(0, 10));
+          setHomeHollywood(deDuplicateMovies(getRes(hollyRes)).map(m => ({ ...m, source: 'netmirror' })).filter(isCleanHollywood).slice(0, 10));
+          setHomeSouth(deDuplicateMovies(getRes(southRes)).map(m => ({ ...m, source: 'hicine' })).filter(isCleanSouthIndian).slice(0, 10));
           
           setHomeIndianWebSeries(deDuplicateMovies(getRes(indWebRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
           setHomeHollywoodTV(deDuplicateMovies(getRes(hollyTvRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
@@ -169,7 +205,7 @@ export default function Home() {
           
           while (tempAllMovies.length < targetCount && attempts < 5) {
             let newItems = [];
-                        if (activeServer === 'server1') {
+                        if (activeServer === 'server1') {
               const params = { page: apiPagePointer };
               
               if (activeTab === 'bollywood') {
@@ -177,25 +213,23 @@ export default function Home() {
                 params.cn = 'India';
                 const data = await api.external.netmirror.list(params);
                 if (cancelled) return;
-                newItems = (data.results || [])
-                  .map(m => ({ ...m, source: 'netmirror' }))
-                  .filter(m => !m.title.toLowerCase().includes('punjabi'));
+                newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' })).filter(isCleanBollywood);
               } else if (activeTab === 'southindian') {
                 const data = await api.external.hicine.search('South', apiPagePointer);
                 if (cancelled) return;
-                newItems = (Array.isArray(data) ? data : []).map(m => ({ ...m, source: 'hicine' }));
+                newItems = (Array.isArray(data) ? data : []).map(m => ({ ...m, source: 'hicine' })).filter(isCleanSouthIndian);
               } else if (activeTab === 'punjabi') {
                 const data = await api.external.hicine.search('Punjabi', apiPagePointer);
                 if (cancelled) return;
-                newItems = (Array.isArray(data) ? data : []).map(m => ({ ...m, source: 'hicine' }));
+                newItems = (Array.isArray(data) ? data : []).map(m => ({ ...m, source: 'hicine' })).filter(isCleanPunjabi);
               } else if (activeTab === 'hollywood') {
                 params.type = '1';
                 params.cn = 'US';
                 const data = await api.external.netmirror.list(params);
                 if (cancelled) return;
-                newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
+                newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' })).filter(isCleanHollywood);
               } else if (activeTab === 'webseries') {
-                params.type = '2'; // Web Series all languages (no cn)
+                params.type = '2';
                 const data = await api.external.netmirror.list(params);
                 if (cancelled) return;
                 newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
@@ -224,19 +258,27 @@ export default function Home() {
               else if (activeTab === 'hollywoodtvshows') categoryKey = 'hollywoodtvshows';
 
               const data = await api.external.hicine.list(categoryKey, apiPagePointer);
-                if (cancelled) return;
-                newItems = data.results || [];
-                
-                if (activeTab === 'anime') {
-                  newItems = newItems.filter(m => {
-                    const t = m.title.toLowerCase();
-                    return !t.includes('anime supremacy') && 
-                           !t.includes('chô jigen kakumei anime') &&
-                           !t.includes('kaun kitney paani mein') &&
-                           !t.includes('leanne morgan');
-                  });
-                }
+              if (cancelled) return;
+              newItems = (Array.isArray(data) ? data : (data.results || []));
+              
+              if (activeTab === 'bollywood') {
+                 newItems = newItems.filter(isCleanBollywood);
+              } else if (activeTab === 'southindian') {
+                 newItems = newItems.filter(isCleanSouthIndian);
+              } else if (activeTab === 'punjabi') {
+                 newItems = newItems.filter(isCleanPunjabi);
+              } else if (activeTab === 'hollywood') {
+                 newItems = newItems.filter(isCleanHollywood);
+              } else if (activeTab === 'anime') {
+                newItems = newItems.filter(m => {
+                  const t = m.title.toLowerCase();
+                  return !t.includes('anime supremacy') && 
+                         !t.includes('chô jigen kakumei anime') &&
+                         !t.includes('kaun kitney paani mein') &&
+                         !t.includes('leanne morgan');
+                });
               }
+            }
 
             if (newItems.length === 0) {
               break;
