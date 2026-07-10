@@ -108,7 +108,8 @@ export default function Home() {
             indWebRes,
             hollyTvRes,
             koreanRes,
-            animeRes
+            animeRes,
+            localRes
           ] = await Promise.allSettled([
             api.external.netmirror.list({ type: '1', cn: 'India', page: 1 }),
             api.external.hicine.search('Punjabi'), // Server 1 search is broken, fallback to Server 2
