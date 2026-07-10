@@ -67,8 +67,8 @@ export const api = {
         return request(`/api/external/netmirror/video-sources${qs ? `?${qs}` : ''}`);
       },
       getProxyUrl: (url) => {
-        const ext = url.includes('cast=1') ? 'stream.mp4' : 'stream.m3u8';
-        return `${API_URL}/api/external/netmirror/proxy-stream/${ext}?url=${encodeURIComponent(url)}`;
+        // Return URL directly as the CDN does not require proxying and blocks Render IPs
+        return url;
       }
     },
     hicine: {
