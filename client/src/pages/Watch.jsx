@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { useParams, Link, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../api.js';
 import { getCleanBase, cleanHicineTitle } from '../utils.js';
@@ -193,7 +193,7 @@ export default function Watch() {
   };
 
   const artInstanceRef = useRef(null);
-  const availableQualities = React.useMemo(() => {
+  const availableQualities = useMemo(() => {
     let rawQualities = [];
     if (source === 'netmirror' && netmirrorQualities && netmirrorQualities.length > 0) {
       rawQualities = netmirrorQualities;
@@ -327,9 +327,9 @@ export default function Watch() {
   const handleAutoVolumeBoost = () => {
     if (!videoRef.current) return;
 
-    // Check if the video source is same-origin (proxied) to prevent CORS muting
+    // Check if the video source is same-origin (proxied or blob) to prevent CORS muting
     const videoSrc = videoRef.current.currentSrc || videoRef.current.src || '';
-    const isSameOrigin = videoSrc.startsWith('/') || videoSrc.startsWith(window.location.origin);
+    const isSameOrigin = videoSrc.startsWith('/') || videoSrc.startsWith(window.location.origin) || videoSrc.startsWith('blob:');
 
     if (!isSameOrigin) {
       return;
