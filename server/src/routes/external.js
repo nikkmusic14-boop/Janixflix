@@ -246,7 +246,7 @@ router.get('/netmirror/video-sources', async (req, res) => {
   try {
     const response = await fetchWithTimeout(signedUrl, {
       headers: {
-        'Referer': 'https://speed.watch22.shop/'
+        'Referer': 'https://netmirror.global/'
       }
     });
     if (!response.ok) {
