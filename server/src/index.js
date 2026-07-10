@@ -25,6 +25,14 @@ app.use((req, res, next) => {
   next();
 });
 
+// Redirect traffic from Render to Netlify for all non-API requests
+app.use((req, res, next) => {
+  if (req.hostname === 'janixflix-1.onrender.com' && req.method === 'GET' && !req.path.startsWith('/api')) {
+    return res.redirect(301, `https://janixflix-pro.netlify.app${req.originalUrl}`);
+  }
+  next();
+});
+
 // ────────────────────────────────────────────────────────────
 app.use(cors());
 app.use(express.json());
