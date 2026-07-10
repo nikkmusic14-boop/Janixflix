@@ -223,7 +223,7 @@ export default function Home() {
                 if (cancelled) return;
                 newItems = (Array.isArray(data) ? data : []).map(m => ({ ...m, source: 'hicine' })).filter(isCleanSouthIndian);
               } else if (activeTab === 'punjabi') {
-                if (apiPagePointer === 1) {
+                if (apiPagePointer === 0) {
                   const [d1, d2, d3, d4] = await Promise.all([
                     api.external.hicine.search('Punjabi'),
                     api.external.hicine.search('Jatt'),
@@ -284,7 +284,7 @@ export default function Home() {
               } else if (activeTab === 'southindian') {
                  newItems = newItems.filter(isCleanSouthIndian);
               } else if (activeTab === 'punjabi') {
-                if (apiPagePointer === 1) {
+                if (apiPagePointer === 0) {
                   const [d1, d2, d3, d4] = await Promise.all([
                     api.external.hicine.search('Punjabi'),
                     api.external.hicine.search('Jatt'),
