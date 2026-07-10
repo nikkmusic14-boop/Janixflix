@@ -261,9 +261,6 @@ router.get('/netmirror/video-sources', async (req, res) => {
     while ((match = qualityRegex.exec(html)) !== null) {
       if (match[2].startsWith('http')) {
         let streamUrl = match[2];
-        if (streamUrl.includes('bcdnxw.hakunaymatata.com')) {
-          streamUrl = streamUrl.replace('bcdnxw.hakunaymatata.com', 'bcdn.watch22.shop');
-        }
         qualities.push({ quality: match[1], url: streamUrl });
       }
     }
@@ -272,9 +269,6 @@ router.get('/netmirror/video-sources', async (req, res) => {
     const chromecastRegex = /url:\s*'([^']+cast=1[^']+)'/;
     const chromecastMatch = html.match(chromecastRegex);
     let chromecastUrl = chromecastMatch ? chromecastMatch[1] : null;
-    if (chromecastUrl && chromecastUrl.includes('bcdnxw.hakunaymatata.com')) {
-      chromecastUrl = chromecastUrl.replace('bcdnxw.hakunaymatata.com', 'bcdn.watch22.shop');
-    }
 
     console.log(`[Netmirror Stream] ID: ${id}, Qualities: ${qualities.length}, Chromecast: ${!!chromecastUrl}`);
     if (qualities.length === 0 && !chromecastUrl) {
