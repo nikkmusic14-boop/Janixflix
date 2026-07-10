@@ -30,20 +30,27 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
                     if (artInstance.controls.audioTrack) {
                       artInstance.controls.remove('audioTrack');
                     }
-                    artInstance.controls.add({
+                    
+                    const audioSetting = {
                       name: 'audioTrack',
-                      position: 'right',
-                      html: 'Audio',
+                      html: 'Audio Track',
                       tooltip: tracks[0].name || tracks[0].lang || 'Track 1',
                       selector: tracks.map((track, index) => ({
                         html: track.name || track.lang || `Track ${index + 1}`,
                         trackId: index
                       })),
-                      onSelect: function (item) {
+                      onSelect: function (item, $dom, event) {
                         hls.audioTrack = item.trackId;
                         return item.html;
                       }
-                    });
+                    };
+                    
+                    const settings = artInstance.setting.option || [];
+                    if (settings.find(s => s.name === 'audioTrack')) {
+                      artInstance.setting.update(audioSetting);
+                    } else {
+                      artInstance.setting.add(audioSetting);
+                    }
                   }
                 });
                 
