@@ -35,7 +35,6 @@ export default function Home() {
   const [homeHollywoodTV, setHomeHollywoodTV] = useState([]);
   const [homeKorean, setHomeKorean] = useState([]);
   const [homeAnime, setHomeAnime] = useState([]);
-  const [localMovies, setLocalMovies] = useState([]);
 
   // Search result states
   const [searchLoading, setSearchLoading] = useState(false);
@@ -108,8 +107,7 @@ export default function Home() {
             indWebRes,
             hollyTvRes,
             koreanRes,
-            animeRes,
-            localRes
+            animeRes
           ] = await Promise.allSettled([
             api.external.netmirror.list({ type: '1', cn: 'India', page: 1 }),
             api.external.hicine.search('Punjabi'), // Server 1 search is broken, fallback to Server 2
@@ -117,8 +115,7 @@ export default function Home() {
             api.external.netmirror.list({ type: '2', cn: 'India', page: 1 }),
             api.external.netmirror.list({ type: '2', cn: 'US', page: 1 }),
             api.external.netmirror.list({ cn: 'Korea', page: 1 }),
-            api.external.hicine.search('Anime'), // Server 1 search is broken, fallback to Server 2
-            api.listMovies()
+            api.external.hicine.search('Anime') // Server 1 search is broken, fallback to Server 2
           ]);
           if (cancelled) return;
           
@@ -141,14 +138,6 @@ export default function Home() {
                      !t.includes('leanne morgan');
             }).slice(0, 10);
           setHomeAnime(animeMovies);
-
-          let localData = [];
-          if (localRes && localRes.status === 'fulfilled' && Array.isArray(localRes.value)) {
-             localData = localRes.value;
-          } else if (localRes && localRes.status === 'fulfilled' && localRes.value && localRes.value.results) {
-             localData = localRes.value.results;
-          }
-          setLocalMovies(localData.map(m => ({ ...m, source: 'local' })));
 
           setHomeSouth([]); // Not easily distinguishable from Bollywood
           setMovies([]);
@@ -395,20 +384,6 @@ export default function Home() {
                       <div key={m.id} style={{ minWidth: '160px', width: '160px', flexShrink: 0 }}>
                         <MovieCard movie={m} />
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Row 1.5: 🌟 Special Collection (Local DB) */}
-              {localMovies.length > 0 && (
-                <div>
-                  <h3 style={{ borderLeft: '4px solid #00f3ff', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px', textShadow: '0 0 10px rgba(0, 243, 255, 0.3)' }}>
-                    🌟 Special Collection (Local DB)
-                  </h3>
-                  <div className="home-row">
-                    {localMovies.map((m) => (
-                      <MovieCard key={m.id} movie={m} />
                     ))}
                   </div>
                 </div>
