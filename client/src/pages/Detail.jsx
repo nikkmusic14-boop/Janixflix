@@ -132,10 +132,15 @@ export default function Detail() {
           setMovie(parsed);
 
           setServerFetching(true);
-          const resolved = await api.external.hicine.getMediaSource(href);
-          if (cancelled) return;
-          setServer2Data(resolved);
-          setServerFetching(false);
+          api.external.hicine.getMediaSource(href).then(resolved => {
+            if (!cancelled) {
+              setServer2Data(resolved);
+              setServerFetching(false);
+            }
+          }).catch(err => {
+            console.error(err);
+            if (!cancelled) setServerFetching(false);
+          });
         } 
         else {
           const local = await api.getMovie(id);
