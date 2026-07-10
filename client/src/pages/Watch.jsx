@@ -661,8 +661,6 @@ export default function Watch() {
   }, [subjectid, activeSe, activeEp, dp, movie, title, mirrorIndex, source]);
 
   // 3. Resolve Hicine streaming source link & episodes list
-  const [hicineQualities, setHicineQualities] = useState([]);
-
   useEffect(() => {
     if (source === 'hicine' && href) {
       setHicineLoading(true);
