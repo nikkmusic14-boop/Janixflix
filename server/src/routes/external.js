@@ -5,9 +5,9 @@ import { Readable } from 'node:stream';
 const router = Router();
 
 // Netmirror Secret Key and Mirrors Configuration
-const NETMIRROR_SECRET = 's3cr3t_k3y_for_n3tm1rr0r';
+const NETMIRROR_SECRET = 'net###@@sss';
 const MIRRORS = [
-  'https://speed.watch22.shop/player'
+  'https://speed.watch22.shop/play/watchbox.php',
 ];
 
 // Helper to fetch with timeout
