@@ -407,11 +407,11 @@ const HICINE_CATEGORY_URLS = {
   southindian: `${HICINE_BASE}/movies`,
   punjabi: `${HICINE_BASE}/movies`,
   hollywood: `${HICINE_BASE}/movies`,
-  webseries: `${HICINE_BASE}/webseries`,
-  indianwebseries: `${HICINE_BASE}/webseries`,
-  indiantvshows: `${HICINE_BASE}/webseries`,
-  tvshows: `${HICINE_BASE}/webseries`,
-  hollywoodtvshows: `${HICINE_BASE}/webseries`,
+  webseries: `${HICINE_BASE}/series`,
+  indianwebseries: `${HICINE_BASE}/series`,
+  indiantvshows: `${HICINE_BASE}/series`,
+  tvshows: `${HICINE_BASE}/series`,
+  hollywoodtvshows: `${HICINE_BASE}/series`,
   bgrade: `${HICINE_BASE}/movies`,
   anime: `${HICINE_BASE}/anime`
 };
@@ -419,8 +419,11 @@ const HICINE_CATEGORY_URLS = {
 // Category Listing Scraper
 router.get('/hicine/category/:cat', async (req, res) => {
   const { cat } = req.params;
+  let page = parseInt(req.query.page, 10) || 1;
+  if (page < 1) page = 1;
   
   let url = HICINE_CATEGORY_URLS[cat] || `${HICINE_BASE}/recent`;
+  url = `${url}?page=${page}`;
 
   try {
     const response = await fetchWithTimeout(url, { timeout: 15000 });

@@ -16,7 +16,7 @@ export default function Home() {
   const { viewHistory } = useHistory();
   
   // Server selection state
-  const [activeServer, setActiveServer] = useState('server2');
+  const [activeServer, setActiveServer] = useState(activeTab === 'anime' ? 'server2' : 'server1');
   
   // Catalog contents
   const [movies, setMovies] = useState([]);
@@ -43,7 +43,7 @@ export default function Home() {
 
   // Reset page and active server when category changes in URL
   useEffect(() => {
-    const defaultServer = 'server2';
+    const defaultServer = activeTab === 'anime' ? 'server2' : 'server1';
     const isSeries = activeTab === 'indianwebseries' || activeTab === 'indiantvshows' || activeTab === 'hollywoodtvshows' || activeTab === 'webseries' || activeTab === 'tvshows';
     const startPage = (defaultServer === 'server2' && isSeries) ? 1 : 0;
     setActiveServer(defaultServer);
