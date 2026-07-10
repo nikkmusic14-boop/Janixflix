@@ -69,28 +69,10 @@ export default function Navbar() {
           <span className="hide-emoji-mobile">🏠</span> Home
         </Link>
         <Link 
-          to="/?tab=bollywood" 
-          className={`nav-link ${(activeTab === 'bollywood' && !hasQuery) ? 'active' : ''}`}
+          to="/?tab=movies" 
+          className={`nav-link ${(activeTab === 'movies' && !hasQuery) ? 'active' : ''}`}
         >
-          <span className="hide-emoji-mobile">🇮🇳</span> Bollywood
-        </Link>
-        <Link 
-          to="/?tab=southindian" 
-          className={`nav-link ${(activeTab === 'southindian' && !hasQuery) ? 'active' : ''}`}
-        >
-          <span className="hide-emoji-mobile">🌴</span> South <span className="hide-mobile">Indian</span>
-        </Link>
-        <Link 
-          to="/?tab=punjabi" 
-          className={`nav-link ${(activeTab === 'punjabi' && !hasQuery) ? 'active' : ''}`}
-        >
-          <span className="hide-emoji-mobile">🌾</span> Punjabi
-        </Link>
-        <Link 
-          to="/?tab=hollywood" 
-          className={`nav-link ${(activeTab === 'hollywood' && !hasQuery) ? 'active' : ''}`}
-        >
-          <span className="hide-emoji-mobile">🇺🇸</span> Hollywood
+          <span className="hide-emoji-mobile">🍿</span> Movies
         </Link>
         <Link 
           to="/?tab=indianwebseries" 
