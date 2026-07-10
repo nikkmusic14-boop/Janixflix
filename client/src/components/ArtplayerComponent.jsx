@@ -9,6 +9,8 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
     const art = new Artplayer({
       ...option,
       container: artRef.current,
+      hotkey: true,
+      fastForward: true,
       fullscreenWeb: true,
       fullscreen: true,
       autoOrientation: true,
@@ -75,12 +77,10 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
         },
         (art) => {
           let touchTime = 0;
-          let isDoubleTapping = false;
 
           const handleTap = (e) => {
             const now = Date.now();
             if (now - touchTime < 300) {
-              isDoubleTapping = true;
               const clientX = e.touches ? e.touches[0].clientX : e.clientX;
               const rect = art.template.$video.getBoundingClientRect();
               const x = clientX - rect.left;
@@ -93,15 +93,24 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
                 art.notice.show = '⏪ -10s';
               }
               if (e.cancelable) e.preventDefault();
-              
-              // Reset
-              setTimeout(() => { isDoubleTapping = false; }, 300);
+              touchTime = 0; // Reset
+            } else {
+              touchTime = now;
             }
-            touchTime = now;
           };
 
           art.on('video:touchstart', handleTap);
-          art.on('video:click', handleTap);
+          art.template.$video.addEventListener('dblclick', (e) => {
+            const rect = art.template.$video.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            if (x > rect.width / 2) {
+              art.currentTime = Math.min(art.currentTime + 10, art.duration);
+              art.notice.show = '⏩ +10s';
+            } else {
+              art.currentTime = Math.max(art.currentTime - 10, 0);
+              art.notice.show = '⏪ -10s';
+            }
+          });
           
           return { name: 'doubleTapSeek' };
         }
@@ -112,6 +121,16 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
     if (getInstance && typeof getInstance === 'function') {
       getInstance(art);
     }
+
+    // Global Spacebar override to pause/play
+    const handleGlobalKeydown = (e) => {
+      if (['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) return;
+      if (e.code === 'Space' || e.keyCode === 32) {
+        e.preventDefault();
+        art.toggle();
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeydown);
 
     // Attach native video events
     const handlers = {
@@ -139,6 +158,7 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
           art.video.removeEventListener(event, handler);
         }
       });
+      window.removeEventListener('keydown', handleGlobalKeydown);
       if (art && art.destroy) {
         art.destroy(false);
       }

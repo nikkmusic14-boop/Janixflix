@@ -983,6 +983,22 @@ export default function Watch() {
 
   const artplayerServerControls = [
     {
+      name: 'audioTrack',
+      position: 'right',
+      html: 'Audio',
+      index: 10,
+      selector: [
+        { html: 'Hindi', lang: 'hi' },
+        { html: 'English', lang: 'en' },
+        { html: 'Tamil', lang: 'ta' },
+        { html: 'Telugu', lang: 'te' }
+      ],
+      onSelect: function (item) {
+        artInstanceRef.current?.notice?.show('Audio track not available on this server. Try Server 2.');
+        return 'Audio';
+      }
+    },
+    {
       name: 'serverSwitch',
       position: 'right',
       html: 'Server',
