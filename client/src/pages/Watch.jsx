@@ -193,6 +193,32 @@ export default function Watch() {
   };
 
   const artInstanceRef = useRef(null);
+  const availableQualities = React.useMemo(() => {
+    let rawQualities = [];
+    if (source === 'netmirror' && netmirrorQualities && netmirrorQualities.length > 0) {
+      rawQualities = netmirrorQualities;
+    } else if (source === 'hicine' && hicineQualities && hicineQualities.length > 0) {
+      rawQualities = hicineQualities;
+    }
+    
+    let labels = rawQualities.map(q => {
+      let label = (q.quality || '').toLowerCase();
+      if (label.includes('1080') || label.includes('fhd')) return '1080p';
+      if (label.includes('720') || label.includes('hd')) return '720p';
+      if (label.includes('480')) return '480p';
+      if (label.includes('360')) return '360p';
+      return null;
+    }).filter(Boolean);
+
+    let finalQualities = [...new Set(labels)];
+    if (finalQualities.length === 0) {
+       // fallback if parser didn't match standard names
+       finalQualities = ['1080p', '720p', '480p'];
+    }
+
+    finalQualities.sort((a, b) => parseInt(b) - parseInt(a));
+    return finalQualities;
+  }, [source, netmirrorQualities, hicineQualities]);
 
   const handleQualityChange = (qLabel) => {
     setSelectedQuality(qLabel);
@@ -1402,11 +1428,11 @@ export default function Watch() {
             </div>
 
             {/* Universal Quality Selector */}
-            {(!netmirrorLoading && !hicineLoading) && (
+            {(!netmirrorLoading && !hicineLoading && availableQualities.length > 0) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '12px', marginTop: '4px' }}>
                 <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>🎬 Video Quality:</span>
                 <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {['1080p', '720p', '480p'].map((qLabel) => {
+                  {availableQualities.map((qLabel) => {
                     const isActive = selectedQuality === qLabel;
                     return (
                       <button
