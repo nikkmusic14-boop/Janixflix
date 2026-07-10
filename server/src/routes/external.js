@@ -426,7 +426,7 @@ router.get('/hicine/category/:cat', async (req, res) => {
       throw new Error(`Hicine fetch failed with status ${response.status}`);
     }
     const json = await response.json();
-    const dataList = json.data || json;
+    const dataList = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : (json.results ? json.results : []));
     
     const items = dataList.map(item => ({
       id: item.url_slug || item._id,
@@ -461,7 +461,7 @@ router.get('/hicine/search', async (req, res) => {
       throw new Error(`Hicine search failed with status ${response.status}`);
     }
     const json = await response.json();
-    const dataList = json.data || json;
+    const dataList = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : (json.results ? json.results : []));
     
     const items = dataList.map(item => ({
       id: item.url_slug || item._id,
@@ -522,7 +522,7 @@ router.get('/hicine/movie-source', async (req, res) => {
         const searchRes = await fetchWithTimeout(`${HICINE_BASE}/search/${encodeURIComponent(query)}`, { timeout: 15000 });
         if (searchRes.ok) {
           const json = await searchRes.json();
-          const dataList = json.data || json;
+          const dataList = Array.isArray(json.data) ? json.data : (Array.isArray(json) ? json : (json.results ? json.results : []));
           item = dataList.find(i => i.url_slug === slug || i._id === slug) || dataList[0];
         }
       }
