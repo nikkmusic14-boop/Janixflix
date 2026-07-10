@@ -242,6 +242,22 @@ export default function Home() {
             attempts++;
           }
           
+          tempAllMovies.sort((a, b) => {
+             const getDate = (m) => {
+               if (!m) return 0;
+               if (m.release_date) {
+                 const d = new Date(m.release_date);
+                 if (!isNaN(d.getTime())) return d.getTime();
+               }
+               if (m.year) {
+                 const d = new Date(m.year.toString());
+                 if (!isNaN(d.getTime())) return d.getTime();
+               }
+               return 0;
+             };
+             return getDate(b) - getDate(a);
+          });
+          
           setAllMovies(tempAllMovies);
           setLastApiPageFetched(currentLastApi);
         }

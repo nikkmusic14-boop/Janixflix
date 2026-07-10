@@ -24,6 +24,29 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
               artInstance.hls = hls;
               
               if (!artInstance.hlsIsBound) {
+                hls.on(Hls.Events.AUDIO_TRACKS_UPDATED, function (_, data) {
+                  const tracks = data.audioTracks;
+                  if (tracks && tracks.length > 1) {
+                    if (artInstance.controls.audioTrack) {
+                      artInstance.controls.remove('audioTrack');
+                    }
+                    artInstance.controls.add({
+                      name: 'audioTrack',
+                      position: 'right',
+                      html: 'Audio',
+                      tooltip: tracks[0].name || tracks[0].lang || 'Track 1',
+                      selector: tracks.map((track, index) => ({
+                        html: track.name || track.lang || `Track ${index + 1}`,
+                        trackId: index
+                      })),
+                      onSelect: function (item) {
+                        hls.audioTrack = item.trackId;
+                        return item.html;
+                      }
+                    });
+                  }
+                });
+                
                 artInstance.on('destroy', () => {
                   if (artInstance.hls) artInstance.hls.destroy();
                 });
