@@ -1,0 +1,1 @@
+fetch('http://localhost:4000/api/external/hicine/search?q=jatt').then(r=>r.json()).then(j=>console.log('Jatt:', j.length)); fetch('http://localhost:4000/api/external/hicine/search?q=singh').then(r=>r.json()).then(j=>console.log('Singh:', j.length));  

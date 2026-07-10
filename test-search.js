@@ -1,0 +1,1 @@
+fetch('http://localhost:4000/api/external/netmirror/filter?type=1&cn=India&page=1').then(r=>r.json()).then(j=>console.log(j.results.filter(m=>m.title.match(/punjabi|jatt|singh|carry on jatta|chhal mera|sardaar|gippy|diljit|ammy|kambdi|shadaa|qismat|honsla rakh|chal mera putt/i)).map(m=>m.title)));  

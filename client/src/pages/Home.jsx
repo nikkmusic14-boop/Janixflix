@@ -147,7 +147,11 @@ export default function Home() {
             southRes
           ] = await Promise.allSettled([
             api.external.netmirror.list({ type: '1', cn: 'India', page: 1 }),
-            api.external.hicine.search('Punjabi'), // Server 1 search is broken, fallback to Server 2
+            Promise.all([
+              api.external.hicine.search('Punjabi'),
+              api.external.hicine.search('Jatt'),
+              api.external.hicine.search('Singh')
+            ]).then(([a,b,c]) => [...(Array.isArray(a)?a:[]), ...(Array.isArray(b)?b:[]), ...(Array.isArray(c)?c:[])]),
             api.external.netmirror.list({ type: '1', cn: 'US', page: 1 }),
             api.external.netmirror.list({ type: '2', cn: 'India', page: 1 }),
             api.external.netmirror.list({ type: '2', cn: 'US', page: 1 }),
@@ -219,9 +223,23 @@ export default function Home() {
                 if (cancelled) return;
                 newItems = (Array.isArray(data) ? data : []).map(m => ({ ...m, source: 'hicine' })).filter(isCleanSouthIndian);
               } else if (activeTab === 'punjabi') {
-                const data = await api.external.hicine.search('Punjabi', apiPagePointer);
-                if (cancelled) return;
-                newItems = (Array.isArray(data) ? data : []).map(m => ({ ...m, source: 'hicine' })).filter(isCleanPunjabi);
+                if (apiPagePointer === 1) {
+                  const [d1, d2, d3, d4] = await Promise.all([
+                    api.external.hicine.search('Punjabi'),
+                    api.external.hicine.search('Jatt'),
+                    api.external.hicine.search('Singh'),
+                    api.external.hicine.search('Carry on')
+                  ]);
+                  const allData = [
+                    ...(Array.isArray(d1) ? d1 : []),
+                    ...(Array.isArray(d2) ? d2 : []),
+                    ...(Array.isArray(d3) ? d3 : []),
+                    ...(Array.isArray(d4) ? d4 : [])
+                  ];
+                  newItems = allData.map(m => ({ ...m, source: 'hicine' })).filter(isCleanPunjabi);
+                } else {
+                  newItems = [];
+                }
               } else if (activeTab === 'hollywood') {
                 params.type = '1';
                 params.cn = 'US';
@@ -266,7 +284,23 @@ export default function Home() {
               } else if (activeTab === 'southindian') {
                  newItems = newItems.filter(isCleanSouthIndian);
               } else if (activeTab === 'punjabi') {
-                 newItems = newItems.filter(isCleanPunjabi);
+                if (apiPagePointer === 1) {
+                  const [d1, d2, d3, d4] = await Promise.all([
+                    api.external.hicine.search('Punjabi'),
+                    api.external.hicine.search('Jatt'),
+                    api.external.hicine.search('Singh'),
+                    api.external.hicine.search('Carry on')
+                  ]);
+                  const allData = [
+                    ...(Array.isArray(d1) ? d1 : []),
+                    ...(Array.isArray(d2) ? d2 : []),
+                    ...(Array.isArray(d3) ? d3 : []),
+                    ...(Array.isArray(d4) ? d4 : [])
+                  ];
+                  newItems = allData.map(m => ({ ...m, source: 'hicine' })).filter(isCleanPunjabi);
+                } else {
+                  newItems = [];
+                }
               } else if (activeTab === 'hollywood') {
                  newItems = newItems.filter(isCleanHollywood);
               } else if (activeTab === 'anime') {
