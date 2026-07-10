@@ -546,7 +546,7 @@ export default function Detail() {
           {!isTv && (
             <div className="hero-buttons" style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
               {/* Play Server 1 Button */}
-              {/* {source === 'local' ? (
+              {source === 'local' ? (
                 <Link 
                   to={`/watch/${movie.id}?source=local`} 
                   className="btn btn-primary"
@@ -575,7 +575,7 @@ export default function Detail() {
                 <button className="btn btn-primary" style={{ background: '#0070f3', opacity: 0.5, cursor: 'default' }} disabled>
                   ⚡ Server 1 (Searching...)
                 </button>
-              )} */}
+              )}
 
               {/* Play Server 2 Button */}
               {source === 'hicine' ? (
@@ -618,13 +618,13 @@ export default function Detail() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px', flexWrap: 'wrap' }}>
                   <h3 style={{ margin: 0, fontSize: '18px' }}>Episodes Selection:</h3>
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    {/* <button
+                    <button
                       onClick={() => switchSeriesServerTab('server1')}
                       disabled={!server1Data && !oppositeLink && oppositeSearching}
                       style={serverTabButtonStyle(activeServerTab === 'server1', '#0070f3')}
                     >
                       ⚡ Server 1 (FHD)
-                    </button> */}
+                    </button>
                     <button
                       onClick={() => switchSeriesServerTab('server2')}
                       disabled={!server2Data && !oppositeLink && oppositeSearching}

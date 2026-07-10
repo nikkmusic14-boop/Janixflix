@@ -321,12 +321,12 @@ export default function Home() {
           justifyContent: 'center',
           gap: '12px' 
         }}>
-          {/* <button
+          <button
             onClick={() => handleServerChange('server1')}
             style={serverButtonStyle(activeServer === 'server1', '#0070f3')}
           >
             ⚡ Stream Server 1 (FHD)
-          </button> */}
+          </button>
           <button
             onClick={() => handleServerChange('server2')}
             style={serverButtonStyle(activeServer === 'server2', '#00a000')}
