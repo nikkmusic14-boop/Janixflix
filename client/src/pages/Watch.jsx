@@ -1046,7 +1046,26 @@ export default function Watch() {
                   playbackRate: true,
                   aspectRatio: true,
                   miniProgressBar: true,
-                  playsInline: true
+                  playsInline: true,
+                  setting: true,
+                  controls: [
+                    {
+                      name: 'audioTrack',
+                      position: 'right',
+                      html: 'Audio',
+                      index: 10,
+                      selector: [
+                        { html: 'Hindi', lang: 'hi' },
+                        { html: 'English', lang: 'en' },
+                        { html: 'Tamil', lang: 'ta' },
+                        { html: 'Telugu', lang: 'te' }
+                      ],
+                      onSelect: function (item) {
+                        artInstanceRef.current?.notice?.show('Audio track not available on this server. Try Server 2.');
+                        return 'Audio';
+                      }
+                    }
+                  ]
                 }}
                 getInstance={(art) => {
                   videoRef.current = art.video;
