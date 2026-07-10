@@ -5,9 +5,9 @@ import { Readable } from 'node:stream';
 const router = Router();
 
 // Netmirror Secret Key and Mirrors Configuration
-const NETMIRROR_SECRET = 'net###@@sss';
+const NETMIRROR_SECRET = 's3cr3t_k3y_for_n3tm1rr0r';
 const MIRRORS = [
-  'https://netmirror.global/play/watchbox.php'
+  'https://speed.watch22.shop/player'
 ];
 
 // Helper to fetch with timeout
@@ -246,7 +246,7 @@ router.get('/netmirror/video-sources', async (req, res) => {
   try {
     const response = await fetchWithTimeout(signedUrl, {
       headers: {
-        'Referer': 'https://netmirror.global/'
+        'Referer': 'https://speed.watch22.shop/'
       }
     });
     if (!response.ok) {
@@ -260,14 +260,21 @@ router.get('/netmirror/video-sources', async (req, res) => {
     let match;
     while ((match = qualityRegex.exec(html)) !== null) {
       if (match[2].startsWith('http')) {
-        qualities.push({ quality: match[1], url: match[2] });
+        let streamUrl = match[2];
+        if (streamUrl.includes('bcdnxw.hakunaymatata.com')) {
+          streamUrl = streamUrl.replace('bcdnxw.hakunaymatata.com', 'bcdn.watch22.shop');
+        }
+        qualities.push({ quality: match[1], url: streamUrl });
       }
     }
 
     // Extract Chromecast URL
     const chromecastRegex = /url:\s*'([^']+cast=1[^']+)'/;
     const chromecastMatch = html.match(chromecastRegex);
-    const chromecastUrl = chromecastMatch ? chromecastMatch[1] : null;
+    let chromecastUrl = chromecastMatch ? chromecastMatch[1] : null;
+    if (chromecastUrl && chromecastUrl.includes('bcdnxw.hakunaymatata.com')) {
+      chromecastUrl = chromecastUrl.replace('bcdnxw.hakunaymatata.com', 'bcdn.watch22.shop');
+    }
 
     console.log(`[Netmirror Stream] ID: ${id}, Qualities: ${qualities.length}, Chromecast: ${!!chromecastUrl}`);
     if (qualities.length === 0 && !chromecastUrl) {
@@ -295,7 +302,7 @@ router.get(['/netmirror/proxy-stream', '/netmirror/proxy-stream/stream.m3u8', '/
 
 
     const headers = {
-      'Referer': 'https://netmirror.global/',
+      'Referer': 'https://speed.watch22.shop/',
       'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
     };
 
