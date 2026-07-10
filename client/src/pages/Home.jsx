@@ -101,37 +101,45 @@ export default function Home() {
 
         if (activeTab === 'home') {
           const [
-            moviesRes,
-            webseriesRes,
+            bollyRes,
+            punjabiRes,
+            hollyRes,
+            indWebRes,
+            hollyTvRes,
+            koreanRes,
             animeRes
-          ] = await Promise.all([
-            api.external.hicine.list('movies').catch(() => ({ results: [] })),
-            api.external.hicine.list('webseries').catch(() => ({ results: [] })),
-            api.external.hicine.list('anime').catch(() => ({ results: [] }))
+          ] = await Promise.allSettled([
+            api.external.netmirror.list({ type: '1', cn: 'India', page: 1 }),
+            api.external.netmirror.search('Punjabi', 1),
+            api.external.netmirror.list({ type: '1', cn: 'US', page: 1 }),
+            api.external.netmirror.list({ type: '2', cn: 'India', page: 1 }),
+            api.external.netmirror.list({ type: '2', cn: 'US', page: 1 }),
+            api.external.netmirror.list({ cn: 'Korea', page: 1 }),
+            api.external.netmirror.search('Anime', 1)
           ]);
           if (cancelled) return;
           
-          setHomeBollywood(deDuplicateMovies(moviesRes.results || []).map(m => ({ ...m, source: 'hicine' })));
-          setHomeIndianWebSeries(deDuplicateMovies(webseriesRes.results || []).map(m => ({ ...m, source: 'hicine' })));
+          const getRes = (res) => (res && res.status === 'fulfilled' && res.value && res.value.results) ? res.value.results : [];
+
+          setHomeBollywood(deDuplicateMovies(getRes(bollyRes)).map(m => ({ ...m, source: 'netmirror' })).filter(m => !m.title.toLowerCase().includes('punjabi')).slice(0, 10));
+          setHomePunjabi(deDuplicateMovies(getRes(punjabiRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
+          setHomeHollywood(deDuplicateMovies(getRes(hollyRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
+          setHomeIndianWebSeries(deDuplicateMovies(getRes(indWebRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
+          setHomeHollywoodTV(deDuplicateMovies(getRes(hollyTvRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
+          setHomeKorean(deDuplicateMovies(getRes(koreanRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
           
-          let animeMovies = deDuplicateMovies(animeRes.results || [])
-            .map(m => ({ ...m, source: 'hicine' }))
+          let animeMovies = deDuplicateMovies(getRes(animeRes))
+            .map(m => ({ ...m, source: 'netmirror' }))
             .filter(m => {
               const t = m.title.toLowerCase();
               return !t.includes('anime supremacy') && 
                      !t.includes('chô jigen kakumei anime') &&
                      !t.includes('kaun kitney paani mein') &&
                      !t.includes('leanne morgan');
-            });
+            }).slice(0, 10);
           setHomeAnime(animeMovies);
 
-          // Clear others
-          setHomeSouth([]);
-          setHomePunjabi([]);
-          setHomeHollywood([]);
-          setHomeHollywoodTV([]);
-          setHomeKorean([]);
-
+          setHomeSouth([]); // Not easily distinguishable from Bollywood
           setMovies([]);
           setLoading(false);
           return;
@@ -365,11 +373,11 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Row 2: 🎬 Trending Movies */}
+              {/* Row 2: 🎬 Bollywood & South Indian Movies */}
               {homeBollywood.length > 0 && (
                 <div>
                   <h3 style={{ borderLeft: '4px solid #0070f3', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
-                    🎬 Trending Movies
+                    🎬 Bollywood & South Indian Movies
                   </h3>
                   <div className="home-row">
                     {homeBollywood.map((m) => (
@@ -379,13 +387,39 @@ export default function Home() {
                 </div>
               )}
 
+              {/* Row 3: 👳 Punjabi Movies */}
+              {homePunjabi.length > 0 && (
+                <div>
+                  <h3 style={{ borderLeft: '4px solid #ffcc00', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
+                    👳 Punjabi Movies
+                  </h3>
+                  <div className="home-row">
+                    {homePunjabi.map((m) => (
+                      <MovieCard key={m.id} movie={m} />
+                    ))}
+                  </div>
+                </div>
+              )}
 
+              {/* Row 4: 🦅 Hollywood Movies */}
+              {homeHollywood.length > 0 && (
+                <div>
+                  <h3 style={{ borderLeft: '4px solid #f30000', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
+                    🦅 Hollywood Movies
+                  </h3>
+                  <div className="home-row">
+                    {homeHollywood.map((m) => (
+                      <MovieCard key={m.id} movie={m} />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              {/* Row 3: 📺 Web Series & TV Shows */}
+              {/* Row 5: 📺 Indian Web Series */}
               {homeIndianWebSeries.length > 0 && (
                 <div>
                   <h3 style={{ borderLeft: '4px solid #00f3ff', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px', textShadow: '0 0 10px rgba(0, 243, 255, 0.3)' }}>
-                    📺 Web Series & TV Shows
+                    📺 Indian Web Series
                   </h3>
                   <div className="home-row">
                     {homeIndianWebSeries.map((m) => (
@@ -395,9 +429,35 @@ export default function Home() {
                 </div>
               )}
 
+              {/* Row 6: 🗽 Hollywood TV Shows */}
+              {homeHollywoodTV.length > 0 && (
+                <div>
+                  <h3 style={{ borderLeft: '4px solid #a300cc', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
+                    🗽 Hollywood TV Shows
+                  </h3>
+                  <div className="home-row">
+                    {homeHollywoodTV.map((m) => (
+                      <MovieCard key={m.id} movie={m} />
+                    ))}
+                  </div>
+                </div>
+              )}
 
+              {/* Row 7: 🎎 Korean Dramas */}
+              {homeKorean.length > 0 && (
+                <div>
+                  <h3 style={{ borderLeft: '4px solid #ff66b2', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
+                    🎎 Korean Dramas & Movies
+                  </h3>
+                  <div className="home-row">
+                    {homeKorean.map((m) => (
+                      <MovieCard key={m.id} movie={m} />
+                    ))}
+                  </div>
+                </div>
+              )}
 
-              {/* Row 4: ⛩️ Anime */}
+              {/* Row 8: ⛩️ Anime */}
               {homeAnime.length > 0 && (
                 <div>
                   <h3 style={{ borderLeft: '4px solid #ff9f43', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
