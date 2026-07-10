@@ -110,26 +110,26 @@ export default function Home() {
             animeRes
           ] = await Promise.allSettled([
             api.external.netmirror.list({ type: '1', cn: 'India', page: 1 }),
-            api.external.netmirror.search('Punjabi', 1),
+            api.external.hicine.search('Punjabi'), // Server 1 search is broken, fallback to Server 2
             api.external.netmirror.list({ type: '1', cn: 'US', page: 1 }),
             api.external.netmirror.list({ type: '2', cn: 'India', page: 1 }),
             api.external.netmirror.list({ type: '2', cn: 'US', page: 1 }),
             api.external.netmirror.list({ cn: 'Korea', page: 1 }),
-            api.external.netmirror.search('Anime', 1)
+            api.external.hicine.search('Anime') // Server 1 search is broken, fallback to Server 2
           ]);
           if (cancelled) return;
           
-          const getRes = (res) => (res && res.status === 'fulfilled' && res.value && res.value.results) ? res.value.results : [];
+          const getRes = (res) => (res && res.status === 'fulfilled' && res.value && res.value.results) ? res.value.results : (res && res.status === 'fulfilled' && Array.isArray(res.value)) ? res.value : [];
 
           setHomeBollywood(deDuplicateMovies(getRes(bollyRes)).map(m => ({ ...m, source: 'netmirror' })).filter(m => !m.title.toLowerCase().includes('punjabi')).slice(0, 10));
-          setHomePunjabi(deDuplicateMovies(getRes(punjabiRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
+          setHomePunjabi(deDuplicateMovies(getRes(punjabiRes)).map(m => ({ ...m, source: 'hicine' })).slice(0, 10));
           setHomeHollywood(deDuplicateMovies(getRes(hollyRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
           setHomeIndianWebSeries(deDuplicateMovies(getRes(indWebRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
           setHomeHollywoodTV(deDuplicateMovies(getRes(hollyTvRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
           setHomeKorean(deDuplicateMovies(getRes(koreanRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
           
           let animeMovies = deDuplicateMovies(getRes(animeRes))
-            .map(m => ({ ...m, source: 'netmirror' }))
+            .map(m => ({ ...m, source: 'hicine' }))
             .filter(m => {
               const t = m.title.toLowerCase();
               return !t.includes('anime supremacy') && 
@@ -179,14 +179,14 @@ export default function Home() {
                   .map(m => ({ ...m, source: 'netmirror' }))
                   .filter(m => !m.title.toLowerCase().includes('punjabi'));
               } else if (activeTab === 'punjabi') {
-                const data = await api.external.netmirror.search('Punjabi', apiPagePointer);
+                const data = await api.external.hicine.search('Punjabi', apiPagePointer);
                 if (cancelled) return;
-                newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' }));
+                newItems = (Array.isArray(data) ? data : []).map(m => ({ ...m, source: 'hicine' }));
               } else if (activeTab === 'anime') {
-                const data = await api.external.netmirror.search('Anime', apiPagePointer);
+                const data = await api.external.hicine.search('Anime', apiPagePointer);
                 if (cancelled) return;
-                newItems = (data.results || [])
-                  .map(m => ({ ...m, source: 'netmirror' }))
+                newItems = (Array.isArray(data) ? data : [])
+                  .map(m => ({ ...m, source: 'hicine' }))
                   .filter(m => {
                     const t = m.title.toLowerCase();
                     return !t.includes('anime supremacy') && 

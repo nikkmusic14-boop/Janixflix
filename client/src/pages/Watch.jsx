@@ -225,7 +225,11 @@ export default function Watch() {
       setActiveNetmirrorUrl(targetUrl);
       
       if (artInstanceRef.current && artInstanceRef.current.switchUrl) {
-        artInstanceRef.current.switchUrl(proxyUrl);
+        artInstanceRef.current.switchUrl(proxyUrl)
+          .then(() => artInstanceRef.current.play())
+          .catch(e => {
+            console.warn('Quality switch play interrupted:', e);
+          });
       }
     } else if (source === 'hicine' && hicineQualities.length > 0) {
       const numeric = qLabel.replace('p', '');
@@ -242,7 +246,11 @@ export default function Watch() {
       setHicineVideoUrl(targetUrl);
       
       if (artInstanceRef.current && artInstanceRef.current.switchUrl) {
-        artInstanceRef.current.switchUrl(proxyUrl);
+        artInstanceRef.current.switchUrl(proxyUrl)
+          .then(() => artInstanceRef.current.play())
+          .catch(e => {
+            console.warn('Quality switch play interrupted:', e);
+          });
       }
     } else {
       if (art && art.video) {
