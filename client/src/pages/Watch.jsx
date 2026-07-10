@@ -981,6 +981,27 @@ export default function Watch() {
     );
   }
 
+  const artplayerServerControls = [
+    {
+      name: 'serverSwitch',
+      position: 'right',
+      html: 'Server',
+      index: 11,
+      selector: [
+        { html: 'Server 1 (FHD)', server: 'server1', default: source === 'netmirror' },
+        { html: 'Server 2 (HD)', server: 'server2', default: source === 'hicine' }
+      ],
+      onSelect: function (item) {
+        if (item.server === 'server1' && source !== 'netmirror') {
+          handleSwitchToServer1();
+        } else if (item.server === 'server2' && source !== 'hicine') {
+          handleSwitchToServer2();
+        }
+        return 'Server';
+      }
+    }
+  ];
+
   const hasSidebar = (source === 'netmirror' && mediaType === 'tv' && seasons.length > 0) || (source === 'hicine' && hicineEpisodes.length > 0);
 
   return (
@@ -1064,7 +1085,8 @@ export default function Watch() {
                         artInstanceRef.current?.notice?.show('Audio track not available on this server. Try Server 2.');
                         return 'Audio';
                       }
-                    }
+                    },
+                    ...artplayerServerControls
                   ]
                 }}
                 getInstance={(art) => {
@@ -1150,7 +1172,8 @@ export default function Watch() {
                       playbackRate: true,
                       aspectRatio: true,
                       miniProgressBar: true,
-                      playsInline: true
+                      playsInline: true,
+                      controls: artplayerServerControls
                     }}
                     getInstance={(art) => {
                       videoRef.current = art.video;
@@ -1243,7 +1266,8 @@ export default function Watch() {
                       playbackRate: true,
                       aspectRatio: true,
                       miniProgressBar: true,
-                      playsInline: true
+                      playsInline: true,
+                      controls: artplayerServerControls
                     }}
                     getInstance={(art) => {
                       videoRef.current = art.video;

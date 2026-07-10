@@ -107,7 +107,8 @@ export default function Home() {
             indWebRes,
             hollyTvRes,
             koreanRes,
-            animeRes
+            animeRes,
+            southRes
           ] = await Promise.allSettled([
             api.external.netmirror.list({ type: '1', cn: 'India', page: 1 }),
             api.external.hicine.search('Punjabi'), // Server 1 search is broken, fallback to Server 2
@@ -115,7 +116,8 @@ export default function Home() {
             api.external.netmirror.list({ type: '2', cn: 'India', page: 1 }),
             api.external.netmirror.list({ type: '2', cn: 'US', page: 1 }),
             api.external.netmirror.list({ cn: 'Korea', page: 1 }),
-            api.external.hicine.search('Anime') // Server 1 search is broken, fallback to Server 2
+            api.external.hicine.search('Anime'), // Server 1 search is broken, fallback to Server 2
+            api.external.hicine.search('South') // Server 1 merges with Bollywood, use Server 2
           ]);
           if (cancelled) return;
           
@@ -139,7 +141,7 @@ export default function Home() {
             }).slice(0, 10);
           setHomeAnime(animeMovies);
 
-          setHomeSouth([]); // Not easily distinguishable from Bollywood
+          setHomeSouth(deDuplicateMovies(getRes(southRes)).map(m => ({ ...m, source: 'hicine' })).slice(0, 10));
           setMovies([]);
           setLoading(false);
           return;
@@ -170,7 +172,7 @@ export default function Home() {
             if (activeServer === 'server1') {
               const params = { page: apiPagePointer };
               
-              if (activeTab === 'bollywood' || activeTab === 'southindian') {
+              if (activeTab === 'bollywood') {
                 params.type = '1';
                 params.cn = 'India';
                 const data = await api.external.netmirror.list(params);
@@ -178,6 +180,11 @@ export default function Home() {
                 newItems = (data.results || [])
                   .map(m => ({ ...m, source: 'netmirror' }))
                   .filter(m => !m.title.toLowerCase().includes('punjabi'));
+              } else if (activeTab === 'southindian') {
+                // Fetch from hicine (Server 2) for South Indian since Netmirror merges them with Bollywood
+                const data = await api.external.hicine.search('South', apiPagePointer);
+                if (cancelled) return;
+                newItems = (Array.isArray(data) ? data : []).map(m => ({ ...m, source: 'hicine' }));
               } else if (activeTab === 'punjabi') {
                 const data = await api.external.hicine.search('Punjabi', apiPagePointer);
                 if (cancelled) return;
@@ -389,14 +396,28 @@ export default function Home() {
                 </div>
               )}
 
-              {/* Row 2: 🎬 Bollywood & South Indian Movies */}
+              {/* Row 2: 🎬 Bollywood Movies */}
               {homeBollywood.length > 0 && (
                 <div>
-                  <h3 style={{ borderLeft: '4px solid #0070f3', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
-                    🎬 Bollywood & South Indian Movies
+                  <h3 style={{ borderLeft: '4px solid #ff007f', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
+                    🎬 Bollywood Movies
                   </h3>
                   <div className="home-row">
                     {homeBollywood.map((m) => (
+                      <MovieCard key={m.id} movie={m} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Row 2.5: 🌴 South Indian Dubbed */}
+              {homeSouth.length > 0 && (
+                <div>
+                  <h3 style={{ borderLeft: '4px solid #00f3ff', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
+                    🌴 South Indian Dubbed Movies
+                  </h3>
+                  <div className="home-row">
+                    {homeSouth.map((m) => (
                       <MovieCard key={m.id} movie={m} />
                     ))}
                   </div>
