@@ -75,17 +75,7 @@ export default function Watch() {
   const [isPaused, setIsPaused] = useState(true);
 
   // Auto-play Next Episode
-  const [autoPlayNext, setAutoPlayNext] = useState(() => {
-    return localStorage.getItem('janixflix_autoplay') !== 'false';
-  });
-
-  const toggleAutoPlay = () => {
-    setAutoPlayNext(prev => {
-      const next = !prev;
-      localStorage.setItem('janixflix_autoplay', next.toString());
-      return next;
-    });
-  };
+  const [autoPlayNext, setAutoPlayNext] = useState(true);
 
   const handleNextEp = useCallback(() => {
     if (source === 'netmirror' && mediaType === 'tv') {
@@ -1488,36 +1478,7 @@ export default function Watch() {
 
 
 
-            {/* Screen Mode / Auto Play Selector */}
-            {(!netmirrorLoading && !hicineLoading) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '12px', marginTop: '4px', justifyContent: 'space-between' }}>
 
-
-                {/* Auto Play Toggle */}
-                {hasSidebar && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                    <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>Auto Play Next Ep:</span>
-                    <button
-                      onClick={toggleAutoPlay}
-                      style={{
-                        background: autoPlayNext ? 'linear-gradient(90deg, #00f3ff 0%, #0070f3 100%)' : '#333',
-                        color: '#fff',
-                        border: autoPlayNext ? '1px solid #00f3ff' : '1px solid #444',
-                        padding: '6px 14px',
-                        borderRadius: '20px',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        boxShadow: autoPlayNext ? '0 0 10px rgba(0, 243, 255, 0.4)' : 'none',
-                        transition: 'all 0.3s'
-                      }}
-                    >
-                      {autoPlayNext ? 'ON' : 'OFF'}
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
 
             {/* Audio Info Bar / Language Selector */}
             <div style={{ 
