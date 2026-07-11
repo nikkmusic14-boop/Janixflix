@@ -281,12 +281,7 @@ export default function Watch() {
     }
   };
 
-  // Volume Boost States & Refs
   const videoRef = useRef(null);
-  const [boostActive, setBoostActive] = useState(false);
-  const audioCtxRef = useRef(null);
-  const gainNodeRef = useRef(null);
-  const sourceNodeRef = useRef(null);
 
   // Global Fullscreen listener for iframes to force landscape on mobile
   useEffect(() => {
@@ -312,46 +307,6 @@ export default function Watch() {
       document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
     };
   }, []);
-
-  // Automatic Web Audio API Volume Boost (2.5x for ALL streams)
-  const handleAutoVolumeBoost = () => {
-    if (!videoRef.current) return;
-
-    // Check if the video source is same-origin (proxied or blob) to prevent CORS muting
-    const videoSrc = videoRef.current.currentSrc || videoRef.current.src || '';
-    const isSameOrigin = videoSrc.startsWith('/') || videoSrc.startsWith(window.location.origin) || videoSrc.startsWith('blob:');
-
-    if (!isSameOrigin) {
-      return;
-    }
-
-    try {
-      if (!audioCtxRef.current) {
-        const AudioContext = window.AudioContext || window.webkitAudioContext;
-        const ctx = new AudioContext();
-        audioCtxRef.current = ctx;
-
-        const sourceNode = ctx.createMediaElementSource(videoRef.current);
-        sourceNodeRef.current = sourceNode;
-
-        const gainNode = ctx.createGain();
-        gainNodeRef.current = gainNode;
-
-        sourceNode.connect(gainNode);
-        gainNode.connect(ctx.destination);
-      }
-
-      // Automatically boost gain to 2.5 (2.5x boost) for all same-origin videos
-      gainNodeRef.current.gain.value = 2.5;
-      setBoostActive(true);
-      if (audioCtxRef.current.state === 'suspended') {
-        audioCtxRef.current.resume();
-      }
-      console.log("[Auto Volume Boost]: Enabled 2.5x gain for stream.");
-    } catch (err) {
-      console.warn("[Auto Volume Boost Failed]:", err.message);
-    }
-  };
 
   const togglePlayPause = useCallback(() => {
     if (!videoRef.current) return;
@@ -519,25 +474,7 @@ export default function Watch() {
     });
   };
 
-  // Reset audio context and play state when stream changes
-  useEffect(() => {
-    if (audioCtxRef.current) {
-      audioCtxRef.current.close().catch(() => {});
-      audioCtxRef.current = null;
-      gainNodeRef.current = null;
-      sourceNodeRef.current = null;
-      setBoostActive(false);
-    }
-  }, [activeNetmirrorUrl, hicineVideoUrl]);
 
-  // Clean up AudioContext on unmount
-  useEffect(() => {
-    return () => {
-      if (audioCtxRef.current) {
-        audioCtxRef.current.close().catch(() => {});
-      }
-    };
-  }, []);
 
   // Adjust screen fit when source changes (Default to 'fill' for Server 2 / hicine to make it full screen)
   useEffect(() => {
@@ -1100,7 +1037,6 @@ export default function Watch() {
                 }}
                 style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', '--video-fit': videoFit }}
                 onPlay={(e) => {
-                  handleAutoVolumeBoost();
                   setVideoBuffering(false);
                   setIsPaused(false);
                 }}
@@ -1187,7 +1123,6 @@ export default function Watch() {
                     }}
                     style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', '--video-fit': videoFit }}
                     onPlay={(e) => {
-                      handleAutoVolumeBoost();
                       setVideoBuffering(false);
                       setIsPaused(false);
                     }}
