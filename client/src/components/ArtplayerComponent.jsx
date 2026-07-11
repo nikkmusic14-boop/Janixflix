@@ -76,40 +76,63 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
           return { name: 'autoRotate' };
         },
         (art) => {
-          let touchTime = 0;
+          let tapCount = 0;
+          let tapTimeout = null;
+          let lastTapDirection = null; // 'left' or 'right'
+          let lastTapTime = 0;
 
-          const handleTap = (e) => {
+          const handleTap = (clientX, isDblClickEvent = false) => {
             const now = Date.now();
-            if (now - touchTime < 300) {
-              const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-              const rect = art.template.$video.getBoundingClientRect();
-              const x = clientX - rect.left;
-              
-              if (x > rect.width / 2) {
+            const rect = art.template.$video.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const direction = x > rect.width / 2 ? 'right' : 'left';
+
+            if (isDblClickEvent) {
+               // From desktop dblclick
+               if (tapCount < 2 || lastTapDirection !== direction) tapCount = 2;
+               else tapCount++;
+               lastTapDirection = direction;
+            } else {
+               // From touchstart
+               if (now - lastTapTime < 300 && lastTapDirection === direction) {
+                 if (tapCount === 0 || tapCount === 1) tapCount = 2;
+                 else tapCount++;
+               } else {
+                 tapCount = 1; 
+               }
+               lastTapTime = now;
+               lastTapDirection = direction;
+            }
+
+            if (tapCount >= 2) {
+              const skipAmount = (tapCount - 1) * 10;
+              if (direction === 'right') {
                 art.currentTime = Math.min(art.currentTime + 10, art.duration);
-                art.notice.show = '⏩ +10s';
+                art.notice.show = `⏩ +${skipAmount}s`;
               } else {
                 art.currentTime = Math.max(art.currentTime - 10, 0);
-                art.notice.show = '⏪ -10s';
+                art.notice.show = `⏪ -${skipAmount}s`;
               }
-              if (e.cancelable) e.preventDefault();
-              touchTime = 0; // Reset
-            } else {
-              touchTime = now;
             }
+
+            if (tapTimeout) clearTimeout(tapTimeout);
+            tapTimeout = setTimeout(() => {
+              tapCount = 0;
+              lastTapDirection = null;
+            }, 600);
           };
 
-          art.on('video:touchstart', handleTap);
-          art.template.$video.addEventListener('dblclick', (e) => {
-            const rect = art.template.$video.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            if (x > rect.width / 2) {
-              art.currentTime = Math.min(art.currentTime + 10, art.duration);
-              art.notice.show = '⏩ +10s';
-            } else {
-              art.currentTime = Math.max(art.currentTime - 10, 0);
-              art.notice.show = '⏪ -10s';
+          const handleTouchStart = (e) => {
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            if (tapCount >= 1 && Date.now() - lastTapTime < 300) {
+               if (e.cancelable) e.preventDefault();
             }
+            handleTap(clientX, false);
+          };
+
+          art.on('video:touchstart', handleTouchStart);
+          art.template.$video.addEventListener('dblclick', (e) => {
+            handleTap(e.clientX, true);
           });
           
           return { name: 'doubleTapSeek' };

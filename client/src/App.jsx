@@ -1,9 +1,10 @@
-import { useEffect } from 'react';
+import { useEffect, Suspense, lazy } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar.jsx';
-import Home from './pages/Home.jsx';
-import Detail from './pages/Detail.jsx';
-import Watch from './pages/Watch.jsx';
+
+const Home = lazy(() => import('./pages/Home.jsx'));
+const Detail = lazy(() => import('./pages/Detail.jsx'));
+const Watch = lazy(() => import('./pages/Watch.jsx'));
 
 export default function App() {
   useEffect(() => {
@@ -46,12 +47,18 @@ export default function App() {
   return (
     <>
       <Navbar />
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/movie/:id" element={<Detail />} />
-        <Route path="/detail/:id" element={<Detail />} />
-        <Route path="/watch/:id" element={<Watch />} />
-      </Routes>
+      <Suspense fallback={
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', color: '#00f3ff', fontFamily: 'Outfit, sans-serif', fontSize: '20px', letterSpacing: '1px' }}>
+          Loading...
+        </div>
+      }>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/movie/:id" element={<Detail />} />
+          <Route path="/detail/:id" element={<Detail />} />
+          <Route path="/watch/:id" element={<Watch />} />
+        </Routes>
+      </Suspense>
       <footer className="footer" style={{
         background: 'linear-gradient(180deg, rgba(10, 10, 15, 0) 0%, rgba(5, 5, 10, 0.95) 100%)',
         borderTop: '1px solid rgba(255, 255, 255, 0.05)',
