@@ -420,7 +420,7 @@ img {
 
 /* ── Player ── */
 .player-wrap {
-  padding: 90px 48px 60px;
+  padding: 0 48px 60px;
   max-width: 1100px;
   margin: 0 auto;
 }

@@ -22,6 +22,21 @@
     "concurrently": "^9.1.0"
   },
   "dependencies": {
-    "archiver": "^8.0.0"
-  }
+    "archiver": "^8.0.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  },
+  "main": "check-render.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nikkmusic14-boop/Janixflix.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nikkmusic14-boop/Janixflix/issues"
+  },
+  "homepage": "https://github.com/nikkmusic14-boop/Janixflix#readme"
 }

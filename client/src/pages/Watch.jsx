@@ -1021,7 +1021,7 @@ export default function Watch() {
   const hasSidebar = (source === 'netmirror' && mediaType === 'tv' && seasons.length > 0) || (source === 'hicine' && hicineEpisodes.length > 0);
 
   return (
-    <div className="player-wrap" style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingTop: '90px' }}>
+    <div className="player-wrap" style={{ display: 'flex', flexDirection: 'column', gap: '20px', paddingTop: '0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <button 
           onClick={() => navigate(-1)}
