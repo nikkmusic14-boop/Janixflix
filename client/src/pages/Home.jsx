@@ -18,17 +18,8 @@ const isCleanPunjabi = (m) => {
   return true;
 };
 
-const isCleanSouthIndian = (m) => {
+const isCleanMovies = (m) => {
   const t = m.title ? m.title.toLowerCase() : '';
-  if (REGEX.southFalsePositives.test(t)) return false;
-  if (REGEX.punjabi.test(t)) return false;
-  if (REGEX.hollywood.test(t)) return false;
-  return true;
-};
-
-const isCleanBollywood = (m) => {
-  const t = m.title ? m.title.toLowerCase() : '';
-  if (REGEX.south.test(t)) return false;
   if (REGEX.punjabi.test(t)) return false;
   if (REGEX.hollywood.test(t)) return false;
   return true;
@@ -63,8 +54,7 @@ export default function Home() {
   const [lastApiPageFetched, setLastApiPageFetched] = useState(-1);
 
   // Home category content feeds
-  const [homeBollywood, setHomeBollywood] = useState([]);
-  const [homeSouth, setHomeSouth] = useState([]);
+  const [homeMovies, setHomeMovies] = useState([]);
   const [homePunjabi, setHomePunjabi] = useState([]);
   const [homeHollywood, setHomeHollywood] = useState([]);
   const [homeIndianWebSeries, setHomeIndianWebSeries] = useState([]);
@@ -163,10 +153,13 @@ export default function Home() {
           
           const getRes = (res) => (res && res.status === 'fulfilled' && res.value && res.value.results) ? res.value.results : (res && res.status === 'fulfilled' && Array.isArray(res.value)) ? res.value : [];
 
-          setHomeBollywood(deDuplicateMovies(getRes(bollyRes)).map(m => ({ ...m, source: 'netmirror' })).filter(isCleanBollywood).slice(0, 10));
+          const combinedMovies = [
+            ...(getRes(bollyRes)).map(m => ({ ...m, source: 'netmirror' })),
+            ...(getRes(southRes)).map(m => ({ ...m, source: 'hicine' }))
+          ];
+          setHomeMovies(deDuplicateMovies(combinedMovies).filter(isCleanMovies).slice(0, 10));
           setHomePunjabi(deDuplicateMovies(getRes(punjabiRes)).map(m => ({ ...m, source: 'hicine' })).filter(isCleanPunjabi).slice(0, 10));
           setHomeHollywood(deDuplicateMovies(getRes(hollyRes)).map(m => ({ ...m, source: 'netmirror' })).filter(isCleanHollywood).slice(0, 10));
-          setHomeSouth(deDuplicateMovies(getRes(southRes)).map(m => ({ ...m, source: 'hicine' })).filter(isCleanSouthIndian).slice(0, 10));
           
           setHomeIndianWebSeries(deDuplicateMovies(getRes(indWebRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
           setHomeHollywoodTV(deDuplicateMovies(getRes(hollyTvRes)).map(m => ({ ...m, source: 'netmirror' })).slice(0, 10));
@@ -212,16 +205,17 @@ export default function Home() {
                         if (activeServer === 'server1') {
               const params = { page: apiPagePointer };
               
-              if (activeTab === 'bollywood') {
-                params.type = '1';
-                params.cn = 'India';
-                const data = await api.external.netmirror.list(params);
+              if (activeTab === 'movies') {
+                const [bollyData, southData] = await Promise.all([
+                  api.external.netmirror.list({ type: '1', cn: 'India', page: apiPagePointer }),
+                  api.external.hicine.search('South', apiPagePointer)
+                ]);
                 if (cancelled) return;
-                newItems = (data.results || []).map(m => ({ ...m, source: 'netmirror' })).filter(isCleanBollywood);
-              } else if (activeTab === 'southindian') {
-                const data = await api.external.hicine.search('South', apiPagePointer);
-                if (cancelled) return;
-                newItems = (Array.isArray(data) ? data : []).map(m => ({ ...m, source: 'hicine' })).filter(isCleanSouthIndian);
+                const combinedMovies = [
+                  ...(bollyData.results || []).map(m => ({ ...m, source: 'netmirror' })),
+                  ...(Array.isArray(southData) ? southData : []).map(m => ({ ...m, source: 'hicine' }))
+                ];
+                newItems = combinedMovies.filter(isCleanMovies);
               } else if (activeTab === 'punjabi') {
                 if (apiPagePointer === 0) {
                   const [d1, d2, d3, d4] = await Promise.all([
@@ -271,6 +265,7 @@ export default function Home() {
               }
             } else {
               let categoryKey = activeTab;
+              if (activeTab === 'movies') categoryKey = 'bollywood';
               if (activeTab === 'home' || !activeTab) categoryKey = 'bollywood';
               else if (activeTab === 'indiantvshows') categoryKey = 'indianwebseries';
               else if (activeTab === 'hollywoodtvshows') categoryKey = 'hollywoodtvshows';
@@ -279,10 +274,8 @@ export default function Home() {
               if (cancelled) return;
               newItems = (Array.isArray(data) ? data : (data.results || []));
               
-              if (activeTab === 'bollywood') {
-                 newItems = newItems.filter(isCleanBollywood);
-              } else if (activeTab === 'southindian') {
-                 newItems = newItems.filter(isCleanSouthIndian);
+              if (activeTab === 'movies') {
+                 newItems = newItems.filter(isCleanMovies);
               } else if (activeTab === 'punjabi') {
                 if (apiPagePointer === 0) {
                   const [d1, d2, d3, d4] = await Promise.all([
@@ -396,8 +389,7 @@ export default function Home() {
   }
 
   const categoryTitles = {
-    bollywood: 'Bollywood Movies',
-    southindian: 'South Indian Dubbed Movies',
+    movies: '🎬 Movies',
     punjabi: 'Punjabi Movies Feed',
     hollywood: 'Hollywood Movies',
     webseries: 'Web Series',
@@ -484,27 +476,14 @@ export default function Home() {
               )}
 
               {/* Row 2: 🎬 Bollywood Movies */}
-              {homeBollywood.length > 0 && (
+              {/* Row 2: 🎬 Movies */}
+              {homeMovies.length > 0 && (
                 <div>
                   <h3 style={{ borderLeft: '4px solid #ff007f', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
-                    🎬 Bollywood Movies
+                    🎬 Movies
                   </h3>
                   <div className="home-row">
-                    {homeBollywood.map((m) => (
-                      <MovieCard key={m.id} movie={m} />
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Row 2.5: 🌴 South Indian Dubbed */}
-              {homeSouth.length > 0 && (
-                <div>
-                  <h3 style={{ borderLeft: '4px solid #00f3ff', paddingLeft: '12px', fontSize: '18px', margin: '0 48px 10px' }}>
-                    🌴 South Indian Dubbed Movies
-                  </h3>
-                  <div className="home-row">
-                    {homeSouth.map((m) => (
+                    {homeMovies.map((m) => (
                       <MovieCard key={m.id} movie={m} />
                     ))}
                   </div>

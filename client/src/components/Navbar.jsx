@@ -8,7 +8,7 @@ export default function Navbar() {
   const [query, setQuery] = useState('');
   const navigate = useNavigate();
 
-  const activeTab = searchParams.get('tab') || 'bollywood';
+  const activeTab = searchParams.get('tab') || 'movies';
   const hasQuery = !!searchParams.get('q');
   
   const { searchHistory, addSearchHistory, removeSearchHistory } = useHistory();
@@ -69,16 +69,10 @@ export default function Navbar() {
           <span className="hide-emoji-mobile">🏠</span> Home
         </Link>
         <Link 
-          to="/?tab=bollywood" 
-          className={`nav-link ${(activeTab === 'bollywood' && !hasQuery) ? 'active' : ''}`}
+          to="/?tab=movies" 
+          className={`nav-link ${(activeTab === 'movies' && !hasQuery) ? 'active' : ''}`}
         >
-          <span className="hide-emoji-mobile">🇮🇳</span> Bollywood Movies
-        </Link>
-        <Link 
-          to="/?tab=southindian" 
-          className={`nav-link ${(activeTab === 'southindian' && !hasQuery) ? 'active' : ''}`}
-        >
-          <span className="hide-emoji-mobile">🌴</span> South Indian Movies
+          <span className="hide-emoji-mobile">🎬</span> Movies
         </Link>
         <Link 
           to="/?tab=punjabi" 
