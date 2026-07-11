@@ -72,13 +72,13 @@ export default function Navbar() {
           to="/?tab=bollywood" 
           className={`nav-link ${(activeTab === 'bollywood' && !hasQuery) ? 'active' : ''}`}
         >
-          <span className="hide-emoji-mobile">🇮🇳</span> Bollywood
+          <span className="hide-emoji-mobile">🇮🇳</span> Bollywood Movies
         </Link>
         <Link 
           to="/?tab=southindian" 
           className={`nav-link ${(activeTab === 'southindian' && !hasQuery) ? 'active' : ''}`}
         >
-          <span className="hide-emoji-mobile">🌴</span> South Indian
+          <span className="hide-emoji-mobile">🌴</span> South Indian Movies
         </Link>
         <Link 
           to="/?tab=punjabi" 

@@ -1,4 +1,4 @@
-import{r as re,j as K,c as To,a as So,u as bo,d as Ao,L as Io}from"./index-ADPLoQgX.js";import{b as qt,a as Re,c as ss}from"./utils-CzplMOlU.js";/*!
+import{r as re,j as K,c as To,a as So,u as bo,d as Ao,L as Io}from"./index-Bf9E1h9k.js";import{b as qt,a as Re,c as ss}from"./utils-CzplMOlU.js";/*!
  * artplayer.js v5.3.0
  * Github: https://github.com/zhw2590582/ArtPlayer
  * (c) 2017-2025 Harvey Zack
