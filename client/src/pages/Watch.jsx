@@ -1486,73 +1486,12 @@ export default function Watch() {
               </div>
             </div>
 
-            {/* Universal Quality Selector */}
-            {(!netmirrorLoading && !hicineLoading && availableQualities.length > 0) && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '12px', marginTop: '4px' }}>
-                <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>🎬 Video Quality:</span>
-                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                  {availableQualities.map((qLabel) => {
-                    const isActive = selectedQuality === qLabel;
-                    return (
-                      <button
-                        key={qLabel}
-                        onClick={() => handleQualityChange(qLabel)}
-                        style={{
-                          background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #0070f3 100%)' : '#222',
-                          color: '#fff',
-                          border: isActive ? '1px solid #00f3ff' : '1px solid #444',
-                          padding: '6px 16px',
-                          borderRadius: '4px',
-                          fontSize: '12px',
-                          fontWeight: 'bold',
-                          cursor: 'pointer',
-                          boxShadow: isActive ? '0 0 10px rgba(0, 243, 255, 0.3)' : 'none',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        {qLabel === '1080p' ? '1080p (FHD)' : qLabel === '720p' ? '720p (HD)' : '480p (SD)'}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+
 
             {/* Screen Mode / Auto Play Selector */}
             {(!netmirrorLoading && !hicineLoading) && (
               <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', borderTop: '1px solid #333', paddingTop: '12px', marginTop: '4px', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: '13px', color: 'var(--text-dim)', fontWeight: 'bold' }}>📺 Screen Mode:</span>
-                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                    {[
-                      { value: 'contain', label: 'Fit (Original)' },
-                      { value: 'fill', label: 'Stretch (Full Screen)' },
-                      { value: 'cover', label: 'Zoom (Crop)' }
-                    ].map((fitOption) => {
-                      const isActive = videoFit === fitOption.value;
-                      return (
-                        <button
-                          key={fitOption.value}
-                          onClick={() => setVideoFit(fitOption.value)}
-                          style={{
-                            background: isActive ? 'linear-gradient(90deg, #00f3ff 0%, #0070f3 100%)' : '#222',
-                            color: '#fff',
-                            border: isActive ? '1px solid #00f3ff' : '1px solid #444',
-                            padding: '6px 16px',
-                            borderRadius: '4px',
-                            fontSize: '12px',
-                            fontWeight: 'bold',
-                            cursor: 'pointer',
-                            boxShadow: isActive ? '0 0 10px rgba(0, 243, 255, 0.3)' : 'none',
-                            transition: 'all 0.2s'
-                          }}
-                        >
-                          {fitOption.label}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
+
 
                 {/* Auto Play Toggle */}
                 {hasSidebar && (
