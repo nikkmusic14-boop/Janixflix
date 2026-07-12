@@ -116,13 +116,15 @@ export default function Navbar() {
         >
           <span className="hide-emoji-mobile">⛩️</span> Anime
         </Link>
-        <Link 
-          to="/upload" 
-          className={`nav-link`}
-          style={{ color: '#ff9800', fontWeight: 'bold' }}
-        >
-          <span className="hide-emoji-mobile">⚙️</span> Admin Panel
-        </Link>
+        {(import.meta.env.DEV || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && (
+          <Link 
+            to="/upload" 
+            className={`nav-link`}
+            style={{ color: '#ff9800', fontWeight: 'bold' }}
+          >
+            <span className="hide-emoji-mobile">⚙️</span> Admin Panel
+          </Link>
+        )}
       </nav>
 
       {/* Right-aligned Search Input & Social Links */}

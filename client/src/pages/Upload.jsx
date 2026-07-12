@@ -12,6 +12,8 @@ export default function Upload() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
+  const [targetServer, setTargetServer] = useState('live'); // Default to live server
+
   const set = (k) => (e) => {
     const v = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     setForm((f) => ({ ...f, [k]: v }));
@@ -34,7 +36,8 @@ export default function Upload() {
       fd.append('rating', form.rating);
       fd.append('featured', String(form.featured));
 
-      const created = await api.uploadMovie(fd);
+      const targetApiUrl = targetServer === 'live' ? 'https://janixflix-1.onrender.com' : null;
+      const created = await api.uploadMovie(fd, targetApiUrl);
       navigate(`/movie/${created.id}`);
     } catch (err) {
       setError(err.message);
@@ -47,6 +50,34 @@ export default function Upload() {
     <div className="upload-page">
       <h1>Admin Panel - Upload a Movie</h1>
       <form className="form-card" onSubmit={submit}>
+        <div className="field" style={{ padding: '10px', background: 'rgba(255,152,0,0.1)', borderRadius: '8px', border: '1px solid rgba(255,152,0,0.3)' }}>
+          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>Upload Destination</label>
+          <div style={{ display: 'flex', gap: '16px' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, cursor: 'pointer' }}>
+              <input 
+                type="radio" 
+                name="targetServer" 
+                value="live" 
+                checked={targetServer === 'live'} 
+                onChange={(e) => setTargetServer(e.target.value)} 
+                style={{ width: 'auto' }}
+              /> 
+              Live Real Website
+            </label>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, cursor: 'pointer' }}>
+              <input 
+                type="radio" 
+                name="targetServer" 
+                value="local" 
+                checked={targetServer === 'local'} 
+                onChange={(e) => setTargetServer(e.target.value)} 
+                style={{ width: 'auto' }}
+              /> 
+              Local Dev Server
+            </label>
+          </div>
+        </div>
+        
         <div className="field">
           <label>Video file *</label>
           <input type="file" accept="video/*" onChange={(e) => setVideo(e.target.files[0])} required />

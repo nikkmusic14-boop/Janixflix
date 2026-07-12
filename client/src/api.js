@@ -28,15 +28,17 @@ export const api = {
   deleteMovie: (id) => request(`/api/movies/${id}`, { method: 'DELETE' }),
 
   // Upload (multipart — uses FormData, NOT JSON)
-  uploadMovie: (formData) =>
-    fetch(`${API_URL}/api/movies/upload`, { method: 'POST', body: formData })
+  uploadMovie: (formData, targetApiUrl = null) => {
+    const baseUrl = targetApiUrl || API_URL;
+    return fetch(`${baseUrl}/api/movies/upload`, { method: 'POST', body: formData })
       .then(async (res) => {
         if (!res.ok) {
           const m = await res.json().catch(() => ({ error: res.statusText }));
           throw new Error(m.error || 'Upload failed');
         }
         return res.json();
-      }),
+      });
+  },
 
   // Media URLs
   streamUrl: (id) => `${API_URL}/api/stream/${id}`,
