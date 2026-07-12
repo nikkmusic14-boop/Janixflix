@@ -21,6 +21,10 @@ export default function MovieCard({ movie }) {
   };
 
   const getSourceBadge = () => {
+    if (movie.createdAt) {
+      return <span className="badge" style={{ background: '#00a000', color: '#ffffff' }}>NEW</span>;
+    }
+
     const label = isTheaterPrint(movie) ? 'PVC' : 'WEB-DL';
     const bg = label === 'PVC' ? '#ff9800' : '#00a000'; // Orange for PVC, Green for WEB-DL
     return <span className="badge" style={{ background: bg }}>{label}</span>;

@@ -45,7 +45,7 @@ export default function Upload() {
 
   return (
     <div className="upload-page">
-      <h1>Upload a movie</h1>
+      <h1>Admin Panel - Upload a Movie</h1>
       <form className="form-card" onSubmit={submit}>
         <div className="field">
           <label>Video file *</label>

@@ -116,6 +116,13 @@ export default function Navbar() {
         >
           <span className="hide-emoji-mobile">⛩️</span> Anime
         </Link>
+        <Link 
+          to="/upload" 
+          className={`nav-link`}
+          style={{ color: '#ff9800', fontWeight: 'bold' }}
+        >
+          <span className="hide-emoji-mobile">⚙️</span> Admin Panel
+        </Link>
       </nav>
 
       {/* Right-aligned Search Input & Social Links */}

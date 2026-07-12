@@ -85,7 +85,12 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
             const now = Date.now();
             const rect = art.template.$video.getBoundingClientRect();
             const x = clientX - rect.left;
-            const direction = x > rect.width / 2 ? 'right' : 'left';
+            let direction = 'center';
+            if (x < rect.width / 3) {
+              direction = 'left';
+            } else if (x > (rect.width * 2) / 3) {
+              direction = 'right';
+            }
 
             if (isDblClickEvent) {
                // From desktop dblclick
@@ -105,11 +110,18 @@ export default function ArtplayerComponent({ option, getInstance, ...rest }) {
             }
 
             if (tapCount >= 2) {
+              if (direction === 'center') {
+                art.toggle();
+                tapCount = 0;
+                lastTapDirection = null;
+                if (tapTimeout) clearTimeout(tapTimeout);
+                return;
+              }
               const skipAmount = (tapCount - 1) * 10;
               if (direction === 'right') {
                 art.currentTime = Math.min(art.currentTime + 10, art.duration);
                 art.notice.show = `⏩ +${skipAmount}s`;
-              } else {
+              } else if (direction === 'left') {
                 art.currentTime = Math.max(art.currentTime - 10, 0);
                 art.notice.show = `⏪ -${skipAmount}s`;
               }
